@@ -52,6 +52,7 @@ export class TicketsService {
         guestCount: dto.guestCount,
         items: dto.items as any,
         desiredAt: dto.desiredAt ? new Date(dto.desiredAt) : undefined,
+        sessionId: dto.sessionId,
       },
     });
 

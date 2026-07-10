@@ -20,7 +20,7 @@ export class SettingsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update settings (alias for info)' })
+  @ApiOperation({ summary: 'Update settings' })
   async updateSettings(@Body() dto: UpdateInfoDto) {
     return this.infoService.updateInfo(dto);
   }

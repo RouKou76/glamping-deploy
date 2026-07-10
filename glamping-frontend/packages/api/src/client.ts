@@ -1,9 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('glamp-token') : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers: getAuthHeaders() });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
   return response.json();
 }
@@ -11,7 +16,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -21,7 +26,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
 export async function apiPut<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -31,7 +36,7 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
 export async function apiDelete(path: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
 }

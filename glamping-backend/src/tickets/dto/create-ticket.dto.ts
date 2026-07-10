@@ -65,4 +65,9 @@ export class CreateTicketDto {
   @IsString()
   @IsOptional()
   desiredAt?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  sessionId?: string;
 }

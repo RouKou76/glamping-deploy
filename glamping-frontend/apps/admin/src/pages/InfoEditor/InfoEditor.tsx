@@ -1,14 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useApi, apiPost } from '@glamping/api'
 
 interface InfoContent { wifiName: string; wifiPassword: string; rules: string; description: string }
-const INITIAL: InfoContent = { wifiName: 'Glamp_Guest', wifiPassword: 'forest2026', rules: '• Тихий час с 23:00 до 8:00\n• Курение только в отведённых местах\n• Выезд до 12:00', description: 'Глэмпинг расположен в 45 км от Суздаля. На территории: баня, беседки, рыбалка.' }
+const INITIAL: InfoContent = { wifiName: '', wifiPassword: '', rules: '', description: '' }
 
 export default function InfoEditor() {
+  const { data } = useApi<InfoContent>('/api/settings')
   const [saved, setSaved] = useState<InfoContent>(INITIAL)
   const [draft, setDraft] = useState<InfoContent>(INITIAL)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    if (data) {
+      setSaved(data)
+      setDraft(data)
+    }
+  }, [data])
+
   const isDirty = draft.wifiName !== saved.wifiName || draft.wifiPassword !== saved.wifiPassword || draft.rules !== saved.rules || draft.description !== saved.description
-  function handleSave() { setSaved(draft); setSuccess(true); setTimeout(() => setSuccess(false), 2500) }
+
+  function handleSave() {
+    apiPost('/api/settings', draft).then(() => {
+      setSaved(draft)
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 2500)
+    }).catch(() => {})
+  }
+
   function handleReset() { setDraft(saved) }
 
   return (

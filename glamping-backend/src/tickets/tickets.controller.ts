@@ -12,7 +12,8 @@ export class TicketsController {
   constructor(private ticketsService: TicketsService) {}
 
   @Get()
-  @Public()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get tickets' })
   @ApiQuery({ name: 'houseId', required: false })
   @ApiQuery({ name: 'status', required: false })
@@ -27,7 +28,7 @@ export class TicketsController {
 
   @Post()
   @Public()
-  @ApiOperation({ summary: 'Create ticket' })
+  @ApiOperation({ summary: 'Create ticket (guest device)' })
   async create(@Body() dto: CreateTicketDto) {
     return this.ticketsService.create(dto);
   }

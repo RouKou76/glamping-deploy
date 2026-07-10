@@ -1,4 +1,5 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Server, Socket } from 'socket.io';
 
@@ -11,6 +12,8 @@ export class GatewayService implements OnGatewayConnection, OnGatewayDisconnect 
   @WebSocketServer()
   server: Server;
 
+  private readonly logger = new Logger('Gateway');
+
   constructor(private config: ConfigService) {}
 
   afterInit() {
@@ -21,7 +24,7 @@ export class GatewayService implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client connected: ${client.id}`);
 
     const role = client.handshake.auth?.role;
     const houseId = client.handshake.auth?.houseId;
@@ -37,7 +40,7 @@ export class GatewayService implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   broadcastToAdmins(event: string, payload: unknown) {

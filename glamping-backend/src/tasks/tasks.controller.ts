@@ -12,7 +12,8 @@ export class TasksController {
   constructor(private ticketsService: TicketsService) {}
 
   @Get()
-  @Public()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get tasks (alias for tickets)' })
   @ApiQuery({ name: 'houseId', required: false })
   @ApiQuery({ name: 'status', required: false })

@@ -19,7 +19,8 @@ export class MessagesController {
   }
 
   @Post()
-  @Public()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Send a message' })
   async create(@Body() dto: CreateMessageDto) {
     return this.messagesService.create(dto.houseId, dto.text);
