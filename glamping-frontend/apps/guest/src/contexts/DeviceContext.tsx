@@ -22,11 +22,11 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const urlToken = urlParams.get('token')
+    const urlHid = urlParams.get('hid')
 
     if (urlToken) {
       localStorage.setItem('glamp-device-token', urlToken)
-      const match = urlToken.match(/^glamp-(\d+)-/)
-      if (match) localStorage.setItem('glamp-house-id', match[1])
+      if (urlHid) localStorage.setItem('glamp-house-id', urlHid)
       window.history.replaceState({}, '', window.location.pathname)
     }
 

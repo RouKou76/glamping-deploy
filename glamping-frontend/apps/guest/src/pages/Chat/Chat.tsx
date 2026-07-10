@@ -7,12 +7,18 @@ import { useDevice } from '../../contexts/DeviceContext'
 export default function Chat() {
   const { t, i18n } = useTranslation()
   const { houseId } = useDevice()
-  const { data: initialMessages } = useApi<Message[]>(houseId ? `/api/messages?houseId=${houseId}` : '')
+  const { data: initialMessages, refetch } = useApi<Message[]>(houseId ? `/api/messages?houseId=${houseId}` : '')
   const [messages, setMessages] = useState<Message[]>([])
   const [msg, setMsg] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { if (initialMessages) setMessages(initialMessages) }, [initialMessages])
+
+  useEffect(() => {
+    if (!houseId) return
+    const interval = setInterval(() => { refetch() }, 5000)
+    return () => clearInterval(interval)
+  }, [houseId, refetch])
 
   const [sending, setSending] = useState(false)
 

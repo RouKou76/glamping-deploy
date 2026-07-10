@@ -12,7 +12,7 @@ export default function CheckIn() {
   const [sessions, setSessions] = useState<GuestSession[]>([])
   const [showForm, setShowForm] = useState(false); const [selectedHouse, setSelectedHouse] = useState<House | null>(null)
   const [formGuests, setFormGuests] = useState<number>(2); const [formLang, setFormLang] = useState<Lang>('ru')
-  const [tokenModal, setTokenModal] = useState<{ number: number; token: string } | null>(null)
+  const [tokenModal, setTokenModal] = useState<{ number: number; token: string; hid: string } | null>(null)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
@@ -26,15 +26,16 @@ export default function CheckIn() {
 
   async function handleSetupTablet(house: House) {
     try {
-      const res = await apiPost<{ success: boolean; data: { number: number; deviceToken: string } }>(`/api/houses/${house.id}/device-token`, {})
-      setTokenModal({ number: res.data.number, token: res.data.deviceToken })
+      const res = await apiPost<{ success: boolean; data: { houseId: string; number: number; deviceToken: string } }>(`/api/houses/${house.id}/device-token`, {})
+      setTokenModal({ number: res.data.number, token: res.data.deviceToken, hid: res.data.houseId })
       setCopied(false)
     } catch { /* ignore */ }
   }
 
   function copyToken() {
     if (tokenModal) {
-      navigator.clipboard.writeText(tokenModal.token)
+      const url = `${window.location.origin}?token=${tokenModal.token}&hid=${tokenModal.hid}`
+      navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -114,7 +115,7 @@ export default function CheckIn() {
             <p className="text-sm text-gray-500 dark:text-white/60 text-center">Домик №{tokenModal.number}</p>
             <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
               <p className="text-xs text-gray-500 dark:text-white/50 mb-1">Код для ввода на планшете:</p>
-              <p className="text-sm font-mono font-bold text-gray-800 dark:text-white break-all select-all">{tokenModal.token}</p>
+              <p className="text-sm font-mono font-bold text-gray-800 dark:text-white break-all select-all">{window.location.origin}?token={tokenModal.token}&hid={tokenModal.hid}</p>
             </div>
             <button onClick={copyToken} className={`w-full py-2.5 rounded-xl text-sm font-bold transition-colors ${copied ? 'bg-green-500 text-white' : 'bg-glamp-600 hover:bg-glamp-700 text-white active:scale-95'}`}>
               {copied ? '✓ Скопировано' : 'Копировать код'}
