@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HousesService } from './houses.service';
 import { CheckInDto } from './dto/check-in.dto';
@@ -17,7 +17,14 @@ export class HousesController {
     return this.housesService.findAll();
   }
 
-  @Put(':id/checkin')
+  @Get('sessions')
+  @Public()
+  @ApiOperation({ summary: 'Get active sessions' })
+  async findSessions() {
+    return this.housesService.findSessions();
+  }
+
+  @Post(':id/check-in')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check in to house' })
@@ -25,7 +32,7 @@ export class HousesController {
     return this.housesService.checkin(id, dto);
   }
 
-  @Put(':id/checkout')
+  @Post(':id/check-out')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check out from house' })

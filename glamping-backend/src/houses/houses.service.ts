@@ -10,6 +10,22 @@ export class HousesService {
     private gateway: GatewayService,
   ) {}
 
+  async findSessions() {
+    const sessions = await this.prisma.guestSession.findMany({
+      where: { isActive: true },
+      include: { house: true },
+    });
+
+    return sessions.map((s) => ({
+      id: s.id,
+      houseId: s.houseId,
+      houseNumber: s.house.number,
+      guestCount: s.guestCount,
+      lang: s.lang,
+      checkInAt: s.checkInAt?.toISOString(),
+    }));
+  }
+
   async findAll() {
     const houses = await this.prisma.house.findMany({
       include: {

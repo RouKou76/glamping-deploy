@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ServicesCatalogService } from './services-catalog.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -27,7 +27,7 @@ export class ServicesCatalogController {
     return this.servicesService.create(dto);
   }
 
-  @Put(':id')
+  @Post(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update service' })
