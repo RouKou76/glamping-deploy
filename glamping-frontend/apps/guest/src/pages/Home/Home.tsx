@@ -76,7 +76,7 @@ export default function Home() {
   const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates'
 
   function handleConfirm(type: ConfirmSheetType) {
-    apiPost('/api/tasks', { houseId, type, description: t(`${type}.description`) })
+    apiPost('/api/tasks', { houseId, type, description: t(`${type}.title`) })
       .then(() => showToast(t(`${type}.success`)))
       .catch(() => showToast('Ошибка отправки'))
   }

@@ -110,7 +110,8 @@ export default function Tickets() {
       if (event.type === 'server:ticket:created') {
         const task = event.payload as Task
         setTickets(prev => [task, ...prev])
-        notify('Новая заявка', `${task.type} — Домик #${getHouseNumber(task.houseId)}`)
+        const typeLabel = task.type === 'custom' && task.description ? task.description.split(']')[0].replace('[', '') : task.type
+        notify('Новая заявка', `${typeLabel} — Домик #${getHouseNumber(task.houseId)}`)
       }
       if (event.type === 'server:ticket:updated') {
         const updated = event.payload as Task
