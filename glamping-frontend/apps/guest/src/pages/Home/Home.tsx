@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApi } from '@glamping/api'
 import { useTask } from '../../contexts/TaskContext'
+import { useDevice } from '../../contexts/DeviceContext'
 import type { MenuItem, Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
@@ -13,13 +14,13 @@ type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleanin
 
 export default function Home() {
   const { t } = useTranslation()
-  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
-  const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
-  const [toast, setToast] = useState<string | null>(null)
-
+  const { houseId } = useDevice()
   const { data: services } = useApi<Service[]>('/api/services')
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
+  const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => {
     const items = menuItems ?? []
@@ -122,6 +123,8 @@ export default function Home() {
           open={true}
           title={SERVICE_CONFIGS[activeModal].title}
           steps={SERVICE_CONFIGS[activeModal].steps}
+          houseId={houseId}
+          taskType={activeModal}
           onClose={() => setActiveModal(null)}
           onSubmit={() => handleOrderSubmit({}, SERVICE_CONFIGS[activeModal].message)}
         />
@@ -132,6 +135,8 @@ export default function Home() {
           open={true}
           title={activeServiceConfig.title}
           steps={activeServiceConfig.steps}
+          houseId={houseId}
+          taskType="custom"
           onClose={() => setActiveServiceConfig(null)}
           onSubmit={() => handleOrderSubmit({}, activeServiceConfig.message)}
         />

@@ -20,6 +20,8 @@ interface OrderFormProps {
   open: boolean
   title: string
   steps: OrderStep[]
+  houseId: string | null
+  taskType: string
   onClose: () => void
   onSubmit: (data: Record<string, unknown>) => void
 }
@@ -44,7 +46,7 @@ function getMinTime(dateStr: string): string {
   return '00:00'
 }
 
-export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormProps) {
+export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
   function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
@@ -142,7 +144,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
     })
 
     const allItems = [...cartItems, ...catalogItems]
-    const payload: Record<string, unknown> = { ...values }
+    const payload: Record<string, unknown> = { ...values, houseId, type: taskType }
     if (allItems.length > 0) payload.items = allItems
 
     apiPost('/api/tasks', payload)
