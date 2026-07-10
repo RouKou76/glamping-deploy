@@ -14,10 +14,11 @@ interface UseWebSocketOptions {
   onConnect?: () => void;
   onDisconnect?: () => void;
   autoConnect?: boolean;
+  auth?: Record<string, unknown>;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
-  const { onMessage, onConnect, onDisconnect, autoConnect = true } = options;
+  const { onMessage, onConnect, onDisconnect, autoConnect = true, auth } = options;
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const onMessageRef = useRef(onMessage);
@@ -36,6 +37,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
+        auth: auth || {},
       });
       socketRef.current = socket;
 

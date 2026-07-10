@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useApi, apiPost, useWebSocket, useNotifications } from '@glamping/api'
-import { mockHouses } from '@glamping/utils'
-import type { Task, TaskStatus } from '@glamping/types'
+import type { Task, TaskStatus, House } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
 type FilterStatus = TaskStatus | 'all'
@@ -87,27 +86,40 @@ const NEXT_LABEL: Record<string, string> = { new: 'В работу', in_progress
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 
 export default function Tickets() {
-  const { data: apiTasks } = useApi<Task[]>('/api/tasks')
+  const { data: apiTasks, refetch } = useApi<Task[]>('/api/tasks')
+  const { data: apiHouses } = useApi<House[]>('/api/houses')
   const [tickets, setTickets] = useState<Task[]>([])
+  const [houses, setHouses] = useState<House[]>([])
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates')) }, [apiTasks])
+  useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
+
+  useEffect(() => {
+    const interval = setInterval(() => { refetch() }, 5000)
+    return () => clearInterval(interval)
+  }, [refetch])
 
   const { notify } = useNotifications()
 
   useWebSocket({
+    auth: { role: 'admin' },
     onMessage: (event) => {
-      if (event.type === 'server:task:created') {
+      if (event.type === 'server:ticket:created') {
         const task = event.payload as Task
         setTickets(prev => [task, ...prev])
         notify('Новая заявка', `${task.type} — Домик #${getHouseNumber(task.houseId)}`)
       }
+      if (event.type === 'server:ticket:updated') {
+        const updated = event.payload as Task
+        setTickets(prev => prev.map(t => t.id === updated.id ? updated : t))
+      }
     },
   })
 
-  function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
+  function getHouseNumber(houseId: string): number { return houses.find(h => h.id === houseId)?.number ?? 0 }
 
   function handleStatusChange(id: string, status: TaskStatus) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
