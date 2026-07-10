@@ -20,6 +20,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { onMessage, onConnect, onDisconnect, autoConnect = true } = options;
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const onMessageRef = useRef(onMessage);
+  const onConnectRef = useRef(onConnect);
+  const onDisconnectRef = useRef(onDisconnect);
+  onMessageRef.current = onMessage;
+  onConnectRef.current = onConnect;
+  onDisconnectRef.current = onDisconnect;
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return;
@@ -35,12 +41,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
       socket.on("connect", () => {
         setIsConnected(true);
-        onConnect?.();
+        onConnectRef.current?.();
       });
 
       socket.on("disconnect", () => {
         setIsConnected(false);
-        onDisconnect?.();
+        onDisconnectRef.current?.();
       });
 
       socket.on("connect_error", () => {
@@ -48,14 +54,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       });
 
       socket.onAny((event: string, data: unknown) => {
-        onMessage?.({ type: event, payload: data, timestamp: new Date().toISOString() });
+        onMessageRef.current?.({ type: event, payload: data, timestamp: new Date().toISOString() });
       });
 
       socket.connect();
     } catch {
       console.error("Failed to create Socket.IO connection");
     }
-  }, [onMessage, onConnect, onDisconnect]);
+  }, []);
 
   const disconnect = useCallback(() => {
     socketRef.current?.disconnect();
