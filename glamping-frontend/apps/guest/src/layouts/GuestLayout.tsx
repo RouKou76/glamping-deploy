@@ -30,6 +30,7 @@ export default function GuestLayout() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-red-700 dark:text-red-400">{t('validation.offline')}</p>
+            <p className="text-xs text-red-600 dark:text-red-300">Связь с администратором:</p>
             <a href={`tel:${info.phone}`} className="text-sm text-red-600 dark:text-red-300 font-medium underline">{info.phone}</a>
           </div>
           <ThemeToggle />
