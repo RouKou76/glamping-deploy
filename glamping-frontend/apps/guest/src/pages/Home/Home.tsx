@@ -112,7 +112,7 @@ export default function Home() {
 
       {isConfirmType(activeModal) && <ConfirmSheet open={true} type={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirm} />}
 
-      {(activeModal === 'food' || activeModal === 'minibar' || activeModal === 'transfer' || activeModal === 'cleaning') && activeModal && (
+      {(activeModal === 'food' || activeModal === 'transfer' || activeModal === 'cleaning') && activeModal && (
         <OrderForm
           open={true}
           title={SERVICE_CONFIGS[activeModal].title}
