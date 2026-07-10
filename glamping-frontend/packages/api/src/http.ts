@@ -57,6 +57,13 @@ async function fetchWithRefresh<T>(url: string, options: RequestInit): Promise<T
     const refreshed = await tryRefreshToken()
     if (refreshed) {
       response = await fetch(url, { ...options, headers: { ...options.headers as Record<string, string>, ...getAuthHeaders() } })
+    } else {
+      localStorage.removeItem('glamp-token')
+      localStorage.removeItem('glamp-refresh-token')
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+      throw new Error('Session expired')
     }
   }
 
