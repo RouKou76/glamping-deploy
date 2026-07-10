@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useApi, apiPost } from '@glamping/api'
+import { useApi, apiPost, apiPut } from '@glamping/api'
 import type { Message, House } from '@glamping/types'
 
 export default function Chats() {
@@ -26,7 +26,7 @@ export default function Chats() {
     if (!activeHouseId) return
     const unread = messages.filter(m => m.houseId === activeHouseId && !m.read && m.sender === 'GUEST')
     unread.forEach(m => {
-      apiPost(`/api/messages/${m.id}/read`, {}).catch(() => {})
+      apiPut(`/api/messages/${m.id}/read`, {}).catch(() => {})
       setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, read: true } : msg))
     })
   }, [activeHouseId, messages])
