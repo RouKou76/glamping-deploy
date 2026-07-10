@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Param,
   Body,
   Query,
@@ -37,7 +36,7 @@ export class MessagesController {
     return this.messagesService.create(dto.houseId, dto.text, dto.sender);
   }
 
-  @Patch(':id/read')
+  @Post(':id/read')
   @Public()
   @ApiOperation({ summary: 'Mark message as read' })
   async markAsRead(@Param('id') id: string) {
