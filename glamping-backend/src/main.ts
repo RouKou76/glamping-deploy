@@ -17,9 +17,12 @@ async function bootstrap() {
   const config = app.get(ConfigService);
 
   app.use(helmet());
-  const allowedOrigins = config.get('FRONTEND_URL', '*');
+  const allowedOrigins = config.get<string>('FRONTEND_URL', '*');
   app.enableCors({
-    origin: allowedOrigins === '*' ? '*' : allowedOrigins.split(',').map((s: string) => s.trim()),
+    origin:
+      allowedOrigins === '*'
+        ? '*'
+        : allowedOrigins.split(',').map((s: string) => s.trim()),
     credentials: true,
   });
 
@@ -34,7 +37,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalInterceptors(new ResponseInterceptor(), new LoggingInterceptor());
+  app.useGlobalInterceptors(
+    new ResponseInterceptor(),
+    new LoggingInterceptor(),
+  );
 
   app.setGlobalPrefix('api');
 
@@ -49,8 +55,7 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  const port = config.get('PORT', 3000);
-  await app.listen(port);
-
+  const port = config.get<number>('PORT', 3000);
+  void app.listen(port);
 }
-bootstrap();
+void bootstrap();

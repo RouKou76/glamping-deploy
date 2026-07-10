@@ -29,14 +29,17 @@ export class MenuService {
       data: {
         name: dto.name,
         description: dto.description,
-        category: dto.category as any,
+        category: dto.category as never,
         price: dto.price,
         hidden: !dto.isAvailable,
         showPrice: dto.showPrice ?? true,
       },
     });
 
-    this.gateway.broadcastToAdmins('server:menu:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:menu:updated',
+      await this.findAll(true),
+    );
 
     return {
       id: item.id,
@@ -57,14 +60,17 @@ export class MenuService {
       data: {
         name: dto.name,
         description: dto.description,
-        category: dto.category as any,
+        category: dto.category as never,
         price: dto.price,
         hidden: dto.isAvailable !== undefined ? !dto.isAvailable : undefined,
         showPrice: dto.showPrice,
       },
     });
 
-    this.gateway.broadcastToAdmins('server:menu:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:menu:updated',
+      await this.findAll(true),
+    );
 
     return {
       id: updated.id,
@@ -78,6 +84,9 @@ export class MenuService {
 
   async delete(id: string) {
     await this.prisma.menuItem.delete({ where: { id } });
-    this.gateway.broadcastToAdmins('server:menu:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:menu:updated',
+      await this.findAll(true),
+    );
   }
 }

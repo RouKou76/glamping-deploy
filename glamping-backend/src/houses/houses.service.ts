@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { CheckInDto } from './dto/check-in.dto';
@@ -45,7 +49,9 @@ export class HousesService {
   }
 
   async checkin(houseId: string, dto: CheckInDto) {
-    const house = await this.prisma.house.findUnique({ where: { id: houseId } });
+    const house = await this.prisma.house.findUnique({
+      where: { id: houseId },
+    });
     if (!house) throw new NotFoundException('House not found');
 
     if (house.status === 'occupied') {

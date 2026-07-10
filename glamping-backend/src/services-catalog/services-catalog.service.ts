@@ -17,7 +17,8 @@ export class ServicesCatalogService {
     return services.map((s) => ({
       id: s.id,
       name: s.name,
-      requiresTime: (s.fields as any)?.requiresTime ?? false,
+      requiresTime:
+        (s.fields as Record<string, unknown>)?.requiresTime ?? false,
       priceInfo: s.price,
       icon: s.icon,
       jsonSchema: s.jsonSchema,
@@ -33,19 +34,23 @@ export class ServicesCatalogService {
         price: dto.priceInfo,
         icon: dto.icon,
         active: dto.active ?? true,
-        assignedTo: dto.assignedTo as any,
+        assignedTo: dto.assignedTo as never,
         fields: dto.fields || {},
         items: dto.items || undefined,
         jsonSchema: dto.jsonSchema || undefined,
       },
     });
 
-    this.gateway.broadcastToAdmins('server:services:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:services:updated',
+      await this.findAll(true),
+    );
 
     return {
       id: service.id,
       name: service.name,
-      requiresTime: (service.fields as any)?.requiresTime ?? false,
+      requiresTime:
+        (service.fields as Record<string, unknown>)?.requiresTime ?? false,
       priceInfo: service.price,
       icon: service.icon,
       jsonSchema: service.jsonSchema,
@@ -65,19 +70,23 @@ export class ServicesCatalogService {
         price: dto.priceInfo,
         icon: dto.icon,
         active: dto.active,
-        assignedTo: dto.assignedTo as any,
+        assignedTo: dto.assignedTo as never,
         fields: dto.fields,
         items: dto.items,
         jsonSchema: dto.jsonSchema,
       },
     });
 
-    this.gateway.broadcastToAdmins('server:services:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:services:updated',
+      await this.findAll(true),
+    );
 
     return {
       id: updated.id,
       name: updated.name,
-      requiresTime: (updated.fields as any)?.requiresTime ?? false,
+      requiresTime:
+        (updated.fields as Record<string, unknown>)?.requiresTime ?? false,
       priceInfo: updated.price,
       icon: updated.icon,
       jsonSchema: updated.jsonSchema,
@@ -88,6 +97,9 @@ export class ServicesCatalogService {
 
   async delete(id: string) {
     await this.prisma.service.delete({ where: { id } });
-    this.gateway.broadcastToAdmins('server:services:updated', await this.findAll(true));
+    void this.gateway.broadcastToAdmins(
+      'server:services:updated',
+      await this.findAll(true),
+    );
   }
 }

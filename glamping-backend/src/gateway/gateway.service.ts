@@ -1,14 +1,24 @@
-import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
-  cors: (client: Socket, done: (err: Error | null, origin?: string) => void) => {
+  cors: (
+    client: Socket,
+    done: (err: Error | null, origin?: string) => void,
+  ) => {
     done(null, '*');
   },
 })
-export class GatewayService implements OnGatewayConnection, OnGatewayDisconnect {
+export class GatewayService
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -26,14 +36,14 @@ export class GatewayService implements OnGatewayConnection, OnGatewayDisconnect 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
 
-    const role = client.handshake.auth?.role;
-    const houseId = client.handshake.auth?.houseId;
+    const role = client.handshake.auth?.role as string | undefined;
+    const houseId = client.handshake.auth?.houseId as string | undefined;
 
     if (role === 'admin') {
-      client.join('admins');
+      void client.join('admins');
     }
     if (houseId) {
-      client.join(`house:${houseId}`);
+      void client.join(`house:${houseId}`);
     }
 
     client.emit('server:connection:status', { connected: true });

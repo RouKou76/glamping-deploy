@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -11,8 +11,12 @@ export class TicketsService {
     private gateway: GatewayService,
   ) {}
 
-  async findAll(query: { houseId?: string; status?: string; assignedTo?: string }) {
-    const where: any = {};
+  async findAll(query: {
+    houseId?: string;
+    status?: string;
+    assignedTo?: string;
+  }) {
+    const where: Record<string, any> = {};
 
     if (query.houseId) where.houseId = query.houseId;
     if (query.status) where.status = query.status;
@@ -33,7 +37,7 @@ export class TicketsService {
       description: t.description,
       geo: t.geo,
       assignedTo: t.assignedTo,
-      items: (t.items as any[]) || undefined,
+      items: (t.items as Array<Record<string, unknown>>) || undefined,
       location: t.location,
       guestCount: t.guestCount,
       priceFix: t.priceFix,
@@ -44,13 +48,13 @@ export class TicketsService {
     const ticket = await this.prisma.ticket.create({
       data: {
         houseId: dto.houseId,
-        type: dto.type as any,
+        type: dto.type as never,
         description: dto.description,
         geo: dto.geo,
-        assignedTo: dto.assignedTo as any,
+        assignedTo: dto.assignedTo as never,
         location: dto.location,
         guestCount: dto.guestCount,
-        items: dto.items as any,
+        items: dto.items as never,
         desiredAt: dto.desiredAt ? new Date(dto.desiredAt) : undefined,
         sessionId: dto.sessionId,
       },
@@ -66,13 +70,13 @@ export class TicketsService {
       description: ticket.description,
       geo: ticket.geo,
       assignedTo: ticket.assignedTo,
-      items: (ticket.items as any[]) || undefined,
+      items: (ticket.items as Array<Record<string, unknown>>) || undefined,
       location: ticket.location,
       guestCount: ticket.guestCount,
       priceFix: ticket.priceFix,
     };
 
-    this.gateway.broadcastToAdmins('server:ticket:created', result);
+    void this.gateway.broadcastToAdmins('server:ticket:created', result);
 
     return result;
   }
@@ -84,8 +88,8 @@ export class TicketsService {
     const updated = await this.prisma.ticket.update({
       where: { id },
       data: {
-        status: dto.status as any,
-        assignedTo: dto.assignedTo as any,
+        status: dto.status as never,
+        assignedTo: dto.assignedTo as never,
       },
     });
 
@@ -99,13 +103,13 @@ export class TicketsService {
       description: updated.description,
       geo: updated.geo,
       assignedTo: updated.assignedTo,
-      items: (updated.items as any[]) || undefined,
+      items: (updated.items as Array<Record<string, unknown>>) || undefined,
       location: updated.location,
       guestCount: updated.guestCount,
       priceFix: updated.priceFix,
     };
 
-    this.gateway.broadcastToAdmins('server:ticket:updated', result);
+    void this.gateway.broadcastToAdmins('server:ticket:updated', result);
 
     return result;
   }

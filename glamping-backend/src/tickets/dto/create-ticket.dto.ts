@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsEnum, IsInt, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsInt,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -25,8 +32,26 @@ export class CreateTicketDto {
   @IsString()
   houseId: string;
 
-  @ApiProperty({ enum: ['food', 'transfer', 'cleaning', 'towels', 'minibar', 'gates', 'custom'] })
-  @IsEnum(['food', 'transfer', 'cleaning', 'towels', 'minibar', 'gates', 'custom'])
+  @ApiProperty({
+    enum: [
+      'food',
+      'transfer',
+      'cleaning',
+      'towels',
+      'minibar',
+      'gates',
+      'custom',
+    ],
+  })
+  @IsEnum([
+    'food',
+    'transfer',
+    'cleaning',
+    'towels',
+    'minibar',
+    'gates',
+    'custom',
+  ])
   type: string;
 
   @ApiPropertyOptional()
