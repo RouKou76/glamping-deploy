@@ -5,6 +5,7 @@ import { ConfirmDialog } from '@glamping/ui'
 
 type CategoryFilter = MenuCategory | 'all'
 const CATEGORY_LABELS: Record<MenuCategory, string> = { breakfast: 'Завтрак', lunch: 'Обед', dinner: 'Ужин', minibar: 'Минибар' }
+const VISIBLE_CATEGORIES: MenuCategory[] = ['breakfast', 'lunch', 'dinner']
 
 export default function Menu() {
   const { data: apiItems } = useApi<MenuItem[]>('/api/menu')
@@ -17,7 +18,7 @@ export default function Menu() {
   const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState('')
   const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast')
 
-  const filtered = useMemo(() => items.filter(i => category === 'all' || i.category === category), [items, category])
+  const filtered = useMemo(() => items.filter(i => i.category !== 'minibar' && (category === 'all' || i.category === category)), [items, category])
   function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setShowForm(true) }
   function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
@@ -50,7 +51,7 @@ export default function Menu() {
         <button onClick={openAdd} className="px-4 py-2 bg-glamp-600 text-white text-xs font-bold rounded-xl hover:bg-glamp-700 transition-colors active:scale-95">+ Добавить</button>
       </div>
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-        {([['all', 'Все'], ...Object.entries(CATEGORY_LABELS)] as [CategoryFilter, string][]).map(([val, label]) => (
+        {([['all', 'Все'], ...VISIBLE_CATEGORIES.map(c => [c, CATEGORY_LABELS[c]] as [MenuCategory, string])] as [CategoryFilter, string][]).map(([val, label]) => (
           <button key={val} onClick={() => setCategory(val)} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${category === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>{label}</button>
         ))}
       </div>
@@ -83,7 +84,7 @@ export default function Menu() {
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽) *</label><input type="number" value={formPrice} onChange={e => { setFormPrice(e.target.value); setFormErrors(p => ({ ...p, price: undefined })) }} min={0} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.price ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.price && <p className="text-red-500 text-xs mt-1">{formErrors.price}</p>}</div>
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
-              <div className="grid grid-cols-2 gap-2">{(Object.entries(CATEGORY_LABELS) as [MenuCategory, string][]).map(([val, label]) => (<button key={val} onClick={() => setFormCategory(val)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
+              <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => setFormCategory(c)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
