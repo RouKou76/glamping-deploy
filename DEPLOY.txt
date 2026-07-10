@@ -1,0 +1,11 @@
+VPS:
+ssh root@109.196.99.62
+109.196.99.62
+2a03:6f00:a::2:df5e
+
+password:
+j8EZ*RNbt+u-6N
+
+DATEBASE:
+psql 'postgresql://gen_user:jA-jsdT%2C%40obVQ3@192.168.0.4:5432/default_db'
+jA-jsdT,@obVQ3

@@ -1,0 +1,23 @@
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    if (context.getType() === 'ws') {
+      return next.handle();
+    }
+
+    const now = Date.now();
+    const req = context.switchToHttp().getRequest();
+    const { method, url, ip } = req;
+
+    return next.handle().pipe(
+      tap(() => {
+        const elapsed = Date.now() - now;
+        console.log(`${method} ${url} ${elapsed}ms - ${ip}`);
+      }),
+    );
+  }
+}

@@ -1,0 +1,287 @@
+import { useState, useMemo, useEffect } from 'react'
+import { useApi, apiPost, useWebSocket, useNotifications } from '@glamping/api'
+import { mockHouses } from '@glamping/utils'
+import type { Task, TaskStatus } from '@glamping/types'
+import { Badge } from '@glamping/ui'
+
+type FilterStatus = TaskStatus | 'all'
+type FilterType = string | 'all'
+
+const TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string }> = {
+  food: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>, label: 'Питание' },
+  minibar: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" x2="6" y1="2" y2="4" /><line x1="10" x2="10" y1="2" y2="4" /><line x1="14" x2="14" y1="2" y2="4" /></svg>, label: 'Минибар' },
+  transfer: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" /></svg>, label: 'Трансфер' },
+  cleaning: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /></svg>, label: 'Уборка' },
+  towels: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2" /><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2" /><path d="M9.8 4.4A2 2 0 1 1 11 8H2" /></svg>, label: 'Полотенца' },
+  gates: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg>, label: 'Ворота' },
+  custom: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>, label: 'Услуга' },
+}
+
+const LOCATION_LABELS: Record<string, string> = {
+  cabin: 'В домик', terrace: 'На террасу', gazebo: 'В беседку',
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  new: 'bg-orange-500', accepted: 'bg-blue-500', in_progress: 'bg-purple-500', done: 'bg-green-500',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  new: 'Новая', accepted: 'Принята', in_progress: 'В работе', done: 'Готово',
+}
+
+function formatCreationTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDesiredTime(iso: string): string {
+  const d = new Date(iso)
+  const now = new Date()
+  const isToday = d.toDateString() === now.toDateString()
+  const time = d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+  if (isToday) return `Сегодня, ${time}`
+  return d.toLocaleDateString('ru', { day: '2-digit', month: 'long' }) + ', ' + time
+}
+
+function getDesiredTimeLabel(type: string): string {
+  switch (type) {
+    case 'food': return 'Подать в'
+    case 'transfer': return 'Выезд в'
+    case 'cleaning': return 'Уборка'
+    default: return 'Время'
+  }
+}
+
+function getUrgency(desiredAt?: string): { color: string; label: string; sort: number } {
+  if (!desiredAt) return { color: '', label: '', sort: 999 }
+  const now = new Date()
+  const target = new Date(desiredAt)
+  const diffMin = (target.getTime() - now.getTime()) / 60000
+  if (diffMin < 0) return { color: 'text-red-500 font-bold', label: 'Просрочено', sort: 0 }
+  if (diffMin < 15) return { color: 'text-orange-500 font-bold', label: `${Math.round(diffMin)} мин`, sort: 1 }
+  return { color: 'text-gray-800 dark:text-white', label: '', sort: 2 }
+}
+
+function getMainContent(ticket: Task): { title: string; items: string[] } {
+  switch (ticket.type) {
+    case 'food': return { title: 'Заказ', items: ticket.items?.map(i => `${i.name} ×${i.quantity}`) ?? [] }
+    case 'transfer': return { title: 'Адрес', items: [ticket.geo ?? 'Не указан'] }
+    case 'cleaning': return { title: '', items: ['Полная уборка домика'] }
+    case 'towels': return { title: '', items: ['Замена полотенец'] }
+    case 'minibar': return { title: '', items: ['Пополнение минибар'] }
+    case 'custom': return { title: '', items: [ticket.description ?? 'Заявка'] }
+    default: return { title: '', items: [] }
+  }
+}
+
+function getExtraInfo(ticket: Task): { icon: React.ReactNode; text: string }[] {
+  const info: { icon: React.ReactNode; text: string }[] = []
+  if (ticket.location) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>, text: LOCATION_LABELS[ticket.location] ?? ticket.location })
+  if (ticket.guestCount) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, text: `${ticket.guestCount} чел.` })
+  if (ticket.description && ticket.type !== 'custom') info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>, text: ticket.description })
+  return info
+}
+
+const NEXT_STATUS: Record<string, TaskStatus> = { new: 'in_progress', in_progress: 'done' }
+const NEXT_LABEL: Record<string, string> = { new: 'В работу', in_progress: 'Готово' }
+
+const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+
+export default function Tickets() {
+  const { data: apiTasks } = useApi<Task[]>('/api/tasks')
+  const [tickets, setTickets] = useState<Task[]>([])
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
+  const [typeFilter, setTypeFilter] = useState<FilterType>('all')
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates')) }, [apiTasks])
+
+  const { notify } = useNotifications()
+
+  useWebSocket({
+    onMessage: (event) => {
+      if (event.type === 'server:task:created') {
+        const task = event.payload as Task
+        setTickets(prev => [task, ...prev])
+        notify('Новая заявка', `${task.type} — Домик #${getHouseNumber(task.houseId)}`)
+      }
+    },
+  })
+
+  function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
+
+  function handleStatusChange(id: string, status: TaskStatus) {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
+    apiPost(`/api/tasks/${id}`, { status }).catch(() => {})
+  }
+
+  function handleArchive(id: string) {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'cancelled' } : t))
+    setExpandedIds(prev => { const n = new Set(prev); n.delete(id); return n })
+    apiPost(`/api/tasks/${id}/cancel`, {}).catch(() => {})
+  }
+
+  const filtered = useMemo(() => {
+    const result = tickets.filter(t => {
+      const matchStatus = statusFilter === 'all' || t.status === statusFilter
+      const matchType = typeFilter === 'all' || t.type === typeFilter
+      return matchStatus && matchType && t.status !== 'cancelled'
+    })
+    return result.sort((a, b) => {
+      const urgA = getUrgency(a.desiredAt)
+      const urgB = getUrgency(b.desiredAt)
+      if (urgA.sort !== urgB.sort) return urgA.sort - urgB.sort
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  }, [tickets, statusFilter, typeFilter])
+
+  useEffect(() => {
+    if (expandedIds.size === 0) {
+      const foodIds = new Set(filtered.filter(t => t.type === 'food').map(t => t.id))
+      if (foodIds.size > 0) setExpandedIds(foodIds)
+    }
+  }, [filtered])
+
+  const newCount = tickets.filter(t => t.status === 'new').length
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Заявки</h2>
+        {newCount > 0 && <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{newCount}</span>}
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+        {(['all', 'new', 'in_progress', 'done'] as FilterStatus[]).map(s => (
+          <button key={s} onClick={() => setStatusFilter(s)}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${statusFilter === s ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+            {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'in_progress' ? 'В работе' : 'Готово'}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+        {(['all', 'food', 'minibar', 'transfer', 'cleaning', 'towels'] as FilterType[]).map(t => (
+          <button key={t} onClick={() => setTypeFilter(t)}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+            {t === 'all' ? 'Все типы' : TYPE_CONFIG[t]?.label}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-gray-300 dark:text-white/10"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <p className="text-sm">Нет заявок</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map(ticket => {
+            const config = TYPE_CONFIG[ticket.type] ?? { icon: null, label: 'Заявка' }
+            const houseNumber = getHouseNumber(ticket.houseId)
+            const mainContent = getMainContent(ticket)
+            const extraInfo = getExtraInfo(ticket)
+            const urgency = getUrgency(ticket.desiredAt)
+            const isExpanded = expandedIds.has(ticket.id)
+            const nextStatus = NEXT_STATUS[ticket.status]
+            const nextLabel = NEXT_LABEL[ticket.status]
+
+            return (
+              <div key={ticket.id}
+                onClick={() => setExpandedIds(prev => { const n = new Set(prev); isExpanded ? n.delete(ticket.id) : n.add(ticket.id); return n })}
+                className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-all cursor-pointer active:scale-[0.98]">
+
+                {/* Шапка */}
+                <div className="px-4 pt-3 pb-1 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-gray-600 dark:text-white/60 shrink-0">{config.icon}</span>
+                    <span className="font-bold text-sm text-gray-800 dark:text-white truncate">{config.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="bg-gray-100 dark:bg-white/10 text-gray-800 dark:text-white/50 text-[11px] font-bold px-2 py-0.5 rounded">Домик №{houseNumber}</span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[ticket.status] ?? 'bg-gray-400'}`}></span>
+                    <span className="text-[11px] font-semibold text-gray-600 dark:text-white/50">{STATUS_LABELS[ticket.status] ?? ticket.status}</span>
+                  </div>
+                </div>
+
+                {/* Заказано в */}
+                <div className="px-4 pb-1">
+                  <span className="text-[11px] text-gray-400 dark:text-white/30">Заказано в {formatCreationTime(ticket.createdAt)}</span>
+                </div>
+
+                {/* Основная информация — только для не-еды */}
+                {ticket.type !== 'food' && mainContent.items.length > 0 && (
+                  <div className="px-4 pb-1">
+                    {mainContent.title && <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-0.5">{mainContent.title}</p>}
+                    <div className="space-y-0">
+                      {mainContent.items.map((item, i) => (
+                        <p key={i} className="text-sm font-medium text-gray-800 dark:text-white leading-tight">• {item}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Время выполнения */}
+                {ticket.desiredAt && (
+                  <div className="px-4 py-1.5 flex items-center gap-1.5">
+                    <span className="text-gray-400 dark:text-white/30"><ClockIcon /></span>
+                    <span className={`text-sm font-semibold ${urgency.color}`}>
+                      {getDesiredTimeLabel(ticket.type)} {formatDesiredTime(ticket.desiredAt)}
+                    </span>
+                    {urgency.label && <span className={`text-xs ${urgency.color}`}>{urgency.label}</span>}
+                  </div>
+                )}
+
+                {/* Доп. информация */}
+                {extraInfo.length > 0 && (
+                  <div className="px-4 pb-3 flex flex-wrap gap-x-4 gap-y-1">
+                    {extraInfo.map((info, i) => (
+                      <span key={i} className="flex items-center gap-1 text-xs text-gray-600 dark:text-white/50">
+                        <span className="text-gray-400 dark:text-white/30">{info.icon}</span>
+                        {info.text}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Расширенный блок */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-white/10 space-y-3">
+                    {ticket.items && ticket.items.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
+                        {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
+                          <div key={item.menuItemId} className="flex justify-between text-sm text-gray-800 dark:text-white">
+                            <span>• {item.name} ×{item.quantity}</span>
+                            <span>{item.price * item.quantity} ₽</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
+                          <span>Итого</span>
+                          <span>{ticket.items!.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)} ₽</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {nextStatus && (
+                        <button onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, nextStatus) }}
+                          className={`py-2.5 rounded-xl text-xs font-bold text-white ${ticket.status === 'new' ? 'bg-amber-500' : ticket.status === 'in_progress' ? 'bg-blue-500' : 'bg-green-500'}`}>
+                          {nextLabel}
+                        </button>
+                      )}
+                      {ticket.status === 'done' && (
+                        <button onClick={(e) => { e.stopPropagation(); handleArchive(ticket.id) }}
+                          className="py-2.5 rounded-xl text-xs font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
+                          В архив
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

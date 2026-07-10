@@ -1,0 +1,34 @@
+{
+  "name": "glamping-frontend",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n guest,admin -c cyan,magenta \"npm run dev -w @glamping/guest\" \"npm run dev -w @glamping/admin\"",
+    "dev:guest": "npm run dev -w @glamping/guest",
+    "dev:admin": "npm run dev -w @glamping/admin",
+    "build": "npm run build -w @glamping/guest && npm run build -w @glamping/admin",
+    "build:guest": "npm run build -w @glamping/guest",
+    "build:admin": "npm run build -w @glamping/admin",
+    "typecheck": "npm run typecheck -w @glamping/guest && npm run typecheck -w @glamping/admin",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "serve apps/guest/dist -s -l $PORT",
+    "start:admin": "serve apps/admin/dist -s -l $PORT"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-legacy": "^6.1.1",
+    "concurrently": "^10.0.3",
+    "terser": "^5.48.0",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "i18next": "^26.3.4",
+    "react-i18next": "^17.0.8",
+    "serve": "^14.2.6"
+  }
+}

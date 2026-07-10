@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "services": "Services",
+    "chat": "Chat",
+    "info": "Info"
+  },
+  "home": {
+    "title": "Order Services",
+    "house": "Cottage #1",
+    "food": "Food Order",
+    "minibar": "Minibar Refill",
+    "transfer": "Transfer",
+    "cleaning": "Cleaning",
+    "towels": "Towel Replacement",
+    "gates": "Open Gates",
+    "additional": "Additional"
+  },
+  "food": {
+    "title": "Food Order",
+    "date": "Date",
+    "time": "Delivery Time",
+    "period": "Meal Period",
+    "location": "Delivery Location",
+    "menu": "Menu",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "cabin": "To cottage",
+    "terrace": "To terrace",
+    "gazebo": "To gazebo",
+    "next": "Next",
+    "back": "← Back",
+    "submit": "Place Order",
+    "subtotal": "Items",
+    "total": "Total",
+    "success": "Order accepted!",
+    "successMsg": "We will prepare and deliver your order.",
+    "kitchenClosed": "Kitchen is currently closed",
+    "kitchenHours": "Breakfast: 08:00–10:00 · Lunch: 13:00–15:00 · Dinner: 19:00–21:00",
+    "required": "Please select a time"
+  },
+  "minibar": {
+    "title": "Minibar Refill",
+    "order": "Order",
+    "success": "Order accepted!",
+    "successMsg": "We will deliver shortly."
+  },
+  "transfer": {
+    "title": "Transfer",
+    "destination": "Destination",
+    "date": "Date",
+    "time": "Pickup Time",
+    "next": "Next",
+    "back": "← Back",
+    "submit": "Book Transfer",
+    "chatHint": "Can't find your destination? Write us in chat.",
+    "priceHint": "Final price may vary. Exact price at checkout.",
+    "success": "Request accepted!",
+    "successMsg": "Driver will arrive at the specified time.",
+    "required": "Please select pickup time"
+  },
+  "cleaning": {
+    "title": "Cleaning",
+    "description": "Choose a convenient time — we will clean the cottage.",
+    "datetime": "Date and Time",
+    "next": "Next",
+    "back": "← Back",
+    "submit": "Confirm",
+    "readyHint": "Please be ready to vacate the cottage during cleaning.",
+    "success": "Request accepted!",
+    "successMsg": "Cleaning will be done at the specified time.",
+    "required": "Please select date and time",
+    "futureOnly": "Please select a future time"
+  },
+  "towels": {
+    "title": "Towel Replacement",
+    "description": "We will bring fresh towels shortly.",
+    "confirm": "Request",
+    "success": "Request accepted! Towels will be delivered."
+  },
+  "gates": {
+    "title": "Open Gates",
+    "description": "Send a request to the administrator to open the gates.",
+    "confirm": "Send Request",
+    "success": "Request sent! Please wait for confirmation."
+  },
+  "chat": {
+    "admin": "Administrator",
+    "online": "Online",
+    "placeholder": "Type a message...",
+    "empty": "Start a conversation with the administrator"
+  },
+  "info": {
+    "title": "Eco Glamp \"Forest Haven\"",
+    "phone": "Contact Administrator",
+    "wifi": "Wi-Fi Connection",
+    "network": "Network",
+    "password": "Password",
+    "about": "About Us",
+    "aboutText": "Welcome to our glamping! Enjoy nature without sacrificing comfort. Our team is always ready to help you. Please note that food orders must be placed at least 1 hour in advance.",
+    "services": "Our Services",
+    "servicesText": "We offer: menu dining, transfer services, cottage cleaning, minibar refills, and fresh towels on request."
+  },
+  "confirm": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "validation": {
+    "required": "This field is required",
+    "selectTime": "Please select a time",
+    "selectOption": "Please select {{field}}",
+    "selectDish": "Please select at least one item",
+    "offline": "No network connection"
+  }
+}

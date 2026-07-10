@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "services": "服务",
+    "chat": "联系",
+    "info": "信息"
+  },
+  "home": {
+    "title": "订购服务",
+    "house": "1号小屋",
+    "food": "订餐",
+    "minibar": "迷你吧补充",
+    "transfer": "接送服务",
+    "cleaning": "清洁服务",
+    "towels": "更换毛巾",
+    "gates": "开门",
+    "additional": "其他"
+  },
+  "food": {
+    "title": "订餐",
+    "date": "日期",
+    "time": "送达时间",
+    "period": "用餐时段",
+    "location": "送达地点",
+    "menu": "菜单",
+    "today": "今天",
+    "tomorrow": "明天",
+    "breakfast": "早餐",
+    "lunch": "午餐",
+    "dinner": "晚餐",
+    "cabin": "送到小屋",
+    "terrace": "送到露台",
+    "gazebo": "送到凉亭",
+    "next": "下一步",
+    "back": "← 返回",
+    "submit": "提交订单",
+    "subtotal": "共",
+    "total": "合计",
+    "success": "订单已接受！",
+    "successMsg": "我们将为您准备并送达。",
+    "kitchenClosed": "厨房目前关闭",
+    "kitchenHours": "早餐: 08:00–10:00 · 午餐: 13:00–15:00 · 晚餐: 19:00–21:00",
+    "required": "请选择时间"
+  },
+  "minibar": {
+    "title": "迷你吧补充",
+    "order": "下单",
+    "success": "订单已接受！",
+    "successMsg": "我们将尽快送达。"
+  },
+  "transfer": {
+    "title": "接送服务",
+    "destination": "目的地",
+    "date": "日期",
+    "time": "出发时间",
+    "next": "下一步",
+    "back": "← 返回",
+    "submit": "预约接送",
+    "chatHint": "找不到目的地？请在聊天中告诉我们。",
+    "priceHint": "最终价格可能有所不同。准确价格在退房时确认。",
+    "success": "请求已接受！",
+    "successMsg": "司机将在指定时间到达。",
+    "required": "请选择出发时间"
+  },
+  "cleaning": {
+    "title": "清洁服务",
+    "description": "选择方便的时间——我们将清洁小屋。",
+    "datetime": "日期和时间",
+    "next": "下一步",
+    "back": "← 返回",
+    "submit": "确认",
+    "readyHint": "请在清洁期间准备好腾出小屋。",
+    "success": "请求已接受！",
+    "successMsg": "清洁将在指定时间进行。",
+    "required": "请选择日期和时间",
+    "futureOnly": "请选择未来的时间"
+  },
+  "towels": {
+    "title": "更换毛巾",
+    "description": "我们将很快送来干净的毛巾。",
+    "confirm": "申请",
+    "success": "申请已接受！毛巾将被送达。"
+  },
+  "gates": {
+    "title": "开门",
+    "description": "向管理员发送开门请求。",
+    "confirm": "发送请求",
+    "success": "请求已发送！请等待确认。"
+  },
+  "chat": {
+    "admin": "管理员",
+    "online": "在线",
+    "placeholder": "输入消息...",
+    "empty": "开始与管理员对话"
+  },
+  "info": {
+    "title": "Eco Glamp \"Forest Haven\"",
+    "phone": "联系管理员",
+    "wifi": "Wi-Fi 连接",
+    "network": "网络",
+    "password": "密码",
+    "about": "关于我们",
+    "aboutText": "欢迎来到我们的豪华露营地！在这里您可以享受大自然而不失舒适。我们的团队随时为您提供帮助。请注意，订餐需提前至少1小时。",
+    "services": "我们的服务",
+    "servicesText": "我们提供：菜单餐饮、接送服务、小屋清洁、迷你吧补充和按需提供干净毛巾。"
+  },
+  "confirm": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "close": "关闭"
+  },
+  "validation": {
+    "required": "请填写此字段",
+    "selectTime": "请选择时间",
+    "selectOption": "请选择{{field}}",
+    "selectDish": "请至少选择一项",
+    "offline": "无网络连接"
+  }
+}

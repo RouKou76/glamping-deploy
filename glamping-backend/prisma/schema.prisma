@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum HouseStatus {
+  occupied
+  vacant
+}
+
+enum TicketType {
+  food
+  transfer
+  cleaning
+  towels
+  minibar
+  gates
+  custom
+}
+
+enum TicketStatus {
+  new
+  accepted
+  in_progress
+  done
+  archived
+}
+
+enum MenuCategory {
+  breakfast
+  lunch
+  dinner
+  minibar
+}
+
+enum AssignedRole {
+  cook
+  cleaning
+  driver
+  admin
+}
+
+model House {
+  id           String        @id @default(cuid())
+  number       Int           @unique
+  status       HouseStatus   @default(vacant)
+  deviceToken  String?       @unique @map("device_token")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  sessions     GuestSession[]
+  tickets      Ticket[]
+  messages     ChatMessage[]
+
+  @@map("houses")
+}
+
+model GuestSession {
+  id           String    @id @default(cuid())
+  houseId      String    @map("house_id")
+  guestCount   Int?      @map("guest_count")
+  lang         String    @default("ru")
+  checkInAt    DateTime? @map("check_in_at")
+  checkOutAt   DateTime? @map("check_out_at")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  house        House     @relation(fields: [houseId], references: [id])
+  tickets      Ticket[]
+  messages     ChatMessage[]
+
+  @@index([houseId, isActive])
+  @@map("guest_sessions")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  permissions String[]
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users       User[]
+
+  @@map("roles")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  name          String
+  roleId        String   @map("role_id")
+  refreshToken  String?  @map("refresh_token")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  role          Role     @relation(fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model Ticket {
+  id           String       @id @default(cuid())
+  houseId      String       @map("house_id")
+  sessionId    String?      @map("session_id")
+  type         TicketType
+  status       TicketStatus @default(new)
+  sentAt       DateTime     @default(now()) @map("sent_at")
+  desiredAt    DateTime?    @map("desired_at")
+  description  String?
+  geo          String?
+  assignedTo   AssignedRole? @map("assigned_to")
+  location     String?
+  guestCount   Int?         @map("guest_count")
+  items        Json?
+  priceFix     Int?         @map("price_fix")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  house        House        @relation(fields: [houseId], references: [id])
+  session      GuestSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([houseId])
+  @@index([status])
+  @@index([assignedTo])
+  @@map("tickets")
+}
+
+model MenuItem {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  category    MenuCategory
+  price       Int
+  hidden      Boolean      @default(false)
+  showPrice   Boolean      @default(true) @map("show_price")
+  translations Json?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  @@map("menu_items")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  price       String?
+  icon        String?
+  active      Boolean  @default(true)
+  assignedTo  AssignedRole @map("assigned_to")
+  fields      Json
+  items       Json?
+  jsonSchema  Json?    @map("json_schema")
+  translations Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("services")
+}
+
+model TransferDestination {
+  id        String   @id @default(cuid())
+  name      String
+  km        Float
+  price     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("transfer_destinations")
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  houseId    String   @map("house_id")
+  sessionId  String?  @map("session_id")
+  sender     String
+  text       String
+  timestamp  DateTime @default(now())
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  house      House         @relation(fields: [houseId], references: [id])
+  session    GuestSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([houseId])
+  @@map("chat_messages")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
