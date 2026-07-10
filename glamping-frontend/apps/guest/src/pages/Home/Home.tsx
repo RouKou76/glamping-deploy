@@ -37,13 +37,6 @@ export default function Home() {
       ],
       message: t('food.successMsg'),
     },
-    minibar: {
-      title: t('minibar.title'),
-      steps: [
-        { type: 'menu', key: 'items', items: items.filter(i => i.category === 'minibar'), required: true },
-      ],
-      message: t('minibar.successMsg'),
-    },
     transfer: {
       title: t('transfer.title'),
       steps: [
@@ -73,7 +66,7 @@ export default function Home() {
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
-  const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates'
+  const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates' || m === 'minibar'
 
   function handleConfirm(type: ConfirmSheetType) {
     apiPost('/api/tasks', { houseId, type, description: t(`${type}.title`) })
