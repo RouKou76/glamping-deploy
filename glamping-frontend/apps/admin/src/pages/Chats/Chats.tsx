@@ -22,6 +22,15 @@ export default function Chats() {
     return () => clearInterval(interval)
   }, [activeHouseId, refetch])
 
+  useEffect(() => {
+    if (!activeHouseId) return
+    const unread = messages.filter(m => m.houseId === activeHouseId && !m.read && m.sender === 'GUEST')
+    unread.forEach(m => {
+      apiPost(`/api/messages/${m.id}/read`, {}).catch(() => {})
+      setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, read: true } : msg))
+    })
+  }, [activeHouseId, messages])
+
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [activeMessages.length])
 
   const handleSend = useCallback(async () => {

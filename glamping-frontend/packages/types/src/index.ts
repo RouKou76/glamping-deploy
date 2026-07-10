@@ -14,6 +14,7 @@ export type TaskStatus =
   | 'in_progress'
   | 'done'
   | 'cancelled'
+  | 'archived'
 
 export type MenuCategory = 'breakfast' | 'lunch' | 'dinner' | 'minibar'
 
