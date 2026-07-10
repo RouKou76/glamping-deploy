@@ -94,7 +94,7 @@ export default function Tickets() {
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates')) }, [apiTasks])
+  useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates' && t.status !== 'archived')) }, [apiTasks])
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
 
   useEffect(() => {
