@@ -2,8 +2,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('glamp-token') : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (typeof localStorage !== 'undefined') {
+    const token = localStorage.getItem('glamp-token');
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const deviceToken = localStorage.getItem('glamp-device-token');
+    if (deviceToken) headers["X-Device-Token"] = deviceToken;
+  }
   return headers;
 }
 

@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApi, apiPost } from '@glamping/api'
 import type { Message } from '@glamping/types'
+import { useDevice } from '../../contexts/DeviceContext'
 
 export default function Chat() {
   const { t, i18n } = useTranslation()
-  const { data: initialMessages } = useApi<Message[]>('/api/messages?houseId=h1')
+  const { houseId } = useDevice()
+  const { data: initialMessages } = useApi<Message[]>(houseId ? `/api/messages?houseId=${houseId}` : '')
   const [messages, setMessages] = useState<Message[]>([])
   const [msg, setMsg] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
@@ -17,13 +19,13 @@ export default function Chat() {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   async function handleSend() {
-    if (!msg.trim() || sending) return
+    if (!msg.trim() || sending || !houseId) return
     setSending(true)
     const text = msg
     setMsg('')
-    setMessages(prev => [...prev, { id: `temp-${Date.now()}`, houseId: 'h1', sender: 'GUEST', text, timestamp: new Date().toISOString(), read: true }])
+    setMessages(prev => [...prev, { id: `temp-${Date.now()}`, houseId, sender: 'GUEST', text, timestamp: new Date().toISOString(), read: true }])
     try {
-      const result = await apiPost<Message>('/api/messages', { houseId: 'h1', text })
+      const result = await apiPost<Message>('/api/messages', { houseId, text })
       setMessages(prev => prev.map(m => m.id.startsWith('temp-') && m.text === text ? { ...m, id: result.id } : m))
     } catch {
       setMessages(prev => prev.filter(m => !(m.id.startsWith('temp-') && m.text === text)))

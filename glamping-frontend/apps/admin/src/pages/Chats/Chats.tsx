@@ -9,7 +9,7 @@ export default function Chats() {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const occupiedHouses = mockHouses.filter(h => h.status === 'occupied')
-  const [activeHouseId, setActiveHouseId] = useState<string>(occupiedHouses[0]?.id ?? 'h1')
+  const [activeHouseId, setActiveHouseId] = useState<string>(occupiedHouses[0]?.id ?? '')
   const activeMessages = messages.filter(m => m.houseId === activeHouseId)
 
   useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])

@@ -1,12 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { DeviceGuard } from './common/guards/device.guard';
+import { PrismaService } from './common/prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +22,10 @@ async function bootstrap() {
     origin: allowedOrigins === '*' ? '*' : allowedOrigins.split(',').map((s: string) => s.trim()),
     credentials: true,
   });
+
+  const reflector = app.get(Reflector);
+  const prisma = app.get(PrismaService);
+  app.useGlobalGuards(new JwtAuthGuard(reflector), new DeviceGuard(prisma));
 
   app.useGlobalPipes(
     new ValidationPipe({
