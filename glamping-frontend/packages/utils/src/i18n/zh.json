@@ -44,7 +44,7 @@
   "minibar": {
     "title": "迷你吧补充",
     "description": "我们将尽快送达饮品和零食。",
-    "order": "下单",
+    "confirm": "下单",
     "success": "订单已接受！",
     "successMsg": "我们将尽快送达。"
   },

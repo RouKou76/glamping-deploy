@@ -44,7 +44,7 @@
   "minibar": {
     "title": "Minibar Refill",
     "description": "We will deliver drinks and snacks shortly.",
-    "order": "Order",
+    "confirm": "Order",
     "success": "Order accepted!",
     "successMsg": "We will deliver shortly."
   },
