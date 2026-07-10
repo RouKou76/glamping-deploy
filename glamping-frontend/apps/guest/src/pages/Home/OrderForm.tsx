@@ -46,6 +46,13 @@ function getMinTime(dateStr: string): string {
   return '00:00'
 }
 
+function getPeriodFromTime(time: string): string {
+  const hour = parseInt(time.split(':')[0])
+  if (hour >= 5 && hour < 12) return 'breakfast'
+  if (hour >= 12 && hour < 17) return 'lunch'
+  return 'dinner'
+}
+
 export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
@@ -145,6 +152,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSu
 
     const allItems = [...cartItems, ...catalogItems]
     const payload: Record<string, unknown> = { ...values, houseId, type: taskType }
+    if (taskType === 'food' && values.time) payload.period = getPeriodFromTime(values.time as string)
     if (allItems.length > 0) payload.items = allItems
 
     apiPost('/api/tasks', payload)
@@ -237,11 +245,19 @@ export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSu
               </div>
             )
 
-            if (s.type === 'menu') return (
+            if (s.type === 'menu') {
+              const selectedTime = values.time as string | undefined
+              const period = selectedTime ? getPeriodFromTime(selectedTime) : null
+              const filteredItems = taskType === 'food' && period
+                ? s.items.filter(i => i.isAvailable && ('category' in i && (i as { category: string }).category === period))
+                : s.items.filter(i => i.isAvailable)
+              return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{t('food.menu')}{s.required && ' *'}</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
+                  {taskType === 'food' && period ? `${t('food.menu')} (${t(`food.${period}`)})` : t('food.menu')}{s.required && ' *'}
+                </label>
                 <div className="space-y-2">
-                  {s.items.filter(i => i.isAvailable).map(item => (
+                  {filteredItems.map(item => (
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
@@ -259,7 +275,8 @@ export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSu
                 </div>
                 <ErrorMsg text={errors[s.key]} />
               </div>
-            )
+              )
+            }
 
             if (s.type === 'catalog') return (
               <div key={s.key}>

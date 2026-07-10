@@ -30,9 +30,6 @@ export default function Home() {
       steps: [
         { type: 'date', key: 'date', label: t('food.date') },
         { type: 'time', key: 'time', label: t('food.time'), required: true },
-        { type: 'select', key: 'period', label: t('food.period'), required: true, options: [
-          { value: 'breakfast', label: t('food.breakfast') }, { value: 'lunch', label: t('food.lunch') }, { value: 'dinner', label: t('food.dinner') },
-        ]},
         { type: 'select', key: 'location', label: t('food.location'), required: true, options: [
           { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
         ]},
