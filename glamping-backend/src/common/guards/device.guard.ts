@@ -21,7 +21,7 @@ export class DeviceGuard implements CanActivate {
     const deviceToken = request.headers['x-device-token'] as string | undefined;
 
     if (!deviceToken) {
-      throw new UnauthorizedException('Device token required');
+      return true;
     }
 
     const house = await this.prisma.house.findUnique({
