@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { CheckInDto } from './dto/check-in.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class HousesService {
@@ -89,6 +90,36 @@ export class HousesService {
       lang: dto.lang || 'ru',
       checkInAt: session.checkInAt?.toISOString(),
     };
+  }
+
+  async generateDeviceToken(houseId: string) {
+    const house = await this.prisma.house.findUnique({
+      where: { id: houseId },
+    });
+    if (!house) throw new NotFoundException('House not found');
+
+    const token = `glamp-${house.number}-${randomBytes(16).toString('hex')}`;
+
+    await this.prisma.house.update({
+      where: { id: houseId },
+      data: { deviceToken: token },
+    });
+
+    return { houseId, number: house.number, deviceToken: token };
+  }
+
+  async resetDeviceToken(houseId: string) {
+    const house = await this.prisma.house.findUnique({
+      where: { id: houseId },
+    });
+    if (!house) throw new NotFoundException('House not found');
+
+    await this.prisma.house.update({
+      where: { id: houseId },
+      data: { deviceToken: null },
+    });
+
+    return { houseId, number: house.number, deviceToken: null };
   }
 
   async checkout(houseId: string) {

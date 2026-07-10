@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HousesService } from './houses.service';
 import { CheckInDto } from './dto/check-in.dto';
@@ -38,5 +47,21 @@ export class HousesController {
   @ApiOperation({ summary: 'Check out from house' })
   async checkout(@Param('id') id: string) {
     return this.housesService.checkout(id);
+  }
+
+  @Patch(':id/device-token')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Generate device token for house' })
+  async generateDeviceToken(@Param('id') id: string) {
+    return this.housesService.generateDeviceToken(id);
+  }
+
+  @Delete(':id/device-token')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reset device token' })
+  async resetDeviceToken(@Param('id') id: string) {
+    return this.housesService.resetDeviceToken(id);
   }
 }
