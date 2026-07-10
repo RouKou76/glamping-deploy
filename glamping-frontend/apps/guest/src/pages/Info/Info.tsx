@@ -49,8 +49,8 @@ export default function Info() {
       </div>
 
       <div className="bg-glamp-50 dark:bg-glamp-900/30 p-6 rounded-3xl border border-glamp-100 dark:border-glamp-500/20 transition-colors">
-        <h2 className="text-lg font-bold text-glamp-900 dark:text-glamp-100 mb-3">{t('info.services')}</h2>
-        <p className="text-glamp-800 dark:text-glamp-200 leading-relaxed text-base">{info.servicesText}</p>
+        <h2 className="text-lg font-bold text-glamp-900 dark:text-glamp-400 mb-3">{t('info.services')}</h2>
+        <p className="text-glamp-800 dark:text-glamp-400 leading-relaxed text-base">{info.servicesText}</p>
       </div>
     </div>
   )
