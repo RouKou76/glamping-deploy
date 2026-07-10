@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { apiPost } from '@glamping/api'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 interface DeviceInfo {
   houseId: string | null
@@ -21,6 +20,16 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlToken = urlParams.get('token')
+
+    if (urlToken) {
+      localStorage.setItem('glamp-device-token', urlToken)
+      const match = urlToken.match(/^glamp-(\d+)-/)
+      if (match) localStorage.setItem('glamp-house-id', match[1])
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+
     const token = localStorage.getItem('glamp-device-token')
     const houseId = localStorage.getItem('glamp-house-id')
     setInfo({
@@ -39,36 +48,4 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
 export function useDevice() {
   return useContext(DeviceContext)
-}
-
-export function useDeviceSetup() {
-  const setup = useCallback(async (token: string) => {
-    // Validate token by making a request with it
-    const response = await fetch('/api/houses', {
-      headers: { 'X-Device-Token': token, 'Content-Type': 'application/json' },
-    })
-    if (!response.ok) throw new Error('Invalid token')
-
-    // Get house info from device guard — use a simple endpoint
-    const res = await apiPost<{ houseId: string; number: number }>('/api/auth/me', {}).catch(() => null)
-    // Since we can't call /api/auth/me with device token, we extract houseId from token format: glamp-{number}-{hex}
-    const match = token.match(/^glamp-(\d+)-/)
-    if (!match) throw new Error('Invalid token format')
-
-    localStorage.setItem('glamp-device-token', token)
-    // We'll set houseId from the token number
-    window.location.reload()
-  }, [])
-
-  return { setup }
-}
-
-export function setDeviceToken(token: string, houseId: string) {
-  localStorage.setItem('glamp-device-token', token)
-  localStorage.setItem('glamp-house-id', houseId)
-}
-
-export function clearDevice() {
-  localStorage.removeItem('glamp-device-token')
-  localStorage.removeItem('glamp-house-id')
 }
