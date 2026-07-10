@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useApi } from '@glamping/api'
+import { useApi, apiPost } from '@glamping/api'
 import { useTask } from '../../contexts/TaskContext'
 import { useDevice } from '../../contexts/DeviceContext'
 import type { MenuItem, Service } from '@glamping/types'
@@ -19,7 +19,7 @@ export default function Home() {
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
-  const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
+  const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string; serviceName: string } | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => {
@@ -64,18 +64,22 @@ export default function Home() {
   }
   }, [t, menuItems])
 
-  function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
+  function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string; serviceName: string } {
     const steps: OrderStep[] = []
     if (service.requiresTime) steps.push({ type: 'time', key: 'time', label: t('food.time') })
-    steps.push({ type: 'textarea', key: 'comment', label: t('food.time'), placeholder: 'Дополнительные пожелания...' })
-    return { title: service.name, steps, message: `Заявка «${service.name}» отправлена` }
+    steps.push({ type: 'textarea', key: 'comment', label: 'Комментарий', placeholder: service.name })
+    return { title: service.name, steps, message: `Заявка «${service.name}» отправлена`, serviceName: service.name }
   }
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
   const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates'
 
-  function handleConfirm(type: ConfirmSheetType) { showToast(type === 'towels' ? t('towels.success') : t('gates.success')) }
+  function handleConfirm(type: ConfirmSheetType) {
+    apiPost('/api/tasks', { houseId, type, description: t(`${type}.description`) })
+      .then(() => showToast(t(`${type}.success`)))
+      .catch(() => showToast('Ошибка отправки'))
+  }
   function handleOrderSubmit(_data: Record<string, unknown>, message: string) { showToast(message) }
 
   return (
@@ -134,6 +138,7 @@ export default function Home() {
           steps={activeServiceConfig.steps}
           houseId={houseId}
           taskType="custom"
+          serviceName={activeServiceConfig.serviceName}
           onClose={() => setActiveServiceConfig(null)}
           onSubmit={() => handleOrderSubmit({}, activeServiceConfig.message)}
         />

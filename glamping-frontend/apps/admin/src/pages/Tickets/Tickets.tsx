@@ -67,7 +67,7 @@ function getMainContent(ticket: Task): { title: string; items: string[] } {
     case 'cleaning': return { title: '', items: ['Полная уборка домика'] }
     case 'towels': return { title: '', items: ['Замена полотенец'] }
     case 'minibar': return { title: '', items: ['Пополнение минибар'] }
-    case 'custom': return { title: '', items: [ticket.description ?? 'Заявка'] }
+    case 'custom': return { title: 'Услуга', items: [ticket.description ?? ''] }
     default: return { title: '', items: [] }
   }
 }

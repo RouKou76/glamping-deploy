@@ -22,6 +22,7 @@ interface OrderFormProps {
   steps: OrderStep[]
   houseId: string | null
   taskType: string
+  serviceName?: string
   onClose: () => void
   onSubmit: (data: Record<string, unknown>) => void
 }
@@ -53,7 +54,7 @@ function getPeriodFromTime(time: string): string {
   return 'dinner'
 }
 
-export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSubmit }: OrderFormProps) {
+export function OrderForm({ open, title, steps, houseId, taskType, serviceName, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
   function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
@@ -153,6 +154,9 @@ export function OrderForm({ open, title, steps, houseId, taskType, onClose, onSu
     const allItems = [...cartItems, ...catalogItems]
     const payload: Record<string, unknown> = { ...values, houseId, type: taskType }
     if (taskType === 'food' && values.time) payload.period = getPeriodFromTime(values.time as string)
+    if (taskType === 'custom' && serviceName && values.comment) {
+      payload.description = `[${serviceName}] ${values.comment}`
+    }
     if (allItems.length > 0) payload.items = allItems
 
     apiPost('/api/tasks', payload)
