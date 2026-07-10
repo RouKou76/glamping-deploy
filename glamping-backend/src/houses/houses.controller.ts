@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Param,
   Body,
@@ -49,7 +48,7 @@ export class HousesController {
     return this.housesService.checkout(id);
   }
 
-  @Patch(':id/device-token')
+  @Post(':id/device-token')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate device token for house' })
