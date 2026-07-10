@@ -26,17 +26,17 @@ export default function Chats() {
 
   const handleSend = useCallback(async () => {
     const text = input.trim()
-    if (!text || !activeHouseId) return
+    if (!text || !activeHouseId || !houses.find(h => h.id === activeHouseId)) return
     setInput('')
     const tempId = `temp-${Date.now()}`
     setMessages(prev => [...prev, { id: tempId, houseId: activeHouseId, sender: 'STAFF', text, timestamp: new Date().toISOString(), read: true }])
     try {
-      const result = await apiPost<{ id: string }>('/api/messages', { houseId: activeHouseId, text, sender: 'STAFF' })
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.id } : m))
+      const result = await apiPost<{ success: boolean; data: { id: string } }>('/api/messages', { houseId: activeHouseId, text, sender: 'STAFF' })
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.data.id } : m))
     } catch {
       setMessages(prev => prev.filter(m => m.id !== tempId))
     }
-  }, [input, activeHouseId])
+  }, [input, activeHouseId, houses])
 
   const occupied = houses.filter(h => h.status === 'occupied')
   const activeHouse = houses.find(h => h.id === activeHouseId)
