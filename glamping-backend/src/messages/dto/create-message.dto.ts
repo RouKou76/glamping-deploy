@@ -1,5 +1,5 @@
-import { IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageDto {
   @ApiProperty()
@@ -9,4 +9,9 @@ export class CreateMessageDto {
   @ApiProperty()
   @IsString()
   text: string;
+
+  @ApiPropertyOptional({ enum: ['GUEST', 'STAFF'] })
+  @IsString()
+  @IsOptional()
+  sender?: string;
 }

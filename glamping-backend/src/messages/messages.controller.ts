@@ -26,17 +26,18 @@ export class MessagesController {
 
   @Get()
   @Public()
-  @ApiOperation({ summary: 'Get messages for a house' })
-  @ApiQuery({ name: 'houseId', required: true })
-  async findByHouseId(@Query('houseId') houseId: string) {
-    return this.messagesService.findByHouseId(houseId);
+  @ApiOperation({ summary: 'Get messages' })
+  @ApiQuery({ name: 'houseId', required: false })
+  async find(@Query('houseId') houseId?: string) {
+    if (houseId) return this.messagesService.findByHouseId(houseId);
+    return this.messagesService.findAll();
   }
 
   @Post()
   @Public()
-  @ApiOperation({ summary: 'Send a message (guest device or admin)' })
+  @ApiOperation({ summary: 'Send a message' })
   async create(@Body() dto: CreateMessageDto) {
-    return this.messagesService.create(dto.houseId, dto.text);
+    return this.messagesService.create(dto.houseId, dto.text, dto.sender);
   }
 
   @Patch(':id/read')

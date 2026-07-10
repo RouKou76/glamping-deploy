@@ -25,9 +25,24 @@ export class MessagesService {
     }));
   }
 
-  async create(houseId: string, text: string) {
+  async findAll() {
+    const messages = await this.prisma.chatMessage.findMany({
+      orderBy: { timestamp: 'asc' },
+    });
+
+    return messages.map((m) => ({
+      id: m.id,
+      houseId: m.houseId,
+      sender: m.sender,
+      text: m.text,
+      timestamp: m.timestamp.toISOString(),
+      read: m.read,
+    }));
+  }
+
+  async create(houseId: string, text: string, sender = 'GUEST') {
     const message = await this.prisma.chatMessage.create({
-      data: { houseId, sender: 'GUEST', text },
+      data: { houseId, sender, text },
     });
 
     return {
