@@ -12,6 +12,7 @@ import { HousesService } from './houses.service';
 import { CheckInDto } from './dto/check-in.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
 
 @ApiTags('houses')
 @Controller('houses')
@@ -34,6 +35,7 @@ export class HousesController {
 
   @Post(':id/check-in')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check in to house' })
   async checkin(@Param('id') id: string, @Body() dto: CheckInDto) {
@@ -42,6 +44,7 @@ export class HousesController {
 
   @Post(':id/check-out')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check out from house' })
   async checkout(@Param('id') id: string) {
@@ -50,6 +53,7 @@ export class HousesController {
 
   @Post(':id/device-token')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate device token for house' })
   async generateDeviceToken(@Param('id') id: string) {
@@ -58,6 +62,7 @@ export class HousesController {
 
   @Delete(':id/device-token')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Reset device token' })
   async resetDeviceToken(@Param('id') id: string) {

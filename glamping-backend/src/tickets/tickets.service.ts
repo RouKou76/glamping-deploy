@@ -15,12 +15,23 @@ export class TicketsService {
     houseId?: string;
     status?: string;
     assignedTo?: string;
+    userRole?: string;
   }) {
     const where: Record<string, any> = {};
 
     if (query.houseId) where.houseId = query.houseId;
     if (query.status) where.status = query.status;
     if (query.assignedTo) where.assignedTo = query.assignedTo;
+
+    if (query.userRole && query.userRole !== 'admin') {
+      const roleTypeMap: Record<string, string[]> = {
+        cook: ['food', 'minibar'],
+        driver: ['transfer'],
+        cleaning: ['cleaning'],
+      };
+      const allowedTypes = roleTypeMap[query.userRole];
+      if (allowedTypes) where.type = { in: allowedTypes };
+    }
 
     const tickets = await this.prisma.ticket.findMany({
       where,

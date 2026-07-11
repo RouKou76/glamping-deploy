@@ -19,6 +19,7 @@ import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
 
 @ApiTags('menu')
 @Controller('menu')
@@ -35,6 +36,7 @@ export class MenuController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_menu')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create menu item' })
   async create(@Body() dto: CreateMenuItemDto) {
@@ -43,6 +45,7 @@ export class MenuController {
 
   @Post(':id')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_menu')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update menu item' })
   async update(@Param('id') id: string, @Body() dto: UpdateMenuItemDto) {
@@ -51,6 +54,7 @@ export class MenuController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_menu')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete menu item' })
   async delete(@Param('id') id: string) {

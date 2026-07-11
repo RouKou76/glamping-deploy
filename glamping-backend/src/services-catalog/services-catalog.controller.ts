@@ -19,6 +19,7 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
 
 @ApiTags('services')
 @Controller('services')
@@ -35,6 +36,7 @@ export class ServicesCatalogController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_services')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create service' })
   async create(@Body() dto: CreateServiceDto) {
@@ -43,6 +45,7 @@ export class ServicesCatalogController {
 
   @Post(':id')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_services')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update service' })
   async update(@Param('id') id: string, @Body() dto: UpdateServiceDto) {
@@ -51,6 +54,7 @@ export class ServicesCatalogController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_services')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete service' })
   async delete(@Param('id') id: string) {

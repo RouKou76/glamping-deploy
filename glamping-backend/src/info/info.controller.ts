@@ -4,6 +4,7 @@ import { InfoService } from './info.service';
 import { UpdateInfoDto } from './dto/update-info.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
 
 @ApiTags('info')
 @Controller('info')
@@ -19,6 +20,7 @@ export class InfoController {
 
   @Put()
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_settings')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update settings/info' })
   async updateInfo(@Body() dto: UpdateInfoDto) {

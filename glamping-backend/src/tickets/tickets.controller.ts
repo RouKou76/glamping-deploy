@@ -7,7 +7,9 @@ import {
   Body,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -19,6 +21,7 @@ import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
 
 @ApiTags('tickets')
 @Controller('tickets')
@@ -27,6 +30,7 @@ export class TicketsController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('view_tickets')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get tickets' })
   @ApiQuery({ name: 'houseId', required: false })
@@ -36,8 +40,9 @@ export class TicketsController {
     @Query('houseId') houseId?: string,
     @Query('status') status?: string,
     @Query('assignedTo') assignedTo?: string,
+    @Req() req?: Request & { user?: { role?: { name?: string } } },
   ) {
-    return this.ticketsService.findAll({ houseId, status, assignedTo });
+    return this.ticketsService.findAll({ houseId, status, assignedTo, userRole: req?.user?.role?.name });
   }
 
   @Post()
@@ -49,6 +54,7 @@ export class TicketsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_tickets')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update ticket' })
   async update(@Param('id') id: string, @Body() dto: UpdateTicketDto) {

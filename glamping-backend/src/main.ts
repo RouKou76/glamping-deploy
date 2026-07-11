@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { PermissionsGuard } from './common/guards/permissions.guard';
 import { DeviceGuard } from './common/guards/device.guard';
 import { PrismaService } from './common/prisma/prisma.service';
 
@@ -28,7 +29,7 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
-  app.useGlobalGuards(new JwtAuthGuard(reflector), new DeviceGuard(prisma));
+  app.useGlobalGuards(new JwtAuthGuard(reflector), new PermissionsGuard(reflector), new DeviceGuard(prisma));
 
   app.useGlobalPipes(
     new ValidationPipe({

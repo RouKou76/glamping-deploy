@@ -9,28 +9,45 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('Seeding database...');
 
-  // Create admin role
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'admin' },
-    update: {},
-    create: {
-      name: 'admin',
-      permissions: ['manage_users', 'manage_houses', 'manage_services', 'manage_menu', 'view_tickets', 'manage_tickets', 'manage_chat'],
-    },
-  });
+  // Create roles
+  const roles = [
+    { name: 'admin', permissions: ['manage_users', 'manage_houses', 'manage_services', 'manage_menu', 'view_tickets', 'manage_tickets', 'manage_chat', 'manage_settings'] },
+    { name: 'cook', permissions: ['view_tickets'] },
+    { name: 'cleaning', permissions: ['view_tickets'] },
+    { name: 'driver', permissions: ['view_tickets'] },
+  ];
 
-  // Create admin user
+  const roleMap: Record<string, string> = {};
+  for (const role of roles) {
+    const r = await prisma.role.upsert({
+      where: { name: role.name },
+      update: { permissions: role.permissions },
+      create: role,
+    });
+    roleMap[role.name] = r.id;
+  }
+
+  // Create users for each role
   const passwordHash = await argon2.hash('admin123');
-  await prisma.user.upsert({
-    where: { email: 'admin@glamping.com' },
-    update: {},
-    create: {
-      email: 'admin@glamping.com',
-      passwordHash,
-      name: 'Admin',
-      roleId: adminRole.id,
-    },
-  });
+  const users = [
+    { email: 'admin@glamping.com', name: 'Admin', roleName: 'admin' },
+    { email: 'cook@glamping.com', name: 'Повар', roleName: 'cook' },
+    { email: 'cleaning@glamping.com', name: 'Клининг', roleName: 'cleaning' },
+    { email: 'driver@glamping.com', name: 'Водитель', roleName: 'driver' },
+  ];
+
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: {
+        email: user.email,
+        passwordHash,
+        name: user.name,
+        roleId: roleMap[user.roleName],
+      },
+    });
+  }
 
   // Create houses
   for (let i = 1; i <= 6; i++) {
