@@ -21,7 +21,7 @@ interface GateRequest {
 
 export default function AdminLayout() {
   const [gateRequest, setGateRequest] = useState<GateRequest | null>(null)
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const allowedPaths = ROLE_NAV[user?.role?.name ?? 'admin'] ?? ROLE_NAV.admin
 
   return (
@@ -39,7 +39,10 @@ export default function AdminLayout() {
       <header className="px-4 py-3 bg-white dark:bg-[#1a1d27] border-b border-gray-200 dark:border-white/10 shrink-0 transition-colors">
         <div className="flex items-center justify-between">
           <h1 className="text-base font-bold text-gray-800 dark:text-white">Glamping · Администратор</h1>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Выйти</button>
+          </div>
         </div>
       </header>
 
