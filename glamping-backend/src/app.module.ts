@@ -12,6 +12,7 @@ import { MessagesModule } from './messages/messages.module';
 import { TransfersModule } from './transfers/transfers.module';
 import { InfoModule } from './info/info.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { GatewayModule } from './gateway/gateway.module';
     TransfersModule,
     InfoModule,
     GatewayModule,
+    RolesModule,
   ],
   controllers: [HealthController],
 })

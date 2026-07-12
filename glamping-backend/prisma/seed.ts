@@ -11,7 +11,7 @@ async function main() {
 
   // Create roles
   const roles = [
-    { name: 'admin', permissions: ['manage_users', 'manage_houses', 'manage_services', 'manage_menu', 'view_tickets', 'manage_tickets', 'manage_chat', 'manage_settings'] },
+    { name: 'admin', permissions: ['manage_users', 'manage_houses', 'manage_services', 'manage_menu', 'view_tickets', 'manage_tickets', 'manage_chat', 'manage_settings', 'manage_roles'] },
     { name: 'cook', permissions: ['view_tickets'] },
     { name: 'cleaning', permissions: ['view_tickets'] },
     { name: 'driver', permissions: ['view_tickets'] },
