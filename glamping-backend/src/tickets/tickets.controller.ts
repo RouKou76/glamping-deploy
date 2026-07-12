@@ -7,9 +7,7 @@ import {
   Body,
   Query,
   UseGuards,
-  Req,
 } from '@nestjs/common';
-import { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -22,6 +20,7 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('tickets')
 @Controller('tickets')
@@ -40,14 +39,14 @@ export class TicketsController {
     @Query('houseId') houseId?: string,
     @Query('status') status?: string,
     @Query('assignedTo') assignedTo?: string,
-    @Req() req?: Request & { user?: { role?: { name?: string; permissions?: string[] } } },
+    @CurrentUser() user?: { role?: { name: string; permissions: string[] } },
   ) {
     return this.ticketsService.findAll({
       houseId,
       status,
       assignedTo,
-      userRole: req?.user?.role?.name,
-      userPermissions: req?.user?.role?.permissions,
+      userRole: user?.role?.name,
+      userPermissions: user?.role?.permissions,
     });
   }
 
