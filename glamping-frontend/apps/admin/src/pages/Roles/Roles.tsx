@@ -69,7 +69,7 @@ export default function Roles() {
         setRoles(prev => prev.map(r => r.id === editRole.id ? { ...r, name: updated.name, permissions: updated.permissions ?? [] } : r))
       } else {
         const created = await apiPost<{ id: string; name: string; permissions: string[] }>('/api/roles', { name: formName.trim(), permissions: allPerms })
-        setRoles(prev => [...prev, { ...created, permissions: created.permissions ?? [], userCount: 0, createdAt: new Date().toISOString() }])
+        setRoles(prev => [...prev, { id: created.id || `temp-${Date.now()}`, name: created.name, permissions: created.permissions ?? [], userCount: 0, createdAt: new Date().toISOString() }])
       }
       setShowForm(false)
     } catch { setError('Ошибка сохранения') }
