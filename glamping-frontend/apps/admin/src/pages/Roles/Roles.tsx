@@ -65,13 +65,12 @@ export default function Roles() {
     const allPerms = [...formPermissions, ...formTicketTypes.map(t => `view_tickets:${t}`)]
     try {
       if (editRole) {
-        const updated = await apiPost<{ id: string; name: string; permissions: string[] }>(`/api/roles/${editRole.id}`, { name: formName.trim(), permissions: allPerms })
-        setRoles(prev => prev.map(r => r.id === editRole.id ? { ...r, name: updated.name, permissions: updated.permissions ?? [] } : r))
+        await apiPost(`/api/roles/${editRole.id}`, { name: formName.trim(), permissions: allPerms })
       } else {
-        const created = await apiPost<{ id: string; name: string; permissions: string[] }>('/api/roles', { name: formName.trim(), permissions: allPerms })
-        setRoles(prev => [...prev, { id: created.id || `temp-${Date.now()}`, name: created.name, permissions: created.permissions ?? [], userCount: 0, createdAt: new Date().toISOString() }])
+        await apiPost('/api/roles', { name: formName.trim(), permissions: allPerms })
       }
       setShowForm(false)
+      refetch()
     } catch { setError('Ошибка сохранения') }
   }
 
