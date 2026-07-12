@@ -33,7 +33,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
         <div>
           <p className="text-gray-800 dark:text-white font-bold text-lg">{title}</p>
-          <p className="text-gray-600 dark:text-gray-300 text-sm mt-1 bg-gray-50 dark:bg-white/5 rounded-xl px-3 py-2">{message}</p>
+          <p className="text-gray-600 dark:text-white/80 text-sm mt-1 bg-gray-50 dark:bg-white/5 rounded-xl px-3 py-2">{message}</p>
         </div>
         <div className="grid grid-cols-2 gap-3 pt-1">
           <button onClick={onClose}

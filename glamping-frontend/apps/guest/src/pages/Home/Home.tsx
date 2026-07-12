@@ -22,7 +22,7 @@ export default function Home() {
   const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string; serviceName: string } | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => {
+  const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string; hint?: string }> = useMemo(() => {
     const items = menuItems ?? []
     return {
     food: {
@@ -45,6 +45,7 @@ export default function Home() {
         { type: 'time', key: 'time', label: t('transfer.time'), required: true },
       ],
       message: t('transfer.successMsg'),
+      hint: t('transfer.priceHint'),
     },
     cleaning: {
       title: t('cleaning.title'),
@@ -119,6 +120,7 @@ export default function Home() {
           steps={SERVICE_CONFIGS[activeModal].steps}
           houseId={houseId}
           taskType={activeModal}
+          hint={SERVICE_CONFIGS[activeModal].hint}
           onClose={() => setActiveModal(null)}
           onSubmit={() => handleOrderSubmit({}, SERVICE_CONFIGS[activeModal].message)}
         />

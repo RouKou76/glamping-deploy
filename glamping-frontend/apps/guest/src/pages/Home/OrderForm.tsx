@@ -23,6 +23,7 @@ interface OrderFormProps {
   houseId: string | null
   taskType: string
   serviceName?: string
+  hint?: string
   onClose: () => void
   onSubmit: (data: Record<string, unknown>) => void
 }
@@ -54,7 +55,7 @@ function getPeriodFromTime(time: string): string {
   return 'dinner'
 }
 
-export function OrderForm({ open, title, steps, houseId, taskType, serviceName, onClose, onSubmit }: OrderFormProps) {
+export function OrderForm({ open, title, steps, houseId, taskType, serviceName, hint, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
   function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
@@ -178,6 +179,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
     <Modal open={open} onClose={handleClose} title={title}>
       {step === 'edit' && (
         <div className="p-6 space-y-5">
+          {hint && <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2 border border-amber-200 dark:border-amber-500/20">{hint}</p>}
           {steps.map(s => {
             if (s.type === 'date') return (
               <div key={s.key}>
