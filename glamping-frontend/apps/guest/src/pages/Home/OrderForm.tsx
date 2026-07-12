@@ -154,8 +154,8 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
     const allItems = [...cartItems, ...catalogItems]
     const payload: Record<string, unknown> = { ...values, houseId, type: taskType }
     if (taskType === 'food' && values.time) payload.period = getPeriodFromTime(values.time as string)
-    if (taskType === 'custom' && serviceName && values.comment) {
-      payload.description = `[${serviceName}] ${values.comment}`
+    if (taskType === 'custom' && serviceName) {
+      payload.description = values.comment ? `[${serviceName}] ${values.comment}` : serviceName
     }
     if (allItems.length > 0) payload.items = allItems
 
