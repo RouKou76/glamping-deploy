@@ -105,7 +105,7 @@ export default function Roles() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(role.permissions ?? []).map(p => (
-                <span key={`${role.id}-${p}`} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-glamp-200 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
+                <span key={`${role.id}-${p}`} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-white/80 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
               ))}
               {(!role.permissions || role.permissions.length === 0) && <span className="text-xs text-gray-400 dark:text-white/30">Нет прав</span>}
             </div>
@@ -130,7 +130,7 @@ export default function Roles() {
                     <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer transition-colors">
                       <input type="checkbox" checked={formPermissions.includes(p.key)} onChange={() => togglePermission(p.key)}
                         className="w-4 h-4 rounded border-gray-300 text-glamp-600 focus:ring-glamp-500" />
-                      <span className="text-sm text-gray-700 dark:text-white/80">{p.label}</span>
+                      <span className="text-sm text-gray-700 dark:text-white/90">{p.label}</span>
                     </label>
                     {p.hasSubtypes && formPermissions.includes('view_tickets') && (
                       <div className="ml-7 mt-1 flex flex-wrap gap-1.5">
