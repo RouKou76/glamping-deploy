@@ -15,11 +15,21 @@ const ALL_PERMISSIONS = [
   { key: 'manage_houses', label: 'Управление домиками' },
   { key: 'manage_services', label: 'Управление услугами' },
   { key: 'manage_menu', label: 'Управление меню' },
-  { key: 'view_tickets', label: 'Просмотр заявок' },
+  { key: 'view_tickets', label: 'Просмотр заявок', hasSubtypes: true },
   { key: 'manage_tickets', label: 'Управление заявками' },
   { key: 'manage_chat', label: 'Управление чатом' },
   { key: 'manage_settings', label: 'Управление настройками' },
   { key: 'manage_roles', label: 'Управление ролями' },
+]
+
+const TICKET_TYPES = [
+  { key: 'food', label: 'Еда' },
+  { key: 'transfer', label: 'Трансфер' },
+  { key: 'cleaning', label: 'Уборка' },
+  { key: 'towels', label: 'Полотенца' },
+  { key: 'gates', label: 'Ворота' },
+  { key: 'minibar', label: 'Мини-бар' },
+  { key: 'custom', label: 'Кастомные' },
 ]
 
 export default function Roles() {
@@ -29,13 +39,22 @@ export default function Roles() {
   const [editRole, setEditRole] = useState<Role | null>(null)
   const [formName, setFormName] = useState('')
   const [formPermissions, setFormPermissions] = useState<string[]>([])
+  const [formTicketTypes, setFormTicketTypes] = useState<string[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => { if (apiRoles) setRoles(apiRoles) }, [apiRoles])
 
-  function openCreate() { setEditRole(null); setFormName(''); setFormPermissions([]); setError(''); setShowForm(true) }
-  function openEdit(role: Role) { setEditRole(role); setFormName(role.name); setFormPermissions([...(role.permissions ?? [])]); setError(''); setShowForm(true) }
+  function openCreate() { setEditRole(null); setFormName(''); setFormPermissions([]); setFormTicketTypes([]); setError(''); setShowForm(true) }
+  function openEdit(role: Role) {
+    const perms = role.permissions ?? []
+    setEditRole(role)
+    setFormName(role.name)
+    setFormPermissions(perms.filter(p => !p.startsWith('view_tickets:')))
+    setFormTicketTypes(perms.filter(p => p.startsWith('view_tickets:')).map(p => p.split(':')[1]))
+    setError('')
+    setShowForm(true)
+  }
 
   function togglePermission(perm: string) {
     setFormPermissions(prev => prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm])
@@ -43,13 +62,14 @@ export default function Roles() {
 
   async function handleSave() {
     if (!formName.trim()) { setError('Введите название роли'); return }
+    const allPerms = [...formPermissions, ...formTicketTypes.map(t => `view_tickets:${t}`)]
     try {
       if (editRole) {
-        const updated = await apiPost<{ id: string; name: string; permissions: string[] }>(`/api/roles/${editRole.id}`, { name: formName.trim(), permissions: formPermissions })
-        setRoles(prev => prev.map(r => r.id === editRole.id ? { ...r, name: updated.name, permissions: updated.permissions } : r))
+        const updated = await apiPost<{ id: string; name: string; permissions: string[] }>(`/api/roles/${editRole.id}`, { name: formName.trim(), permissions: allPerms })
+        setRoles(prev => prev.map(r => r.id === editRole.id ? { ...r, name: updated.name, permissions: updated.permissions ?? [] } : r))
       } else {
-        const created = await apiPost<{ id: string; name: string; permissions: string[] }>('/api/roles', { name: formName.trim(), permissions: formPermissions })
-        setRoles(prev => [...prev, { ...created, userCount: 0, createdAt: new Date().toISOString() }])
+        const created = await apiPost<{ id: string; name: string; permissions: string[] }>('/api/roles', { name: formName.trim(), permissions: allPerms })
+        setRoles(prev => [...prev, { ...created, permissions: created.permissions ?? [], userCount: 0, createdAt: new Date().toISOString() }])
       }
       setShowForm(false)
     } catch { setError('Ошибка сохранения') }
@@ -85,7 +105,7 @@ export default function Roles() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(role.permissions ?? []).map(p => (
-                <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-glamp-200 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
+                <span key={`${role.id}-${p}`} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-glamp-200 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
               ))}
               {(!role.permissions || role.permissions.length === 0) && <span className="text-xs text-gray-400 dark:text-white/30">Нет прав</span>}
             </div>
@@ -106,11 +126,25 @@ export default function Roles() {
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Права доступа</label>
               <div className="space-y-2">
                 {ALL_PERMISSIONS.map(p => (
-                  <label key={p.key} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                    <input type="checkbox" checked={formPermissions.includes(p.key)} onChange={() => togglePermission(p.key)}
-                      className="w-4 h-4 rounded border-gray-300 text-glamp-600 focus:ring-glamp-500" />
-                    <span className="text-sm text-gray-700 dark:text-white/80">{p.label}</span>
-                  </label>
+                  <div key={p.key}>
+                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer transition-colors">
+                      <input type="checkbox" checked={formPermissions.includes(p.key)} onChange={() => togglePermission(p.key)}
+                        className="w-4 h-4 rounded border-gray-300 text-glamp-600 focus:ring-glamp-500" />
+                      <span className="text-sm text-gray-700 dark:text-white/80">{p.label}</span>
+                    </label>
+                    {p.hasSubtypes && formPermissions.includes('view_tickets') && (
+                      <div className="ml-7 mt-1 flex flex-wrap gap-1.5">
+                        {TICKET_TYPES.map(t => (
+                          <label key={t.key} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 dark:bg-white/5 cursor-pointer transition-colors">
+                            <input type="checkbox" checked={formTicketTypes.includes(t.key)}
+                              onChange={() => setFormTicketTypes(prev => prev.includes(t.key) ? prev.filter(x => x !== t.key) : [...prev, t.key])}
+                              className="w-3.5 h-3.5 rounded border-gray-300 text-glamp-600 focus:ring-glamp-500" />
+                            <span className="text-xs text-gray-600 dark:text-white/70">{t.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

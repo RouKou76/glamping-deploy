@@ -16,6 +16,7 @@ export class TicketsService {
     status?: string;
     assignedTo?: string;
     userRole?: string;
+    userPermissions?: string[];
   }) {
     const where: Record<string, any> = {};
 
@@ -23,14 +24,13 @@ export class TicketsService {
     if (query.status) where.status = query.status;
     if (query.assignedTo) where.assignedTo = query.assignedTo;
 
-    if (query.userRole && query.userRole !== 'admin') {
-      const roleTypeMap: Record<string, string[]> = {
-        cook: ['food', 'minibar'],
-        driver: ['transfer'],
-        cleaning: ['cleaning'],
-      };
-      const allowedTypes = roleTypeMap[query.userRole];
-      if (allowedTypes) where.type = { in: allowedTypes };
+    if (query.userPermissions && query.userRole !== 'admin') {
+      const viewTicketTypes = query.userPermissions
+        .filter(p => p.startsWith('view_tickets:'))
+        .map(p => p.split(':')[1]);
+      if (viewTicketTypes.length > 0) {
+        where.type = { in: viewTicketTypes };
+      }
     }
 
     const tickets = await this.prisma.ticket.findMany({

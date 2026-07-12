@@ -40,9 +40,15 @@ export class TicketsController {
     @Query('houseId') houseId?: string,
     @Query('status') status?: string,
     @Query('assignedTo') assignedTo?: string,
-    @Req() req?: Request & { user?: { role?: { name?: string } } },
+    @Req() req?: Request & { user?: { role?: { name?: string; permissions?: string[] } } },
   ) {
-    return this.ticketsService.findAll({ houseId, status, assignedTo, userRole: req?.user?.role?.name });
+    return this.ticketsService.findAll({
+      houseId,
+      status,
+      assignedTo,
+      userRole: req?.user?.role?.name,
+      userPermissions: req?.user?.role?.permissions,
+    });
   }
 
   @Post()
