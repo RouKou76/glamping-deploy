@@ -40,7 +40,7 @@ export default function Home() {
     transfer: {
       title: t('transfer.title'),
       steps: [
-        { type: 'text', key: 'address', label: t('transfer.destination'), required: true, placeholder: 'Введите адрес...' },
+        { type: 'text', key: 'geo', label: t('transfer.destination'), required: true, placeholder: 'Введите адрес...' },
         { type: 'date', key: 'date', label: t('food.date') },
         { type: 'time', key: 'time', label: t('transfer.time'), required: true },
       ],
