@@ -7,8 +7,7 @@ import Tickets from './pages/Tickets/Tickets'
 import Chats from './pages/Chats/Chats'
 import Management from './pages/Management/Management'
 import CheckIn from './pages/CheckIn/CheckIn'
-import Roles from './pages/Roles/Roles'
-import Users from './pages/Users/Users'
+import Staff from './pages/Staff/Staff'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -29,8 +28,7 @@ export default function App() {
               <Route path="/checkin" element={<CheckIn />} />
               <Route path="/manage" element={<Management />} />
               <Route path="/chats" element={<Chats />} />
-              <Route path="/roles" element={<Roles />} />
-              <Route path="/users" element={<Users />} />
+              <Route path="/staff" element={<Staff />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
