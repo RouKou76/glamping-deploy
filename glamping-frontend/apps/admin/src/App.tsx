@@ -8,6 +8,7 @@ import Chats from './pages/Chats/Chats'
 import Management from './pages/Management/Management'
 import CheckIn from './pages/CheckIn/CheckIn'
 import Roles from './pages/Roles/Roles'
+import Users from './pages/Users/Users'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -29,6 +30,7 @@ export default function App() {
               <Route path="/manage" element={<Management />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/roles" element={<Roles />} />
+              <Route path="/users" element={<Users />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
