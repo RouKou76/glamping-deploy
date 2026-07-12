@@ -85,7 +85,7 @@ export default function Roles() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(role.permissions ?? []).map(p => (
-                <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-glamp-300 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
+                <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-glamp-50 dark:bg-glamp-500/10 text-glamp-700 dark:text-glamp-200 border border-glamp-200 dark:border-glamp-500/20">{ALL_PERMISSIONS.find(ap => ap.key === p)?.label ?? p}</span>
               ))}
               {(!role.permissions || role.permissions.length === 0) && <span className="text-xs text-gray-400 dark:text-white/30">Нет прав</span>}
             </div>
