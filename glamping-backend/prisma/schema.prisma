@@ -92,12 +92,12 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   name         String
-  roleId       String   @map("role_id")
+  roleId       String?  @map("role_id")
   refreshToken String?  @map("refresh_token")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  role Role @relation(fields: [roleId], references: [id])
+  role Role? @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }
