@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import i18n from '@glamping/utils'
 
 interface DeviceInfo {
   houseId: string | null
@@ -50,6 +51,20 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
           if (Array.isArray(houses)) {
             const house = houses.find((h: { id: string }) => h.id === houseId)
             if (house) setInfo(prev => ({ ...prev, houseNumber: house.number }))
+          }
+        })
+        .catch(() => {})
+
+      fetch('/api/houses/sessions')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const sessions = data?.data
+          if (Array.isArray(sessions)) {
+            const session = sessions.find((s: { houseId: string; isActive: boolean }) => s.houseId === houseId && s.isActive)
+            if (session?.lang) {
+              i18n.changeLanguage(session.lang)
+              localStorage.setItem('glamp-lang', session.lang)
+            }
           }
         })
         .catch(() => {})
