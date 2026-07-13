@@ -14,7 +14,7 @@ type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleanin
 
 export default function Home() {
   const { t } = useTranslation()
-  const { houseId } = useDevice()
+  const { houseId, houseNumber } = useDevice()
   const { data: services } = useApi<Service[]>('/api/services')
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
@@ -81,7 +81,7 @@ export default function Home() {
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('home.title')}</h1>
       </div>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('home.house')}</p>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('home.house')}{houseNumber ? ` №${houseNumber}` : ''}</p>
 
       <div className="grid grid-cols-2 gap-4 animate-slide-up">
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>} label={t('home.food')} color="bg-orange-500" onClick={() => setActiveModal('food')} />

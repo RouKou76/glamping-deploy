@@ -2,12 +2,14 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 
 interface DeviceInfo {
   houseId: string | null
+  houseNumber: number | null
   deviceToken: string | null
   isInitialized: boolean
 }
 
 const DeviceContext = createContext<DeviceInfo>({
   houseId: null,
+  houseNumber: null,
   deviceToken: null,
   isInitialized: false,
 })
@@ -15,6 +17,7 @@ const DeviceContext = createContext<DeviceInfo>({
 export function DeviceProvider({ children }: { children: ReactNode }) {
   const [info, setInfo] = useState<DeviceInfo>({
     houseId: null,
+    houseNumber: null,
     deviceToken: null,
     isInitialized: false,
   })
@@ -34,9 +37,23 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     const houseId = localStorage.getItem('glamp-house-id')
     setInfo({
       houseId: houseId || null,
+      houseNumber: null,
       deviceToken: token || null,
       isInitialized: true,
     })
+
+    if (houseId) {
+      fetch('/api/houses')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const houses = data?.data
+          if (Array.isArray(houses)) {
+            const house = houses.find((h: { id: string }) => h.id === houseId)
+            if (house) setInfo(prev => ({ ...prev, houseNumber: house.number }))
+          }
+        })
+        .catch(() => {})
+    }
   }, [])
 
   return (
