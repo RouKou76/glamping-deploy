@@ -39,7 +39,8 @@
     "successMsg": "我们将为您准备并送达。",
     "kitchenClosed": "厨房目前关闭",
     "kitchenHours": "早餐: 08:00–10:00 · 午餐: 13:00–15:00 · 晚餐: 19:00–21:00",
-    "required": "请选择时间"
+    "required": "请选择时间",
+    "selectTimeFirst": "请先选择送达时间"
   },
   "minibar": {
     "title": "迷你吧补充",
@@ -114,6 +115,7 @@
     "selectTime": "请选择时间",
     "selectOption": "请选择{{field}}",
     "selectDish": "请至少选择一项",
-    "offline": "无网络连接"
+    "offline": "无网络连接",
+    "minAdvanceTime": "订餐需提前至少1小时"
   }
 }

@@ -43,7 +43,7 @@ function formatDesiredTime(iso: string): string {
 
 function getDesiredTimeLabel(type: string): string {
   switch (type) {
-    case 'food': return 'Подать в'
+    case 'food': return 'Подать '
     case 'transfer': return 'Выезд в'
     case 'cleaning': return 'Уборка'
     default: return 'Время'
@@ -124,13 +124,13 @@ export default function Tickets() {
 
   function handleStatusChange(id: string, status: TaskStatus) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
-    apiPost(`/api/tasks/${id}`, { status }).catch(() => {})
+    apiPost(`/api/tasks/${id}`, { status }).catch(() => { })
   }
 
   function handleArchive(id: string) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'cancelled' } : t))
     setExpandedIds(prev => { const n = new Set(prev); n.delete(id); return n })
-    apiPost(`/api/tasks/${id}/cancel`, {}).catch(() => {})
+    apiPost(`/api/tasks/${id}/cancel`, {}).catch(() => { })
   }
 
   const filtered = useMemo(() => {
@@ -183,7 +183,7 @@ export default function Tickets() {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-gray-300 dark:text-white/10"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-gray-300 dark:text-white/10"><rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /></svg>
           <p className="text-sm">Нет заявок</p>
         </div>
       ) : (

@@ -842,6 +842,8 @@
 "@glamping/api@*", "@glamping/api@file:/home/gleb/HOTEL/app/glamping-frontend/packages/api":
   version "1.0.0"
   resolved "file:packages/api"
+  dependencies:
+    socket.io-client "^4.8.0"
 
 "@glamping/guest@file:/home/gleb/HOTEL/app/glamping-frontend/apps/guest":
   version "0.1.0"

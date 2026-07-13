@@ -39,7 +39,8 @@
     "successMsg": "We will prepare and deliver your order.",
     "kitchenClosed": "Kitchen is currently closed",
     "kitchenHours": "Breakfast: 08:00–10:00 · Lunch: 13:00–15:00 · Dinner: 19:00–21:00",
-    "required": "Please select a time"
+    "required": "Please select a time",
+    "selectTimeFirst": "Please select delivery time first"
   },
   "minibar": {
     "title": "Minibar Refill",
@@ -114,6 +115,7 @@
     "selectTime": "Please select a time",
     "selectOption": "Please select {{field}}",
     "selectDish": "Please select at least one item",
-    "offline": "No network connection"
+    "offline": "No network connection",
+    "minAdvanceTime": "Food orders must be placed at least 1 hour in advance"
   }
 }

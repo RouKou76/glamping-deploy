@@ -11,4 +11,14 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 })
 
+i18n.addResourceBundle('ru', 'translation', {
+  validation: { minAdvanceTime: 'Заказ еды возможен минимум за 1 час' },
+}, true)
+i18n.addResourceBundle('en', 'translation', {
+  validation: { minAdvanceTime: 'Food orders must be placed at least 1 hour in advance' },
+}, true)
+i18n.addResourceBundle('zh', 'translation', {
+  validation: { minAdvanceTime: '订餐需提前至少1小时' },
+}, true)
+
 export default i18n

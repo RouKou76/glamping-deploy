@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useApi, apiPost, apiDelete } from '@glamping/api'
-import type { Service, AssignedRole } from '@glamping/types'
+import type { Service } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
-
-const ROLE_LABELS: Record<AssignedRole, string> = { cook: 'Повар', cleaning: 'Клининг', driver: 'Водитель', admin: 'Администратор' }
 
 export default function Services() {
   const { data: apiServices } = useApi<Service[]>('/api/services')
@@ -15,24 +13,24 @@ export default function Services() {
   const [formName, setFormName] = useState('')
   const [formPrice, setFormPrice] = useState('')
   const [formIcon, setFormIcon] = useState('')
-  const [formRole, setFormRole] = useState<AssignedRole>('admin')
   const [formRequiresTime, setFormRequiresTime] = useState(true)
   const [formErrors, setFormErrors] = useState<{ name?: string }>({})
 
-  function openAdd() { setEditService(null); setFormName(''); setFormPrice(''); setFormIcon(''); setFormRole('admin'); setFormRequiresTime(true); setShowForm(true) }
-  function openEdit(service: Service) { setEditService(service); setFormName(service.name); setFormPrice(service.priceInfo ?? ''); setFormIcon(service.icon ?? ''); setFormRole(service.assignedTo); setFormRequiresTime(service.requiresTime); setShowForm(true) }
+  function openAdd() { setEditService(null); setFormName(''); setFormPrice(''); setFormIcon(''); setFormRequiresTime(true); setShowForm(true) }
+  function openEdit(service: Service) { setEditService(service); setFormName(service.name); setFormPrice(service.priceInfo ?? ''); setFormIcon(service.icon ?? ''); setFormRequiresTime(service.requiresTime); setShowForm(true) }
 
   function handleSave() {
     if (!formName.trim()) { setFormErrors({ name: 'Введите название' }); return }
     setFormErrors({})
+    const payload = { name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, assignedTo: 'admin' as const, fields: { requiresTime: formRequiresTime } }
     if (editService) {
-      const updated = { ...editService, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, requiresTime: formRequiresTime }
+      const updated = { ...editService, ...payload, requiresTime: formRequiresTime }
       setServices(prev => prev.map(s => s.id === editService.id ? updated : s))
-      apiPost(`/api/services/${editService.id}`, updated).catch(() => {})
+      apiPost(`/api/services/${editService.id}`, payload).catch(() => {})
     } else {
-      const newService: Service = { id: `cs-${Date.now()}`, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, requiresTime: formRequiresTime }
+      const newService: Service = { id: `cs-${Date.now()}`, ...payload, active: true, requiresTime: formRequiresTime }
       setServices(prev => [...prev, newService])
-      apiPost('/api/services', newService).catch(() => {})
+      apiPost('/api/services', { ...payload, active: true }).catch(() => {})
     }
     setShowForm(false)
   }
@@ -53,7 +51,7 @@ export default function Services() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{service.icon || '⭐'}</span>
-                <div><p className="text-sm font-bold text-gray-800 dark:text-white">{service.name}</p><p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{service.priceInfo ?? 'Цена не указана'} · {ROLE_LABELS[service.assignedTo]}</p></div>
+                <div><p className="text-sm font-bold text-gray-800 dark:text-white">{service.name}</p><p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{service.priceInfo ?? 'Цена не указана'}</p></div>
               </div>
               <button onClick={() => toggleActive(service.id)} className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${service.active ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${service.active ? 'left-6' : 'left-1'}`} /></button>
             </div>
@@ -77,10 +75,6 @@ export default function Services() {
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="⭐" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
               <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (текстом)</label><input type="text" value={formPrice} onChange={e => setFormPrice(e.target.value)} placeholder="500 ₽ / час" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
-            </div>
-            <div>
-              <label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-2 block">Ответственный</label>
-              <div className="grid grid-cols-2 gap-2">{(Object.entries(ROLE_LABELS) as [AssignedRole, string][]).map(([role, label]) => (<button key={role} onClick={() => setFormRole(role)} className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors text-left ${formRole === role ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-white/70">Требует время</span>

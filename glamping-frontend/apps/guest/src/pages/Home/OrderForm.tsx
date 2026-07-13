@@ -39,6 +39,9 @@ function tomorrowStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+const FOOD_MIN_ADVANCE_HOURS = 1
+const GENERAL_MIN_ADVANCE_MINUTES = 15
+
 function getMinTime(dateStr: string): string {
   if (dateStr === todayStr()) {
     const now = new Date()
@@ -127,6 +130,26 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
     if (!navigator.onLine) return
 
     const validationErrors = validate(steps, values, cart)
+
+    if (values.time) {
+      const selectedDate = (values.date as string) || todayStr()
+      const selectedTime = values.time as string
+      const [h, m] = selectedTime.split(':').map(Number)
+      const selected = new Date(selectedDate)
+      selected.setHours(h, m, 0, 0)
+      const minAllowed = new Date()
+      if (taskType === 'food') {
+        minAllowed.setHours(minAllowed.getHours() + FOOD_MIN_ADVANCE_HOURS)
+      } else {
+        minAllowed.setMinutes(minAllowed.getMinutes() + GENERAL_MIN_ADVANCE_MINUTES)
+      }
+      if (selected < minAllowed) {
+        validationErrors.time = taskType === 'food'
+          ? 'Заказ еды возможен минимум за 1 час'
+          : `Выберите время не менее чем за ${GENERAL_MIN_ADVANCE_MINUTES} минут`
+      }
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
@@ -153,8 +176,16 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
     })
 
     const allItems = [...cartItems, ...catalogItems]
-    const payload: Record<string, unknown> = { ...values, houseId, type: taskType }
+    const payload: Record<string, unknown> = { houseId, type: taskType }
+
+    if (values.time) {
+      const dateStr = (values.date as string) || todayStr()
+      payload.desiredAt = new Date(`${dateStr}T${values.time as string}:00`).toISOString()
+    }
     if (taskType === 'food' && values.time) payload.period = getPeriodFromTime(values.time as string)
+    if (values.location) payload.location = values.location
+    if (values.geo) payload.geo = values.geo
+    if (values.guestCount) payload.guestCount = values.guestCount
     if (taskType === 'custom' && serviceName) {
       payload.description = values.comment ? `[${serviceName}] ${values.comment}` : serviceName
     }
@@ -254,6 +285,20 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
             if (s.type === 'menu') {
               const selectedTime = values.time as string | undefined
               const period = selectedTime ? getPeriodFromTime(selectedTime) : null
+
+              if (taskType === 'food' && !selectedTime) {
+                return (
+                <div key={s.key}>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
+                    {t('food.menu')}{s.required && ' *'}
+                  </label>
+                  <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
+                    <p className="text-sm text-gray-400 dark:text-white/40">{t('food.selectTimeFirst')}</p>
+                  </div>
+                </div>
+                )
+              }
+
               const filteredItems = taskType === 'food' && period
                 ? s.items.filter(i => i.isAvailable && ('category' in i && (i as { category: string }).category === period))
                 : s.items.filter(i => i.isAvailable)
