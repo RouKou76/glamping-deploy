@@ -14,6 +14,7 @@ import { InfoModule } from './info/info.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UsersModule } from './users/users.module';
     GatewayModule,
     RolesModule,
     UsersModule,
+    PushModule,
   ],
   controllers: [HealthController],
 })

@@ -7,4 +7,7 @@ export const configValidationSchema = Joi.object({
   REFRESH_EXPIRES_IN: Joi.string().default('7d'),
   PORT: Joi.number().default(3000),
   FRONTEND_URL: Joi.string().default('http://localhost:5173'),
+  VAPID_PUBLIC_KEY: Joi.string().allow('').optional(),
+  VAPID_PRIVATE_KEY: Joi.string().allow('').optional(),
+  VAPID_SUBJECT: Joi.string().allow('').optional(),
 });

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
+import { PushService } from '../push/push.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 
@@ -9,6 +10,7 @@ export class TicketsService {
   constructor(
     private prisma: PrismaService,
     private gateway: GatewayService,
+    private push: PushService,
   ) {}
 
   async findAll(query: {
@@ -89,6 +91,14 @@ export class TicketsService {
 
     void this.gateway.broadcastToAdmins('server:ticket:created', result);
 
+    const house = await this.prisma.house.findUnique({ where: { id: dto.houseId } });
+    const typeLabel = dto.type === 'custom' && dto.description ? dto.description : dto.type;
+    void this.push.sendNotification({
+      title: 'Новая заявка',
+      body: `${typeLabel} — Домик №${house?.number ?? '?'}`,
+      url: '/',
+    });
+
     return result;
   }
 
@@ -103,6 +113,8 @@ export class TicketsService {
         assignedTo: dto.assignedTo as never,
       },
     });
+
+    const house = await this.prisma.house.findUnique({ where: { id: updated.houseId } });
 
     const result = {
       id: updated.id,
@@ -121,6 +133,16 @@ export class TicketsService {
     };
 
     void this.gateway.broadcastToAdmins('server:ticket:updated', result);
+
+    if (dto.status) {
+      const statusLabels: Record<string, string> = { in_progress: 'В работе', done: 'Готово', archived: 'В архив' };
+      const label = statusLabels[dto.status] ?? dto.status;
+      void this.push.sendNotification({
+        title: 'Заявка обновлена',
+        body: `${result.type} — Домик №${house?.number ?? '?'} → ${label}`,
+        url: '/',
+      });
+    }
 
     return result;
   }

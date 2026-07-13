@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { apiPost, apiGet } from '@glamping/api'
+import { apiPost, apiGet, subscribeToPush, unsubscribeFromPush } from '@glamping/api'
 
 interface User {
   id: string
@@ -33,7 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
     apiGet<{ data: User }>('/api/auth/me')
-      .then(res => setUser(res.data))
+      .then(res => {
+        setUser(res.data)
+        subscribeToPush()
+      })
       .catch(() => localStorage.removeItem('glamp-token'))
       .finally(() => setLoading(false))
   }, [])
@@ -44,9 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('glamp-token', accessToken)
     localStorage.setItem('glamp-refresh-token', refreshToken)
     setUser(user)
+    subscribeToPush()
   }, [])
 
   const logout = useCallback(() => {
+    unsubscribeFromPush()
     localStorage.removeItem('glamp-token')
     localStorage.removeItem('glamp-refresh-token')
     setUser(null)
