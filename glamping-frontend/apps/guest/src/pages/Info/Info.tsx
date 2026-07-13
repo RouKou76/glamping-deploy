@@ -44,6 +44,11 @@ export default function Info() {
       </div>
 
       <div className="bg-white dark:bg-[#1a1d27] p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-white/10 mb-6 transition-colors">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">{t('info.rules')}</h2>
+        <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-base whitespace-pre-line">{info.rules}</p>
+      </div>
+
+      <div className="bg-white dark:bg-[#1a1d27] p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-white/10 mb-6 transition-colors">
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">{t('info.about')}</h2>
         <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-base">{info.description}</p>
       </div>

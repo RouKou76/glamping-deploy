@@ -17,10 +17,11 @@ export default function Menu() {
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState('')
   const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast')
+  const [formDescription, setFormDescription] = useState('')
 
   const filtered = useMemo(() => items.filter(i => i.category !== 'minibar' && (category === 'all' || i.category === category)), [items, category])
-  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setShowForm(true) }
-  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setShowForm(true) }
+  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormDescription(''); setShowForm(true) }
+  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormDescription(item.description ?? ''); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
   function handleSave() {
     const errs: { name?: string; price?: string } = {}
@@ -30,11 +31,11 @@ export default function Menu() {
     if (Object.keys(errs).length > 0) { setFormErrors(errs); return }
     setFormErrors({})
     if (editItem) {
-      const updated = { ...editItem, name: formName.trim(), price, category: formCategory }
+      const updated = { ...editItem, name: formName.trim(), price, category: formCategory, description: formDescription || undefined }
       setItems(prev => prev.map(i => i.id === editItem.id ? updated : i))
       apiPost(`/api/menu/${editItem.id}`, updated).catch(() => {})
     } else {
-      const newItem: MenuItem = { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true }
+      const newItem: MenuItem = { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true, description: formDescription || undefined }
       setItems(prev => [...prev, newItem])
       apiPost('/api/menu', newItem).catch(() => {})
     }
@@ -60,6 +61,7 @@ export default function Menu() {
           <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${!item.isAvailable ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
+              {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5 truncate">{item.description}</p>}
               <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.price} ₽</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -86,6 +88,7 @@ export default function Menu() {
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
               <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => setFormCategory(c)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
             </div>
+            <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Описание</label><textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={2} placeholder="Краткое описание блюда" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" /></div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
               <button onClick={handleSave} disabled={!formName.trim() || !formPrice} className="py-2.5 rounded-xl bg-glamp-600 hover:bg-glamp-700 disabled:opacity-30 text-white text-sm font-bold transition-colors active:scale-95">{editItem ? 'Сохранить' : 'Добавить'}</button>

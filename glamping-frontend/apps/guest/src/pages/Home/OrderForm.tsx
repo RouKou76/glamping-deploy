@@ -312,6 +312,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
+                        {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
                         <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
                       </div>
                       <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">

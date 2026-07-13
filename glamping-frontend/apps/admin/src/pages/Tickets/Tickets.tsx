@@ -44,7 +44,7 @@ function formatDesiredTime(iso: string): string {
 function getDesiredTimeLabel(type: string): string {
   switch (type) {
     case 'food': return 'Подать '
-    case 'transfer': return 'Выезд в'
+    case 'transfer': return 'Выезд '
     case 'cleaning': return 'Уборка'
     default: return 'Время'
   }
