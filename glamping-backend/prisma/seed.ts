@@ -12,9 +12,9 @@ async function main() {
   // Create roles
   const roles = [
     { name: 'admin', permissions: ['manage_users', 'manage_houses', 'manage_services', 'manage_menu', 'view_tickets', 'manage_tickets', 'manage_chat', 'manage_settings', 'manage_roles'] },
-    { name: 'cook', permissions: ['view_tickets:food', 'view_tickets:minibar'] },
-    { name: 'cleaning', permissions: ['view_tickets:cleaning'] },
-    { name: 'driver', permissions: ['view_tickets:transfer'] },
+    { name: 'cook', permissions: ['view_tickets'] },
+    { name: 'cleaning', permissions: ['view_tickets'] },
+    { name: 'driver', permissions: ['view_tickets'] },
   ];
 
   const roleMap: Record<string, string> = {};
