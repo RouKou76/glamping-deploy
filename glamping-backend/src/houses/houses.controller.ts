@@ -10,6 +10,8 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HousesService } from './houses.service';
 import { CheckInDto } from './dto/check-in.dto';
+import { CreateHouseDto } from './dto/create-house.dto';
+import { UpdateHouseDto } from './dto/update-house.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
@@ -31,6 +33,33 @@ export class HousesController {
   @ApiOperation({ summary: 'Get active sessions' })
   async findSessions() {
     return this.housesService.findSessions();
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create house' })
+  async create(@Body() dto: CreateHouseDto) {
+    return this.housesService.create(dto);
+  }
+
+  @Post(':id')
+  @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update house' })
+  async update(@Param('id') id: string, @Body() dto: UpdateHouseDto) {
+    return this.housesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_houses')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete house' })
+  async remove(@Param('id') id: string) {
+    return this.housesService.remove(id);
   }
 
   @Post(':id/check-in')

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApi, apiPost } from '@glamping/api'
+import { useApi, apiPost, apiDelete } from '@glamping/api'
 import type { House, GuestSession, Lang } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
@@ -17,7 +17,7 @@ function fallbackCopy(text: string) {
 }
 
 export default function CheckIn() {
-  const { data: apiHouses } = useApi<House[]>('/api/houses')
+  const { data: apiHouses, refetch: refetchHouses } = useApi<House[]>('/api/houses')
   const { data: apiSessions, refetch: refetchSessions } = useApi<GuestSession[]>('/api/houses/sessions')
   const [houses, setHouses] = useState<House[]>([])
   const [sessions, setSessions] = useState<GuestSession[]>([])
@@ -25,6 +25,12 @@ export default function CheckIn() {
   const [formGuests, setFormGuests] = useState<number>(2); const [formLang, setFormLang] = useState<Lang>('ru')
   const [tokenModal, setTokenModal] = useState<{ number: number; token: string; hid: string } | null>(null)
   const [copied, setCopied] = useState(false)
+
+  const [showHouseForm, setShowHouseForm] = useState(false)
+  const [editHouse, setEditHouse] = useState<House | null>(null)
+  const [houseNumber, setHouseNumber] = useState('')
+  const [houseError, setHouseError] = useState('')
+  const [deleteHouseId, setDeleteHouseId] = useState<string | null>(null)
 
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
   useEffect(() => { if (apiSessions) setSessions(apiSessions) }, [apiSessions])
@@ -76,12 +82,36 @@ export default function CheckIn() {
     }
   }
 
+  function openAddHouse() { setEditHouse(null); setHouseNumber(''); setHouseError(''); setShowHouseForm(true) }
+  function openEditHouse(house: House) { setEditHouse(house); setHouseNumber(String(house.number)); setHouseError(''); setShowHouseForm(true) }
+
+  function handleSaveHouse() {
+    const num = parseInt(houseNumber)
+    if (!num || num < 1) { setHouseError('Введите корректный номер'); return }
+    setHouseError('')
+    if (editHouse) {
+      apiPost(`/api/houses/${editHouse.id}`, { number: num }).then(() => refetchHouses()).catch(() => setHouseError('Ошибка сохранения'))
+    } else {
+      apiPost('/api/houses', { number: num }).then(() => refetchHouses()).catch(() => setHouseError('Домик с таким номером уже существует'))
+    }
+    setShowHouseForm(false)
+  }
+
+  function handleDeleteHouse() {
+    if (!deleteHouseId) return
+    apiDelete(`/api/houses/${deleteHouseId}`).then(() => refetchHouses()).catch(() => {})
+    setDeleteHouseId(null)
+  }
+
   const occupied = houses.filter(h => h.status === 'occupied')
   const vacant = houses.filter(h => h.status === 'vacant')
 
   return (
     <div className="p-4 space-y-4">
-      <div><h2 className="text-2xl font-bold text-gray-800 dark:text-white">Домики</h2><p className="text-xs text-gray-500 dark:text-white/50 mt-1">Заселено: {occupied.length} · Свободно: {vacant.length}</p></div>
+      <div className="flex items-center justify-between">
+        <div><h2 className="text-2xl font-bold text-gray-800 dark:text-white">Домики</h2><p className="text-xs text-gray-500 dark:text-white/50 mt-1">Заселено: {occupied.length} · Свободно: {vacant.length}</p></div>
+        <button onClick={openAddHouse} className="px-4 py-2 bg-glamp-600 text-white text-xs font-bold rounded-xl hover:bg-glamp-700 transition-colors active:scale-95">+ Добавить</button>
+      </div>
       {occupied.length > 0 && (
         <section>
           <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Заселены</p>
@@ -114,6 +144,8 @@ export default function CheckIn() {
               <div className="flex gap-2">
                 <button onClick={() => handleSetupTablet(house)} className="px-3 py-2 border border-blue-200 dark:border-blue-500/20 text-blue-500 dark:text-blue-400/70 text-xs font-medium rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors active:scale-95">Планшет</button>
                 <button onClick={() => openCheckIn(house)} className="px-4 py-2 bg-glamp-600 text-white text-xs font-bold rounded-xl hover:bg-glamp-700 transition-colors active:scale-95">Заселить</button>
+                <button onClick={() => openEditHouse(house)} className="px-3 py-2 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-xs font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-95">✏️</button>
+                <button onClick={() => setDeleteHouseId(house.id)} className="px-3 py-2 border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 text-xs font-medium rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors active:scale-95">🗑</button>
               </div>
             </div>
           ))}</div>
@@ -143,6 +175,23 @@ export default function CheckIn() {
           </div>
         </div>
       )}
+      {showHouseForm && (
+        <div className="fixed inset-0 z-40 bg-black/60 flex items-end" onClick={() => setShowHouseForm(false)}>
+          <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-5 animate-slide-up" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editHouse ? 'Редактировать домик' : 'Новый домик'}</h3>
+            <div>
+              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Номер домика</label>
+              <input type="number" value={houseNumber} onChange={e => { setHouseNumber(e.target.value); setHouseError('') }} min={1}
+                className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${houseError ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
+              {houseError && <p className="text-red-500 text-xs mt-1">{houseError}</p>}
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <button onClick={() => setShowHouseForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
+              <button onClick={handleSaveHouse} className="py-2.5 rounded-xl bg-glamp-600 hover:bg-glamp-700 text-white text-sm font-bold transition-colors active:scale-95">{editHouse ? 'Сохранить' : 'Создать'}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {tokenModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setTokenModal(null)}>
           <div className="w-full max-w-sm bg-white dark:bg-[#1a1d27] rounded-2xl p-6 space-y-4 shadow-xl" onClick={e => e.stopPropagation()}>
@@ -165,6 +214,7 @@ export default function CheckIn() {
         </div>
       )}
       <ConfirmDialog open={!!checkoutId} title="Выселить домик?" message="Домик будет освобождён, чат очищен." confirmLabel="Выселить" onConfirm={handleCheckoutConfirm} onClose={() => setCheckoutId(null)} />
+      <ConfirmDialog open={!!deleteHouseId} title="Удалить домик?" message="Домик будет удалён безвозвратно." confirmLabel="Удалить" onConfirm={handleDeleteHouse} onClose={() => setDeleteHouseId(null)} />
     </div>
   )
 }

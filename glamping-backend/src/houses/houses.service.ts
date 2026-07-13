@@ -6,6 +6,8 @@ import {
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { CheckInDto } from './dto/check-in.dto';
+import { CreateHouseDto } from './dto/create-house.dto';
+import { UpdateHouseDto } from './dto/update-house.dto';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -48,6 +50,36 @@ export class HousesService {
       lang: h.sessions[0]?.lang ?? 'ru',
       checkInAt: h.sessions[0]?.checkInAt?.toISOString() ?? undefined,
     }));
+  }
+
+  async create(dto: CreateHouseDto) {
+    const existing = await this.prisma.house.findUnique({ where: { number: dto.number } });
+    if (existing) throw new BadRequestException('Домик с таким номером уже существует');
+
+    const house = await this.prisma.house.create({ data: { number: dto.number } });
+    return { id: house.id, number: house.number, status: house.status };
+  }
+
+  async update(id: string, dto: UpdateHouseDto) {
+    const house = await this.prisma.house.findUnique({ where: { id } });
+    if (!house) throw new NotFoundException('House not found');
+
+    if (dto.number && dto.number !== house.number) {
+      const existing = await this.prisma.house.findUnique({ where: { number: dto.number } });
+      if (existing) throw new BadRequestException('Домик с таким номером уже существует');
+    }
+
+    const updated = await this.prisma.house.update({ where: { id }, data: { number: dto.number } });
+    return { id: updated.id, number: updated.number, status: updated.status };
+  }
+
+  async remove(id: string) {
+    const house = await this.prisma.house.findUnique({ where: { id }, include: { sessions: { where: { isActive: true } } } });
+    if (!house) throw new NotFoundException('House not found');
+    if (house.sessions.length > 0) throw new BadRequestException('Нельзя удалить заселённый домик');
+
+    await this.prisma.house.delete({ where: { id } });
+    return { id, number: house.number };
   }
 
   async checkin(houseId: string, dto: CheckInDto) {
