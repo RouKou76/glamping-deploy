@@ -41,9 +41,6 @@ export default function Roles() {
   const [formPermissions, setFormPermissions] = useState<string[]>([])
   const [formTicketTypes, setFormTicketTypes] = useState<string[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleteStep, setDeleteStep] = useState<1 | 2>(1)
-  const [deletePassword, setDeletePassword] = useState('')
-  const [deleteError, setDeleteError] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => { if (apiRoles) setRoles(apiRoles) }, [apiRoles])
@@ -77,20 +74,14 @@ export default function Roles() {
     } catch { setError('Ошибка сохранения') }
   }
 
-  function handleDeleteStep1() { setDeleteStep(2); setDeletePassword(''); setDeleteError('') }
-
-  async function handleDeleteStep2() {
-    if (!deleteId || !deletePassword) { setDeleteError('Введите пароль'); return }
+  async function handleDelete() {
+    if (!deleteId) return
     try {
       await apiDelete(`/api/roles/${deleteId}`)
       setRoles(prev => prev.filter(r => r.id !== deleteId))
-      setDeleteId(null)
-      setDeleteStep(1)
-      refreshUser()
-    } catch { setDeleteError('Неверный пароль или ошибка удаления') }
+    } catch { /* ignore */ }
+    setDeleteId(null)
   }
-
-  function cancelDelete() { setDeleteId(null); setDeleteStep(1); setDeletePassword(''); setDeleteError('') }
 
   return (
     <div className="p-4 space-y-4">
@@ -167,24 +158,7 @@ export default function Roles() {
           </div>
         </div>
       )}
-      {deleteId && deleteStep === 1 && (
-        <ConfirmDialog open={true} title="Удалить роль?" message="Роль и все пользователи с ней будут удалены безвозвратно." confirmLabel="Далее" onConfirm={handleDeleteStep1} onClose={cancelDelete} />
-      )}
-      {deleteId && deleteStep === 2 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={cancelDelete}>
-          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-slide-up border border-gray-200 dark:border-white/10" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white text-center">Подтвердите удаление</h3>
-            <p className="text-sm text-gray-600 dark:text-white/70 text-center">Введите пароль для подтверждения</p>
-            <input type="password" value={deletePassword} onChange={e => setDeletePassword(e.target.value)} autoFocus
-              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-            {deleteError && <p className="text-sm text-red-500 text-center">{deleteError}</p>}
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={cancelDelete} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/70 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
-              <button onClick={handleDeleteStep2} className="py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition-colors active:scale-95 shadow-sm">Удалить</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog open={!!deleteId} title="Удалить роль?" message="Роль будет удалена. Пользователи с этой ролью потеряют доступ." confirmLabel="Удалить" onConfirm={handleDelete} onClose={() => setDeleteId(null)} />
     </div>
   )
 }

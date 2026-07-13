@@ -5,7 +5,6 @@ import type { ConnectionStatus } from '@glamping/ui'
 import { GateAlertBanner } from './GateAlertBanner'
 import { useAuth } from '../contexts/AuthContext'
 
-const DEFAULT_NAV = ['/']
 const ROLE_NAV: Record<string, string[]> = {
   admin: ['/', '/checkin', '/manage', '/chats', '/staff'],
   cook: ['/'],
@@ -23,7 +22,7 @@ interface GateRequest {
 export default function AdminLayout() {
   const [gateRequest, setGateRequest] = useState<GateRequest | null>(null)
   const { user, logout } = useAuth()
-  const allowedPaths = ROLE_NAV[user?.role?.name ?? ''] ?? DEFAULT_NAV
+  const allowedPaths = ROLE_NAV[user?.role?.name ?? 'admin'] ?? ROLE_NAV.admin
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-[#0f1117] text-gray-800 dark:text-white overflow-hidden transition-colors">
