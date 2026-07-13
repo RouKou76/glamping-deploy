@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import i18n from '@glamping/utils'
+import { i18n } from '@glamping/utils'
 
 interface DeviceInfo {
   houseId: string | null
