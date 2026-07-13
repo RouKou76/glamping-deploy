@@ -5,9 +5,20 @@ import { ConfirmDialog } from '@glamping/ui'
 
 const LANG_OPTIONS: { value: Lang; label: string }[] = [{ value: 'ru', label: '🇷🇺 Русский' }, { value: 'en', label: '🇬🇧 English' }, { value: 'zh', label: '🇨🇳 中文' }]
 
+function fallbackCopy(text: string) {
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.style.position = 'fixed'
+  ta.style.opacity = '0'
+  document.body.appendChild(ta)
+  ta.select()
+  document.execCommand('copy')
+  document.body.removeChild(ta)
+}
+
 export default function CheckIn() {
   const { data: apiHouses } = useApi<House[]>('/api/houses')
-  const { data: apiSessions } = useApi<GuestSession[]>('/api/houses/sessions')
+  const { data: apiSessions, refetch: refetchSessions } = useApi<GuestSession[]>('/api/houses/sessions')
   const [houses, setHouses] = useState<House[]>([])
   const [sessions, setSessions] = useState<GuestSession[]>([])
   const [showForm, setShowForm] = useState(false); const [selectedHouse, setSelectedHouse] = useState<House | null>(null)
@@ -19,9 +30,20 @@ export default function CheckIn() {
   useEffect(() => { if (apiSessions) setSessions(apiSessions) }, [apiSessions])
 
   function openCheckIn(house: House) { setSelectedHouse(house); setFormGuests(2); setFormLang('ru'); setShowForm(true) }
-  function handleCheckIn() { if (!selectedHouse) return; setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied' } : h)); apiPost(`/api/houses/${selectedHouse.id}/check-in`, { guestCount: formGuests, lang: formLang }).catch(() => {}); setShowForm(false) }
+  function handleCheckIn() {
+    if (!selectedHouse) return
+    setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied' } : h))
+    apiPost(`/api/houses/${selectedHouse.id}/check-in`, { guestCount: formGuests, lang: formLang }).then(() => refetchSessions()).catch(() => {})
+    setShowForm(false)
+  }
   const [checkoutId, setCheckoutId] = useState<string | null>(null)
-  function handleCheckoutConfirm() { if (checkoutId) { setHouses(prev => prev.map(h => h.id === checkoutId ? { ...h, status: 'vacant' } : h)); apiPost(`/api/houses/${checkoutId}/check-out`, {}).catch(() => {}) }; setCheckoutId(null) }
+  function handleCheckoutConfirm() {
+    if (checkoutId) {
+      setHouses(prev => prev.map(h => h.id === checkoutId ? { ...h, status: 'vacant' } : h))
+      apiPost(`/api/houses/${checkoutId}/check-out`, {}).then(() => refetchSessions()).catch(() => {})
+    }
+    setCheckoutId(null)
+  }
   function formatCheckIn(iso: string): string { return new Date(iso).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) }
 
   async function handleSetupTablet(house: House) {
@@ -33,11 +55,22 @@ export default function CheckIn() {
   }
 
   function copyToken() {
-    if (tokenModal) {
-      const host = window.location.hostname
-      const guestUrl = import.meta.env.DEV ? `http://${host}:5173` : `http://${host}`
-      const url = `${guestUrl}?token=${tokenModal.token}&hid=${tokenModal.hid}`
-      navigator.clipboard.writeText(url)
+    if (!tokenModal) return
+    const host = window.location.hostname
+    const guestUrl = import.meta.env.DEV ? `http://${host}:5173` : `http://${host}`
+    const url = `${guestUrl}?token=${tokenModal.token}&hid=${tokenModal.hid}`
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }).catch(() => {
+        fallbackCopy(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+    } else {
+      fallbackCopy(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -59,7 +92,7 @@ export default function CheckIn() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-base font-bold text-gray-800 dark:text-white">Домик №{house.number}</p>
-                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{session?.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === session?.lang)?.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{session?.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === session?.lang)?.label ?? 'Русский'}</p>
                   {session?.checkInAt && <p className="text-xs text-gray-400 dark:text-white/50 mt-0.5">Заезд: {formatCheckIn(session.checkInAt)}</p>}
                 </div>
                 <span className="bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold px-2.5 py-1 rounded-full">Занят</span>
