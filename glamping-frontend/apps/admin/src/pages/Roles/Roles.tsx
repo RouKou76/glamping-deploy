@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApi, apiPost, apiDelete } from '@glamping/api'
 import { ConfirmDialog } from '@glamping/ui'
-import { useAuth } from '../../contexts/AuthContext'
 
 interface Role {
   id: string
@@ -35,7 +34,6 @@ const TICKET_TYPES = [
 
 export default function Roles() {
   const { data: apiRoles, refetch } = useApi<Role[]>('/api/roles')
-  const { refreshUser } = useAuth()
   const [roles, setRoles] = useState<Role[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editRole, setEditRole] = useState<Role | null>(null)
@@ -76,7 +74,6 @@ export default function Roles() {
       }
       setShowForm(false)
       refetch()
-      refreshUser()
     } catch { setError('Ошибка сохранения') }
   }
 
