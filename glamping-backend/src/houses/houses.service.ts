@@ -27,6 +27,7 @@ export class HousesService {
       houseNumber: s.house.number,
       guestCount: s.guestCount,
       lang: s.lang,
+      isActive: true,
       checkInAt: s.checkInAt?.toISOString(),
     }));
   }
