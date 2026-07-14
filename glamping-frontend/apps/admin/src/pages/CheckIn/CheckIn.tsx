@@ -31,6 +31,7 @@ export default function CheckIn() {
   const [houseNumber, setHouseNumber] = useState('')
   const [houseError, setHouseError] = useState('')
   const [deleteHouseId, setDeleteHouseId] = useState<string | null>(null)
+  const [tabletHouse, setTabletHouse] = useState<House | null>(null)
 
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
   useEffect(() => { if (apiSessions) setSessions(apiSessions) }, [apiSessions])
@@ -52,12 +53,18 @@ export default function CheckIn() {
   }
   function formatCheckIn(iso: string): string { return new Date(iso).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) }
 
-  async function handleSetupTablet(house: House) {
+  function handleSetupTablet(house: House) {
+    setTabletHouse(house)
+  }
+
+  async function confirmSetupTablet() {
+    if (!tabletHouse) return
     try {
-      const res = await apiPost<{ success: boolean; data: { houseId: string; number: number; deviceToken: string } }>(`/api/houses/${house.id}/device-token`, {})
+      const res = await apiPost<{ success: boolean; data: { houseId: string; number: number; deviceToken: string } }>(`/api/houses/${tabletHouse.id}/device-token`, {})
       setTokenModal({ number: res.data.number, token: res.data.deviceToken, hid: res.data.houseId })
       setCopied(false)
     } catch { /* ignore */ }
+    setTabletHouse(null)
   }
 
   function copyToken() {
@@ -215,6 +222,7 @@ export default function CheckIn() {
       )}
       <ConfirmDialog open={!!checkoutId} title="Выселить домик?" message="Домик будет освобождён, чат очищен." confirmLabel="Выселить" onConfirm={handleCheckoutConfirm} onClose={() => setCheckoutId(null)} />
       <ConfirmDialog open={!!deleteHouseId} title="Удалить домик?" message="Домик будет удалён безвозвратно." confirmLabel="Удалить" onConfirm={handleDeleteHouse} onClose={() => setDeleteHouseId(null)} />
+      <ConfirmDialog open={!!tabletHouse} title="Настроить планшет?" message="Будет сгенерирована новая ссылка для планшета." confirmLabel="Настроить" variant="primary" onConfirm={confirmSetupTablet} onClose={() => setTabletHouse(null)} />
     </div>
   )
 }
