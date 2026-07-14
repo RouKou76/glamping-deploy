@@ -151,6 +151,17 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
       }
     }
 
+    if (taskType === 'food' && values.time && !validationErrors.time) {
+      const hour = parseInt((values.time as string).split(':')[0])
+      const inSlot = SLOTS.some(s =>
+        (hour >= s.slotStart && hour < s.slotEnd) ||
+        (hour >= s.slotEnd && hour < s.bufferEnd)
+      )
+      if (!inSlot) {
+        validationErrors.time = 'Выберите время из предложенных периодов'
+      }
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
