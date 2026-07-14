@@ -19,12 +19,12 @@ async function bootstrap() {
   const config = app.get(ConfigService);
 
   app.use(helmet());
-  const allowedOrigins = config.get<string>('FRONTEND_URL', '*');
+  const allowedOrigins = config.get<string>('FRONTEND_URL');
+
   app.enableCors({
-    origin:
-      allowedOrigins === '*'
-        ? '*'
-        : allowedOrigins.split(',').map((s: string) => s.trim()),
+    origin: allowedOrigins
+      ? allowedOrigins.split(',').map((s) => s.trim())
+      : false,
     credentials: true,
   });
 
