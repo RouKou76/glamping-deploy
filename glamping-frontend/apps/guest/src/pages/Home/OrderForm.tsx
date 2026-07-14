@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
 import { useApi, apiPost } from '@glamping/api'
 import type { MenuItem, TaskItem } from '@glamping/types'
+import { SLOTS } from '../../hooks/useMealPeriod'
 import { SuccessScreen } from './SuccessScreen'
 
 export interface OrderStepDate { type: 'date'; key: string; label: string; required?: boolean }
@@ -232,6 +233,15 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
                 <input type="time" value={(values[s.key] as string) || ''} min={getMinTime((values.date as string) || todayStr())}
                   onChange={e => setVal(s.key, e.target.value)}
                   className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark] ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
+                {taskType === 'food' && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {SLOTS.map(slot => (
+                      <span key={slot.period} className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40">
+                        {t(`food.${slot.period}`)}: {String(slot.slotStart).padStart(2, '0')}:00–{String(slot.slotEnd).padStart(2, '0')}:00
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <ErrorMsg text={errors[s.key]} />
               </div>
             )

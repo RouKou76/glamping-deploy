@@ -8,7 +8,7 @@ interface TimeSlot {
   bufferEnd: number
 }
 
-const SLOTS: TimeSlot[] = [
+export const SLOTS: TimeSlot[] = [
   { period: 'breakfast', slotStart: 8, slotEnd: 10, bufferEnd: 12 },
   { period: 'lunch', slotStart: 13, slotEnd: 15, bufferEnd: 17 },
   { period: 'dinner', slotStart: 19, slotEnd: 21, bufferEnd: 23 },
