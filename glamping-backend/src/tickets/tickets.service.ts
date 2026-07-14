@@ -46,6 +46,7 @@ export class TicketsService {
       type: t.type,
       status: t.status,
       createdAt: t.sentAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
       desiredAt: t.desiredAt?.toISOString(),
       description: t.description,
       geo: t.geo,
