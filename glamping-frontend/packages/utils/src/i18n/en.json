@@ -58,7 +58,7 @@
     "back": "← Back",
     "submit": "Book Transfer",
     "chatHint": "Can't find your destination? Write us in chat.",
-    "priceHint": "Final price may vary. Exact price at checkout.",
+    "priceHint": "Up to 35 km — 500 RUB, 35–50 km — 700 RUB, over 50 km — 1000 RUB",
     "success": "Request accepted!",
     "successMsg": "Driver will arrive at the specified time.",
     "required": "Please select pickup time"
