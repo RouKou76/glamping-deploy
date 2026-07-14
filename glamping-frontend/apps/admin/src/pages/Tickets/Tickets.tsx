@@ -115,7 +115,11 @@ export default function Tickets() {
       }
       if (event.type === 'server:ticket:updated') {
         const updated = event.payload as Task
-        setTickets(prev => prev.map(t => t.id === updated.id ? updated : t))
+        if (updated.status === 'archived') {
+          setTickets(prev => prev.filter(t => t.id !== updated.id))
+        } else {
+          setTickets(prev => prev.map(t => t.id === updated.id ? updated : t))
+        }
       }
     },
   })
