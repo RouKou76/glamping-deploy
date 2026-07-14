@@ -21,11 +21,11 @@ const LOCATION_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new: 'bg-orange-500', accepted: 'bg-blue-500', in_progress: 'bg-purple-500', done: 'bg-green-500',
+  new: 'bg-orange-500', accepted: 'bg-blue-500', in_progress: 'bg-purple-500', done: 'bg-green-500', archived: 'bg-gray-400',
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  new: 'Новая', accepted: 'Принята', in_progress: 'В работе', done: 'Готово',
+  new: 'Новая', accepted: 'Принята', in_progress: 'В работе', done: 'Готово', archived: 'В архиве',
 }
 
 function formatCreationTime(iso: string): string {
@@ -239,7 +239,7 @@ export default function Tickets() {
                 )}
 
                 {/* Время выполнения */}
-                {ticket.desiredAt && (
+                {ticket.desiredAt && ticket.status !== 'archived' && (
                   <div className="px-4 py-1.5 flex items-center gap-1.5">
                     <span className="text-gray-400 dark:text-white/30"><ClockIcon /></span>
                     <span className={`text-sm font-semibold ${urgency.color}`}>
