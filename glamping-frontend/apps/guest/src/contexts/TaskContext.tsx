@@ -25,8 +25,16 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchTasks = useCallback(() => {
+    const token = localStorage.getItem('glamp-token')
+    if (!token) {
+      setTasks([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
-    fetch('/api/tasks')
+    fetch('/api/tasks', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.data) setTasks(data.data) })
       .catch(() => {})
