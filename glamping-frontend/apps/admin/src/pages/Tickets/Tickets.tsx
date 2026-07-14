@@ -248,6 +248,14 @@ export default function Tickets() {
                     {urgency.label && <span className={`text-xs ${urgency.color}`}>{urgency.label}</span>}
                   </div>
                 )}
+                {ticket.status === 'archived' && (
+                  <div className="px-4 py-1.5 flex items-center gap-1.5">
+                    <span className="text-gray-400 dark:text-white/30"><ClockIcon /></span>
+                    <span className="text-sm text-gray-500 dark:text-white/50">
+                      Архивировано {formatCreationTime(ticket.updatedAt)}
+                    </span>
+                  </div>
+                )}
 
                 {/* Доп. информация */}
                 {extraInfo.length > 0 && (
