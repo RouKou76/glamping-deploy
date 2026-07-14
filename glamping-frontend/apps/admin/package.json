@@ -14,9 +14,11 @@
     "@glamping/types": "*",
     "@glamping/ui": "*",
     "@glamping/utils": "*",
+    "core-js": "^3.49.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.18.0"
+    "react-router-dom": "^7.18.0",
+    "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
@@ -25,6 +27,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
+    "@vitejs/plugin-legacy": "^6.1.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.3"
   }

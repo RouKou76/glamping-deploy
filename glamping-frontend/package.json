@@ -27,8 +27,6 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
-    "i18next": "^26.3.4",
-    "react-i18next": "^17.0.8",
     "serve": "^14.2.6"
   }
 }
