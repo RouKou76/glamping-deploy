@@ -31,4 +31,11 @@ export class MessagesController {
   async markAsRead(@Param('id') id: string) {
     return this.messagesService.markAsRead(id);
   }
+
+  @Get('history/:houseId')
+  @Public()
+  @ApiOperation({ summary: 'Get chat history by house' })
+  async findHistory(@Param('houseId') houseId: string) {
+    return this.messagesService.findHistoryByHouseId(houseId);
+  }
 }

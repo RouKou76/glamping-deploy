@@ -10,8 +10,13 @@ export class MessagesService {
   ) {}
 
   async findByHouseId(houseId: string) {
+    const session = await this.prisma.guestSession.findFirst({
+      where: { houseId, isActive: true },
+    });
+    if (!session) return [];
+
     const messages = await this.prisma.chatMessage.findMany({
-      where: { houseId },
+      where: { houseId, sessionId: session.id },
       orderBy: { timestamp: 'asc' },
     });
 
@@ -40,9 +45,43 @@ export class MessagesService {
     }));
   }
 
+  async findHistoryByHouseId(houseId: string) {
+    const sessions = await this.prisma.guestSession.findMany({
+      where: { houseId },
+      orderBy: { checkInAt: 'desc' },
+    });
+
+    const result = [];
+    for (const session of sessions) {
+      const messages = await this.prisma.chatMessage.findMany({
+        where: { sessionId: session.id },
+        orderBy: { timestamp: 'asc' },
+      });
+      if (messages.length > 0) {
+        result.push({
+          sessionId: session.id,
+          checkInAt: session.checkInAt?.toISOString(),
+          checkOutAt: session.checkOutAt?.toISOString(),
+          messages: messages.map((m) => ({
+            id: m.id,
+            sender: m.sender,
+            text: m.text,
+            timestamp: m.timestamp.toISOString(),
+            read: m.read,
+          })),
+        });
+      }
+    }
+    return result;
+  }
+
   async create(houseId: string, text: string, sender = 'GUEST') {
+    const session = await this.prisma.guestSession.findFirst({
+      where: { houseId, isActive: true },
+    });
+
     const message = await this.prisma.chatMessage.create({
-      data: { houseId, sender, text },
+      data: { houseId, sender, text, sessionId: session?.id },
     });
 
     return {
