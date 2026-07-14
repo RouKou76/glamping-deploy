@@ -28,8 +28,8 @@ export class TicketsService {
 
     if (query.userPermissions && query.userRole !== 'admin') {
       const viewTicketTypes = query.userPermissions
-        .filter(p => p.startsWith('view_tickets:'))
-        .map(p => p.split(':')[1]);
+        .filter((p) => p.startsWith('view_tickets:'))
+        .map((p) => p.split(':')[1]);
       if (viewTicketTypes.length > 0) {
         where.type = { in: viewTicketTypes };
       }
@@ -91,8 +91,11 @@ export class TicketsService {
 
     void this.gateway.broadcastToAdmins('server:ticket:created', result);
 
-    const house = await this.prisma.house.findUnique({ where: { id: dto.houseId } });
-    const typeLabel = dto.type === 'custom' && dto.description ? dto.description : dto.type;
+    const house = await this.prisma.house.findUnique({
+      where: { id: dto.houseId },
+    });
+    const typeLabel =
+      dto.type === 'custom' && dto.description ? dto.description : dto.type;
     void this.push.sendNotification({
       title: 'Новая заявка',
       body: `${typeLabel} — Домик №${house?.number ?? '?'}`,
@@ -114,7 +117,9 @@ export class TicketsService {
       },
     });
 
-    const house = await this.prisma.house.findUnique({ where: { id: updated.houseId } });
+    const house = await this.prisma.house.findUnique({
+      where: { id: updated.houseId },
+    });
 
     const result = {
       id: updated.id,
@@ -135,7 +140,11 @@ export class TicketsService {
     void this.gateway.broadcastToAdmins('server:ticket:updated', result);
 
     if (dto.status) {
-      const statusLabels: Record<string, string> = { in_progress: 'В работе', done: 'Готово', archived: 'В архив' };
+      const statusLabels: Record<string, string> = {
+        in_progress: 'В работе',
+        done: 'Готово',
+        archived: 'В архив',
+      };
       const label = statusLabels[dto.status] ?? dto.status;
       void this.push.sendNotification({
         title: 'Заявка обновлена',

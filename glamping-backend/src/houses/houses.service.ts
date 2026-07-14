@@ -53,10 +53,15 @@ export class HousesService {
   }
 
   async create(dto: CreateHouseDto) {
-    const existing = await this.prisma.house.findUnique({ where: { number: dto.number } });
-    if (existing) throw new BadRequestException('Домик с таким номером уже существует');
+    const existing = await this.prisma.house.findUnique({
+      where: { number: dto.number },
+    });
+    if (existing)
+      throw new BadRequestException('Домик с таким номером уже существует');
 
-    const house = await this.prisma.house.create({ data: { number: dto.number } });
+    const house = await this.prisma.house.create({
+      data: { number: dto.number },
+    });
     return { id: house.id, number: house.number, status: house.status };
   }
 
@@ -65,18 +70,28 @@ export class HousesService {
     if (!house) throw new NotFoundException('House not found');
 
     if (dto.number && dto.number !== house.number) {
-      const existing = await this.prisma.house.findUnique({ where: { number: dto.number } });
-      if (existing) throw new BadRequestException('Домик с таким номером уже существует');
+      const existing = await this.prisma.house.findUnique({
+        where: { number: dto.number },
+      });
+      if (existing)
+        throw new BadRequestException('Домик с таким номером уже существует');
     }
 
-    const updated = await this.prisma.house.update({ where: { id }, data: { number: dto.number } });
+    const updated = await this.prisma.house.update({
+      where: { id },
+      data: { number: dto.number },
+    });
     return { id: updated.id, number: updated.number, status: updated.status };
   }
 
   async remove(id: string) {
-    const house = await this.prisma.house.findUnique({ where: { id }, include: { sessions: { where: { isActive: true } } } });
+    const house = await this.prisma.house.findUnique({
+      where: { id },
+      include: { sessions: { where: { isActive: true } } },
+    });
     if (!house) throw new NotFoundException('House not found');
-    if (house.sessions.length > 0) throw new BadRequestException('Нельзя удалить заселённый домик');
+    if (house.sessions.length > 0)
+      throw new BadRequestException('Нельзя удалить заселённый домик');
 
     await this.prisma.house.delete({ where: { id } });
     return { id, number: house.number };

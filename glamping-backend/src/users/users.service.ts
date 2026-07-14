@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,10 +29,17 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (existing) throw new BadRequestException('Пользователь с таким email уже существует');
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (existing)
+      throw new BadRequestException(
+        'Пользователь с таким email уже существует',
+      );
 
-    const role = await this.prisma.role.findUnique({ where: { id: dto.roleId } });
+    const role = await this.prisma.role.findUnique({
+      where: { id: dto.roleId },
+    });
     if (!role) throw new BadRequestException('Роль не найдена');
 
     const passwordHash = await argon2.hash(dto.password);
@@ -49,7 +60,9 @@ export class UsersService {
     if (!user) throw new NotFoundException('Пользователь не найден');
 
     if (dto.roleId) {
-      const role = await this.prisma.role.findUnique({ where: { id: dto.roleId } });
+      const role = await this.prisma.role.findUnique({
+        where: { id: dto.roleId },
+      });
       if (!role) throw new BadRequestException('Роль не найдена');
     }
 
@@ -68,7 +81,8 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Пользователь не найден');
-    if (user.email === 'admin@glamping.com') throw new BadRequestException('Нельзя удалить главного администратора');
+    if (user.email === 'admin@glamping.com')
+      throw new BadRequestException('Нельзя удалить главного администратора');
 
     return this.prisma.user.delete({ where: { id } });
   }

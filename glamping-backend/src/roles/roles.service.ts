@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -23,8 +27,11 @@ export class RolesService {
   }
 
   async create(dto: CreateRoleDto) {
-    const existing = await this.prisma.role.findUnique({ where: { name: dto.name } });
-    if (existing) throw new BadRequestException('Роль с таким именем уже существует');
+    const existing = await this.prisma.role.findUnique({
+      where: { name: dto.name },
+    });
+    if (existing)
+      throw new BadRequestException('Роль с таким именем уже существует');
 
     return this.prisma.role.create({
       data: { name: dto.name, permissions: dto.permissions || [] },
@@ -34,11 +41,15 @@ export class RolesService {
   async update(id: string, dto: UpdateRoleDto) {
     const role = await this.prisma.role.findUnique({ where: { id } });
     if (!role) throw new NotFoundException('Роль не найдена');
-    if (role.name === 'admin') throw new BadRequestException('Нельзя изменить роль admin');
+    if (role.name === 'admin')
+      throw new BadRequestException('Нельзя изменить роль admin');
 
     if (dto.name && dto.name !== role.name) {
-      const existing = await this.prisma.role.findUnique({ where: { name: dto.name } });
-      if (existing) throw new BadRequestException('Роль с таким именем уже существует');
+      const existing = await this.prisma.role.findUnique({
+        where: { name: dto.name },
+      });
+      if (existing)
+        throw new BadRequestException('Роль с таким именем уже существует');
     }
 
     return this.prisma.role.update({
@@ -56,8 +67,12 @@ export class RolesService {
       include: { _count: { select: { users: true } } },
     });
     if (!role) throw new NotFoundException('Роль не найдена');
-    if (role.name === 'admin') throw new BadRequestException('Нельзя удалить роль admin');
-    if (role._count.users > 0) throw new BadRequestException('Нельзя удалить роль с привязанными пользователями');
+    if (role.name === 'admin')
+      throw new BadRequestException('Нельзя удалить роль admin');
+    if (role._count.users > 0)
+      throw new BadRequestException(
+        'Нельзя удалить роль с привязанными пользователями',
+      );
 
     return this.prisma.role.delete({ where: { id } });
   }

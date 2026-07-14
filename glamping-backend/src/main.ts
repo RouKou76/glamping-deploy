@@ -29,7 +29,11 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
-  app.useGlobalGuards(new JwtAuthGuard(reflector), new PermissionsGuard(reflector), new DeviceGuard(prisma));
+  app.useGlobalGuards(
+    new JwtAuthGuard(reflector),
+    new PermissionsGuard(reflector),
+    new DeviceGuard(prisma),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

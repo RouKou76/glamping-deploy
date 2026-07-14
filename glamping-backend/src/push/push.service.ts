@@ -38,7 +38,12 @@ export class PushService {
     await this.prisma.pushSubscription.deleteMany({ where: { endpoint } });
   }
 
-  async sendNotification(payload: { title: string; body: string; icon?: string; url?: string }) {
+  async sendNotification(payload: {
+    title: string;
+    body: string;
+    icon?: string;
+    url?: string;
+  }) {
     if (!this.initialized) return;
 
     const subscriptions = await this.prisma.pushSubscription.findMany();
@@ -47,13 +52,18 @@ export class PushService {
     for (const sub of subscriptions) {
       try {
         await webPush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, p256da: sub.p256da } },
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, p256da: sub.p256da },
+          },
           message,
         );
       } catch (err: any) {
         this.logger.error(`Push failed for ${sub.endpoint}: ${err.message}`);
         if (err.statusCode === 404 || err.statusCode === 410) {
-          await this.prisma.pushSubscription.deleteMany({ where: { endpoint: sub.endpoint } });
+          await this.prisma.pushSubscription.deleteMany({
+            where: { endpoint: sub.endpoint },
+          });
         }
       }
     }
