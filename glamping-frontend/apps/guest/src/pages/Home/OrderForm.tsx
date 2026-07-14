@@ -231,7 +231,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 {taskType === 'food' && (
-                  <span className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/60 mb-2 inline-block">
+                  <span className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-white/70 mb-2 inline-block">
                     {t('validation.minAdvanceTime')}
                   </span>
                 )}
@@ -241,7 +241,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
                 {taskType === 'food' && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {SLOTS.map(slot => (
-                      <span key={slot.period} className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/60">
+                      <span key={slot.period} className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-white/70">
                         {t(`food.${slot.period}`)}: {String(slot.slotStart).padStart(2, '0')}:00–{String(slot.slotEnd).padStart(2, '0')}:00
                       </span>
                     ))}
