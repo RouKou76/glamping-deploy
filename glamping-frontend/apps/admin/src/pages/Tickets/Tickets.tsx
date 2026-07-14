@@ -3,7 +3,7 @@ import { useApi, apiPost, useWebSocket, useNotifications } from '@glamping/api'
 import type { Task, TaskStatus, House } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
-type FilterStatus = TaskStatus | 'all'
+type FilterStatus = TaskStatus | 'all' | 'archived'
 type FilterType = string | 'all'
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -94,7 +94,7 @@ export default function Tickets() {
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.status !== 'archived')) }, [apiTasks])
+  useEffect(() => { if (apiTasks) setTickets(apiTasks) }, [apiTasks])
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
 
   useEffect(() => {
@@ -139,9 +139,10 @@ export default function Tickets() {
 
   const filtered = useMemo(() => {
     const result = tickets.filter(t => {
+      if (statusFilter === 'archived') return t.status === 'archived'
       const matchStatus = statusFilter === 'all' || t.status === statusFilter
       const matchType = typeFilter === 'all' || t.type === typeFilter
-      return matchStatus && matchType && t.status !== 'cancelled'
+      return matchStatus && matchType && t.status !== 'cancelled' && t.status !== 'archived'
     })
     return result.sort((a, b) => {
       const urgA = getUrgency(a.desiredAt)
@@ -168,10 +169,10 @@ export default function Tickets() {
       </div>
 
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-        {(['all', 'new', 'in_progress', 'done'] as FilterStatus[]).map(s => (
+        {(['all', 'new', 'in_progress', 'done', 'archived'] as FilterStatus[]).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${statusFilter === s ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-            {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'in_progress' ? 'В работе' : 'Готово'}
+            {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'in_progress' ? 'В работе' : s === 'archived' ? 'Архив' : 'Готово'}
           </button>
         ))}
       </div>
