@@ -38,15 +38,3 @@ test: ## Run tests
 
 lint: ## Run linter
 	npm run lint
-
-docker-build: ## Build production Docker images
-	docker compose -f docker-compose.prod.yml build
-
-docker-up: ## Start production containers
-	docker compose -f docker-compose.prod.yml up -d
-
-docker-down: ## Stop production containers
-	docker compose -f docker-compose.prod.yml down
-
-docker-logs: ## View production logs
-	docker compose -f docker-compose.prod.yml logs -f
