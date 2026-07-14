@@ -11,7 +11,6 @@ interface HistorySession {
 
 export default function Chats() {
   const { data: apiHouses } = useApi<House[]>('/api/houses')
-  const { data: apiMessages, refetch } = useApi<Message[]>('/api/messages')
   const [houses, setHouses] = useState<House[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -21,10 +20,13 @@ export default function Chats() {
   const [showHistory, setShowHistory] = useState(false)
   const [loadingHistory, setLoadingHistory] = useState(false)
 
+  const messagesPath = activeHouseId ? `/api/messages?houseId=${activeHouseId}` : '/api/messages'
+  const { data: apiMessages, refetch } = useApi<Message[]>(messagesPath)
+
   useEffect(() => { if (apiHouses) { setHouses(apiHouses); if (!activeHouseId && apiHouses.length > 0) setActiveHouseId(apiHouses[0].id) } }, [apiHouses, activeHouseId])
   useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])
 
-  const activeMessages = messages.filter(m => m.houseId === activeHouseId)
+  const activeMessages = activeHouseId ? messages : []
 
   useEffect(() => {
     if (!activeHouseId) return
