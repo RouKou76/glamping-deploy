@@ -96,6 +96,9 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
   function setVal(key: string, value: unknown) {
     setValues(prev => ({ ...prev, [key]: value }))
     if (errors[key]) setErrors(prev => { const n = { ...prev }; delete n[key]; return n })
+    if (taskType === 'food' && key === 'time') {
+      setCart({})
+    }
   }
 
   function setQty(id: string, delta: number) {
