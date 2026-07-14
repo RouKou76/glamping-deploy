@@ -835,9 +835,11 @@
     "@glamping/types" "*"
     "@glamping/ui" "*"
     "@glamping/utils" "*"
+    core-js "^3.49.0"
     react "^18.3.1"
     react-dom "^18.3.1"
     react-router-dom "^7.18.0"
+    regenerator-runtime "^0.14.1"
 
 "@glamping/api@*", "@glamping/api@file:/home/gleb/HOTEL/app/glamping-frontend/packages/api":
   version "1.0.0"
@@ -854,10 +856,10 @@
     "@glamping/ui" "*"
     "@glamping/utils" "*"
     core-js "^3.49.0"
-    i18next "^25.1.3"
+    i18next "^26.3.4"
     react "^18.3.1"
     react-dom "^18.3.1"
-    react-i18next "^15.5.1"
+    react-i18next "^17.0.8"
     react-router-dom "^7.17.0"
     regenerator-runtime "^0.14.1"
 
@@ -872,6 +874,9 @@
 "@glamping/utils@*", "@glamping/utils@file:/home/gleb/HOTEL/app/glamping-frontend/packages/utils":
   version "0.1.0"
   resolved "file:packages/utils"
+  dependencies:
+    i18next "^26.3.4"
+    react-i18next "^17.0.8"
 
 "@jridgewell/gen-mapping@^0.3.12", "@jridgewell/gen-mapping@^0.3.2", "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"

@@ -1,6 +1,7 @@
 node_modules
 dist
 .git
-.env
-.env.*
-apps/*/dist
+*.log
+.DS_Store
+apps/*/node_modules
+packages/*/node_modules
