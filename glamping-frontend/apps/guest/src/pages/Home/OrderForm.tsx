@@ -230,6 +230,11 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
             if (s.type === 'time') return (
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
+                {taskType === 'food' && (
+                  <span className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 mb-2 inline-block">
+                    {t('validation.minAdvanceTime')}
+                  </span>
+                )}
                 <input type="time" value={(values[s.key] as string) || ''} min={getMinTime((values.date as string) || todayStr())}
                   onChange={e => setVal(s.key, e.target.value)}
                   className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark] ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
