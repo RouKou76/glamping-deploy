@@ -51,7 +51,7 @@ export class MessagesService {
       orderBy: { checkInAt: 'desc' },
     });
 
-    const result = [];
+    const result: { sessionId: string; checkInAt: string | undefined; checkOutAt: string | undefined; messages: { id: string; sender: string; text: string; timestamp: string; read: boolean }[] }[] = [];
     for (const session of sessions) {
       const messages = await this.prisma.chatMessage.findMany({
         where: { sessionId: session.id },
