@@ -32,6 +32,12 @@ function formatCreationTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
 }
 
+function formatArchiveTime(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' ' +
+    d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
 function formatDesiredTime(iso: string): string {
   const d = new Date(iso)
   const now = new Date()
@@ -252,7 +258,7 @@ export default function Tickets() {
                   <div className="px-4 py-1.5 flex items-center gap-1.5">
                     <span className="text-gray-400 dark:text-white/30"><ClockIcon /></span>
                     <span className="text-sm text-gray-500 dark:text-white/50">
-                      Архивировано {formatCreationTime(ticket.updatedAt)}
+                      Архивировано {formatArchiveTime(ticket.updatedAt)}
                     </span>
                   </div>
                 )}

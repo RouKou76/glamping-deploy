@@ -39,6 +39,7 @@ export interface Task {
   type: TaskType
   status: TaskStatus
   createdAt: string
+  updatedAt: string
   desiredAt?: string
   description?: string
   geo?: string
