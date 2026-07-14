@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { i18n } from '@glamping/utils'
+import { useWebSocket } from '@glamping/api'
 
 interface DeviceInfo {
   houseId: string | null
@@ -70,6 +71,19 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         .catch(() => {})
     }
   }, [])
+
+  useWebSocket({
+    auth: info.houseId ? { houseId: info.houseId } : undefined,
+    onMessage: (msg) => {
+      if (msg.type === 'server:session:updated') {
+        const payload = msg.payload as { lang?: string }
+        if (payload?.lang) {
+          i18n.changeLanguage(payload.lang)
+          localStorage.setItem('glamp-lang', payload.lang)
+        }
+      }
+    },
+  })
 
   return (
     <DeviceContext.Provider value={info}>

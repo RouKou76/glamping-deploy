@@ -130,6 +130,10 @@ export class HousesService {
       checkInAt: session.checkInAt?.toISOString(),
     });
 
+    this.gateway.sendToHouse(houseId, 'server:session:updated', {
+      lang: dto.lang || 'ru',
+    });
+
     return {
       id: houseId,
       number: house.number,
