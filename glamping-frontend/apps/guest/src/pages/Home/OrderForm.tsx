@@ -94,11 +94,13 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function setVal(key: string, value: unknown) {
+    if (taskType === 'food' && key === 'time' && values.time) {
+      const oldPeriod = getPeriodFromTime(values.time as string)
+      const newPeriod = getPeriodFromTime(value as string)
+      if (oldPeriod !== newPeriod) setCart({})
+    }
     setValues(prev => ({ ...prev, [key]: value }))
     if (errors[key]) setErrors(prev => { const n = { ...prev }; delete n[key]; return n })
-    if (taskType === 'food' && key === 'time') {
-      setCart({})
-    }
   }
 
   function setQty(id: string, delta: number) {
