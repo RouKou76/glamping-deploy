@@ -87,6 +87,7 @@ export class TicketsService {
       location: ticket.location,
       guestCount: ticket.guestCount,
       priceFix: ticket.priceFix,
+      updatedAt: ticket.updatedAt.toISOString(),
     };
 
     void this.gateway.broadcastToAdmins('server:ticket:created', result);
@@ -135,6 +136,7 @@ export class TicketsService {
       location: updated.location,
       guestCount: updated.guestCount,
       priceFix: updated.priceFix,
+      updatedAt: updated.updatedAt.toISOString(),
     };
 
     void this.gateway.broadcastToAdmins('server:ticket:updated', result);
