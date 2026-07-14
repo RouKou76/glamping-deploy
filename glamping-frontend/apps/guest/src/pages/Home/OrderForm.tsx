@@ -200,9 +200,9 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
   const menuStep = steps.find(s => s.type === 'menu')
   const cartItems = menuStep && menuStep.type === 'menu'
     ? Object.entries(cart).filter(([, q]) => q > 0).map(([id, qty]) => {
-        const item = menuStep.items.find(i => i.id === id)!
-        return { name: item.name, price: item.price, qty }
-      })
+      const item = menuStep.items.find(i => i.id === id)!
+      return { name: item.name, price: item.price, qty }
+    })
     : []
 
   const totalPrice = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
@@ -231,7 +231,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 {taskType === 'food' && (
-                  <span className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 mb-2 inline-block">
+                  <span className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/60 mb-2 inline-block">
                     {t('validation.minAdvanceTime')}
                   </span>
                 )}
@@ -241,7 +241,7 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
                 {taskType === 'food' && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {SLOTS.map(slot => (
-                      <span key={slot.period} className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40">
+                      <span key={slot.period} className="text-[10px] px-2 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/60">
                         {t(`food.${slot.period}`)}: {String(slot.slotStart).padStart(2, '0')}:00–{String(slot.slotEnd).padStart(2, '0')}:00
                       </span>
                     ))}
@@ -303,14 +303,14 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
 
               if (taskType === 'food' && !selectedTime) {
                 return (
-                <div key={s.key}>
-                  <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
-                    {t('food.menu')}{s.required && ' *'}
-                  </label>
-                  <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
-                    <p className="text-sm text-gray-400 dark:text-white/40">{t('food.selectTimeFirst')}</p>
+                  <div key={s.key}>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
+                      {t('food.menu')}{s.required && ' *'}
+                    </label>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
+                      <p className="text-sm text-gray-400 dark:text-white/40">{t('food.selectTimeFirst')}</p>
+                    </div>
                   </div>
-                </div>
                 )
               }
 
@@ -318,30 +318,30 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
                 ? s.items.filter(i => i.isAvailable && ('category' in i && (i as { category: string }).category === period))
                 : s.items.filter(i => i.isAvailable)
               return (
-              <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
-                  {taskType === 'food' && period ? `${t('food.menu')} (${t(`food.${period}`)})` : t('food.menu')}{s.required && ' *'}
-                </label>
-                <div className="space-y-2">
-                  {filteredItems.map(item => (
-                    <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
-                        {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
-                        <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+                <div key={s.key}>
+                  <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
+                    {taskType === 'food' && period ? `${t('food.menu')} (${t(`food.${period}`)})` : t('food.menu')}{s.required && ' *'}
+                  </label>
+                  <div className="space-y-2">
+                    {filteredItems.map(item => (
+                      <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
+                          {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
+                          <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
+                          <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
+                            className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
+                          <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
+                          <button onClick={() => setQty(item.id, +1)}
+                            className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
-                        <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
-                          className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
-                        <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
-                        <button onClick={() => setQty(item.id, +1)}
-                          className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <ErrorMsg text={errors[s.key]} />
                 </div>
-                <ErrorMsg text={errors[s.key]} />
-              </div>
               )
             }
 
