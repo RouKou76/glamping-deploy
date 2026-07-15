@@ -53,16 +53,25 @@ export class HousesService {
   }
 
   async create(dto: CreateHouseDto) {
+    const number = dto.number ?? await this.getNextHouseNumber();
+
     const existing = await this.prisma.house.findUnique({
-      where: { number: dto.number },
+      where: { number },
     });
     if (existing)
       throw new BadRequestException('Домик с таким номером уже существует');
 
     const house = await this.prisma.house.create({
-      data: { number: dto.number },
+      data: { number },
     });
     return { id: house.id, number: house.number, status: house.status };
+  }
+
+  private async getNextHouseNumber(): Promise<number> {
+    const lastHouse = await this.prisma.house.findFirst({
+      orderBy: { number: 'desc' },
+    });
+    return (lastHouse?.number ?? 0) + 1;
   }
 
   async update(id: string, dto: UpdateHouseDto) {
