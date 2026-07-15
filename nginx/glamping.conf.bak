@@ -1,28 +1,30 @@
 server {
     listen 80;
-    server_name exemplehotel.tw1.ru www.exemplehotel.tw1.ru;
+    server_name yourdomain.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name exemplehotel.tw1.ru www.exemplehotel.tw1.ru;
+    server_name yourdomain.com;
 
-    ssl_certificate /etc/letsencrypt/live/exemplehotel.tw1.ru/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/exemplehotel.tw1.ru/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
 
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
+    # Гостевое приложение
     location / {
         root /opt/glamping/glamping-frontend/apps/guest/dist;
         try_files $uri $uri/ /index.html;
     }
 
+    # Админка
     location /admin {
-        root /opt/glamping/glamping-frontend/apps;
-        try_files $uri $uri/ /admin/dist/index.html;
+        alias /opt/glamping/glamping-frontend/apps/admin/dist;
+        try_files $uri $uri/ /admin/index.html;
     }
 
     # API
