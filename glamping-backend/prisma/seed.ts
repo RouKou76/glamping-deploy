@@ -50,7 +50,7 @@ async function main() {
   }
 
   // Create houses
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 8; i++) {
     await prisma.house.upsert({
       where: { number: i },
       update: {},
