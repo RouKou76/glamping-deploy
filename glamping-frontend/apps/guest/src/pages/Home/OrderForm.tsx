@@ -91,6 +91,8 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [cart, setCart] = useState<Record<string, number>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [collapsedSubcats, setCollapsedSubcats] = useState<Set<string>>(new Set())
+  function toggleSubcat(subcat: string) { setCollapsedSubcats(prev => { const next = new Set(prev); next.has(subcat) ? next.delete(subcat) : next.add(subcat); return next }) }
   const [cooldown, setCooldown] = useState(0)
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -355,25 +357,31 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
                     <div className="space-y-4">
                       {grouped.map(group => (
                         <div key={group.subcat}>
-                          <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 mb-1.5 inline-block">{group.label}</p>
-                          <div className="space-y-2">
-                            {group.items.map(item => (
-                              <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
-                                <div className="flex-1">
-                                  <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
-                                  {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
-                                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+                          <button type="button" onClick={() => toggleSubcat(group.subcat)} className="flex items-center gap-2 mb-1.5 cursor-pointer">
+                            <span className="text-xs text-gray-400 dark:text-white/30 transition-transform">{collapsedSubcats.has(group.subcat) ? '▶' : '▼'}</span>
+                            <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 inline-block">{group.label}</p>
+                            <span className="text-[10px] text-gray-400 dark:text-white/30">{group.items.length}</span>
+                          </button>
+                          {!collapsedSubcats.has(group.subcat) && (
+                            <div className="space-y-2">
+                              {group.items.map(item => (
+                                <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
+                                  <div className="flex-1">
+                                    <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
+                                    {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
+                                    <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+                                  </div>
+                                  <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
+                                    <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
+                                      className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
+                                    <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
+                                    <button onClick={() => setQty(item.id, +1)}
+                                      className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
-                                  <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
-                                    className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
-                                  <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
-                                  <button onClick={() => setQty(item.id, +1)}
-                                    className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

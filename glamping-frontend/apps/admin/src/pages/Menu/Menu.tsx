@@ -60,6 +60,9 @@ export default function Menu() {
       .filter(g => g.items.length > 0)
   }, [filtered, category])
 
+  const [collapsedSubcats, setCollapsedSubcats] = useState<Set<string>>(new Set())
+  function toggleSubcat(subcat: string) { setCollapsedSubcats(prev => { const next = new Set(prev); next.has(subcat) ? next.delete(subcat) : next.add(subcat); return next }) }
+
   function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormSubcat(null); setFormDescription(''); setShowForm(true) }
   function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormSubcat(item.subcat ?? null); setFormDescription(item.description ?? ''); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
@@ -106,12 +109,18 @@ export default function Menu() {
         <div className="space-y-5">
           {groupedItems.map(group => (
             <div key={group.subcat}>
-              <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 mb-2 inline-block">{group.label}</p>
-              <div className="space-y-2">
-                {group.items.map(item => (
-                  <ItemRow key={item.id} item={item} onToggle={() => toggleAvailable(item.id)} onEdit={() => openEdit(item)} onDelete={() => setDeleteId(item.id)} />
-                ))}
-              </div>
+              <button onClick={() => toggleSubcat(group.subcat)} className="flex items-center gap-2 mb-2 cursor-pointer group">
+                <span className="text-xs text-gray-400 dark:text-white/30 transition-transform">{collapsedSubcats.has(group.subcat) ? '▶' : '▼'}</span>
+                <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 inline-block group-hover:bg-glamp-100 dark:group-hover:bg-glamp-500/20 transition-colors">{group.label}</p>
+                <span className="text-[10px] text-gray-400 dark:text-white/30">{group.items.length}</span>
+              </button>
+              {!collapsedSubcats.has(group.subcat) && (
+                <div className="space-y-2">
+                  {group.items.map(item => (
+                    <ItemRow key={item.id} item={item} onToggle={() => toggleAvailable(item.id)} onEdit={() => openEdit(item)} onDelete={() => setDeleteId(item.id)} />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
