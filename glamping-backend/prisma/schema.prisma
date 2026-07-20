@@ -134,6 +134,7 @@ model MenuItem {
   name         String
   description  String?
   category     MenuCategory
+  subcat       String?      @map("subcategory")
   price        Int
   hidden       Boolean      @default(false)
   showPrice    Boolean      @default(true) @map("show_price")

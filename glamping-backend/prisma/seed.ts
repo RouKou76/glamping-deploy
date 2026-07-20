@@ -60,27 +60,63 @@ async function main() {
 
   // Create menu items
   const menuItems = [
-    { name: 'Сырники из фермерского творога', category: 'breakfast', price: 450 },
-    { name: 'Овсяная каша с ягодами', category: 'breakfast', price: 320 },
-    { name: 'Яичница с беконом', category: 'breakfast', price: 380 },
-    { name: 'Борщ со сметаной', category: 'lunch', price: 420 },
-    { name: 'Паста карбонара', category: 'lunch', price: 550 },
-    { name: 'Греческий салат', category: 'lunch', price: 380 },
-    { name: 'Стейк из форели', category: 'dinner', price: 890 },
-    { name: 'Утиная грудка с овощами', category: 'dinner', price: 950 },
-    { name: 'Кока-кола 0.33', category: 'minibar', price: 150 },
-    { name: 'Вода Evian 0.5', category: 'minibar', price: 120 },
-    { name: 'Пиво Paulaner 0.5', category: 'minibar', price: 320 },
-    { name: 'Чипсы Lays', category: 'minibar', price: 180 },
+    // Завтрак (без подкатегорий)
+    { name: 'Сырники из фермерского творога', category: 'breakfast', subcat: null, price: 450 },
+    { name: 'Овсяная каша с ягодами', category: 'breakfast', subcat: null, price: 320 },
+    { name: 'Яичница с беконом', category: 'breakfast', subcat: null, price: 380 },
+    { name: 'Кофе', category: 'breakfast', subcat: null, price: 200 },
+    { name: 'Чай зеленый', category: 'breakfast', subcat: null, price: 150 },
+    { name: 'Чай черный', category: 'breakfast', subcat: null, price: 150 },
+    { name: 'Горячий шоколад', category: 'breakfast', subcat: null, price: 250 },
+    // Обед — Закуски/Салаты
+    { name: 'Греческий салат', category: 'lunch', subcat: 'appetizers', price: 380 },
+    { name: 'Цезарь с курицей', category: 'lunch', subcat: 'appetizers', price: 420 },
+    // Обед — Горячее
+    { name: 'Борщ со сметаной', category: 'lunch', subcat: 'hot', price: 420 },
+    { name: 'Паста карбонара', category: 'lunch', subcat: 'hot', price: 550 },
+    // Обед — Гарниры
+    { name: 'Рис', category: 'lunch', subcat: 'sides', price: 120 },
+    { name: 'Картофельное пюре', category: 'lunch', subcat: 'sides', price: 150 },
+    // Обед — Десерты
+    { name: 'Чизкейк', category: 'lunch', subcat: 'desserts', price: 350 },
+    { name: 'Тирамису', category: 'lunch', subcat: 'desserts', price: 380 },
+    // Обед — Напитки
+    { name: 'Чай зеленый', category: 'lunch', subcat: 'drinks', price: 150 },
+    { name: 'Чай черный', category: 'lunch', subcat: 'drinks', price: 150 },
+    { name: 'Фруктовый компот', category: 'lunch', subcat: 'drinks', price: 180 },
+    { name: 'Горячий шоколад', category: 'lunch', subcat: 'drinks', price: 250 },
+    // Ужин — Закуски
+    { name: 'Тартар из лосося', category: 'dinner', subcat: 'appetizers', price: 520 },
+    { name: 'Капрезе', category: 'dinner', subcat: 'appetizers', price: 380 },
+    // Ужин — Горячее
+    { name: 'Стейк из форели', category: 'dinner', subcat: 'hot', price: 890 },
+    { name: 'Утиная грудка с овощами', category: 'dinner', subcat: 'hot', price: 950 },
+    // Ужин — Гарниры
+    { name: 'Рис', category: 'dinner', subcat: 'sides', price: 120 },
+    { name: 'Картофельное пюре', category: 'dinner', subcat: 'sides', price: 150 },
+    // Ужин — Десерты
+    { name: 'Чизкейк', category: 'dinner', subcat: 'desserts', price: 350 },
+    { name: 'Тирамису', category: 'dinner', subcat: 'desserts', price: 380 },
+    // Ужин — Напитки
+    { name: 'Чай зеленый', category: 'dinner', subcat: 'drinks', price: 150 },
+    { name: 'Чай черный', category: 'dinner', subcat: 'drinks', price: 150 },
+    { name: 'Фруктовый компот', category: 'dinner', subcat: 'drinks', price: 180 },
+    { name: 'Горячий шоколад', category: 'dinner', subcat: 'drinks', price: 250 },
+    // Минибар
+    { name: 'Кока-кола 0.33', category: 'minibar', subcat: null, price: 150 },
+    { name: 'Вода Evian 0.5', category: 'minibar', subcat: null, price: 120 },
+    { name: 'Пиво Paulaner 0.5', category: 'minibar', subcat: null, price: 320 },
+    { name: 'Чипсы Lays', category: 'minibar', subcat: null, price: 180 },
   ];
 
   for (const item of menuItems) {
-    const existing = await prisma.menuItem.findFirst({ where: { name: item.name } });
+    const existing = await prisma.menuItem.findFirst({ where: { name: item.name, category: item.category as any } });
     if (!existing) {
       await prisma.menuItem.create({
         data: {
           name: item.name,
           category: item.category as any,
+          subcat: item.subcat,
           price: item.price,
         },
       });
