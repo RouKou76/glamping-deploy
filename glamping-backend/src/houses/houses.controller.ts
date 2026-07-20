@@ -61,6 +61,13 @@ export class HousesController {
     return this.housesService.checkout(id);
   }
 
+  @Post(':id/checkout-request')
+  @Public()
+  @ApiOperation({ summary: 'Guest requests checkout' })
+  async checkoutRequest(@Param('id') id: string) {
+    return this.housesService.checkoutRequest(id);
+  }
+
   @Post(':id/device-token')
   @UseGuards(JwtAuthGuard)
   @RequirePermissions('manage_houses')

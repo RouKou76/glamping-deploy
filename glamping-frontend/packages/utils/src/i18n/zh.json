@@ -131,5 +131,12 @@
   "andetta": {
     "title": "ANDETTA 产品",
     "noCatalog": "目录暂未提供"
+  },
+  "checkout": {
+    "title": "退房",
+    "confirmTitle": "退房离开",
+    "confirmMessage": "您确定准备好退房了吗？管理员将检查小屋并退还押金。",
+    "submit": "确认退房",
+    "requested": "申请已发送，请等待"
   }
 }

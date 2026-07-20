@@ -59,14 +59,15 @@ model House {
 }
 
 model GuestSession {
-  id         String    @id @default(cuid())
-  houseId    String    @map("house_id")
-  guestCount Int?      @map("guest_count")
-  lang       String    @default("ru")
-  checkInAt  DateTime? @map("check_in_at")
-  checkOutAt DateTime? @map("check_out_at")
-  isActive   Boolean   @default(true) @map("is_active")
-  createdAt  DateTime  @default(now()) @map("created_at")
+  id                String    @id @default(cuid())
+  houseId           String    @map("house_id")
+  guestCount        Int?      @map("guest_count")
+  lang              String    @default("ru")
+  checkInAt         DateTime? @map("check_in_at")
+  checkOutAt        DateTime? @map("check_out_at")
+  isActive          Boolean   @default(true) @map("is_active")
+  checkoutRequested Boolean   @default(false) @map("checkout_requested")
+  createdAt         DateTime  @default(now()) @map("created_at")
 
   house    House         @relation(fields: [houseId], references: [id])
   tickets  Ticket[]

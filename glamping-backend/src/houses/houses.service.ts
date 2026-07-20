@@ -29,6 +29,7 @@ export class HousesService {
       guestCount: s.guestCount,
       lang: s.lang,
       isActive: true,
+      checkoutRequested: s.checkoutRequested,
       checkInAt: s.checkInAt?.toISOString(),
     }));
   }
@@ -187,5 +188,47 @@ export class HousesService {
         status: 'vacant' as const,
       };
     });
+  }
+
+  async checkoutRequest(houseId: string) {
+    const session = await this.prisma.guestSession.findFirst({
+      where: { houseId, isActive: true },
+    });
+
+    if (!session) {
+      throw new BadRequestException('No active session found');
+    }
+
+    if (session.checkoutRequested) {
+      throw new BadRequestException('Checkout already requested');
+    }
+
+    await this.prisma.guestSession.update({
+      where: { id: session.id },
+      data: { checkoutRequested: true },
+    });
+
+    const ticket = await this.prisma.ticket.create({
+      data: {
+        houseId,
+        sessionId: session.id,
+        type: 'custom',
+        description: 'Заявка на выезд',
+      },
+    });
+
+    const house = await this.prisma.house.findUnique({ where: { id: houseId } });
+
+    this.gateway.broadcastToAdmins('server:ticket:created', {
+      id: ticket.id,
+      houseId: ticket.houseId,
+      type: ticket.type,
+      status: ticket.status,
+      createdAt: ticket.sentAt.toISOString(),
+      description: ticket.description,
+      houseNumber: house?.number,
+    });
+
+    return { success: true };
   }
 }

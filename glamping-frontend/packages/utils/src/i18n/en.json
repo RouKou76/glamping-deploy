@@ -131,5 +131,12 @@
   "andetta": {
     "title": "ANDITTA Products",
     "noCatalog": "Catalog not yet available"
+  },
+  "checkout": {
+    "title": "Check-out",
+    "confirmTitle": "Check-out from cottage",
+    "confirmMessage": "Are you ready to check out? The administrator will inspect the cottage and return the deposit.",
+    "submit": "Confirm check-out",
+    "requested": "Request sent, please wait"
   }
 }

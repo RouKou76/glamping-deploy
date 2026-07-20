@@ -6,15 +6,16 @@ import { useDevice } from '../../contexts/DeviceContext'
 import type { MenuItem, Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
+import { CheckoutSheet } from './CheckoutSheet'
 import { OrderForm, type OrderStep } from './OrderForm'
 
 const SERVICE_COLORS: Record<string, string> = { cs1: 'bg-amber-500', cs2: 'bg-emerald-500' }
 
-type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleaning' | null
+type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleaning' | 'checkout' | null
 
 export default function Home() {
   const { t } = useTranslation()
-  const { houseId, houseNumber, guestCount } = useDevice()
+  const { houseId, houseNumber, guestCount, checkoutRequested } = useDevice()
   const { data: services } = useApi<Service[]>('/api/services')
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
@@ -76,6 +77,16 @@ export default function Home() {
   }
   function handleOrderSubmit(_data: Record<string, unknown>, message: string) { showToast(message) }
 
+  function handleCheckout() {
+    if (!houseId) return
+    apiPost(`/api/houses/${houseId}/checkout-request`, {})
+      .then(() => {
+        showToast(t('checkout.requested'))
+        setActiveModal(null)
+      })
+      .catch(() => showToast('Ошибка отправки'))
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-2">
@@ -90,14 +101,25 @@ export default function Home() {
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg>} label={t('home.towels')} color="bg-cyan-500" onClick={() => setActiveModal('towels')} />
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>} label={t('home.minibar')} color="bg-purple-500" onClick={() => setActiveModal('minibar')} />
 
-        {/* <div onClick={() => setActiveModal('gates')}
-          className="bg-glamp-600 text-white rounded-3xl p-5 shadow-md cursor-pointer hover:bg-glamp-700 transition-all active:scale-95 flex flex-col justify-between h-36 group relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 transform group-hover:scale-110 transition-transform">
-            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        {checkoutRequested ? (
+          <div className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-5 flex flex-col justify-between h-36 transition-colors">
+            <div className="p-3 bg-gray-200 dark:bg-white/10 rounded-2xl w-fit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 dark:text-white/40"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-500 dark:text-white/40">{t('checkout.requested')}</h3>
+            </div>
           </div>
-          <div className="p-2 bg-white/20 rounded-xl w-fit text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
-          <h3 className="text-base font-bold">{t('home.gates')}</h3>
-        </div> */}
+        ) : (
+          <div onClick={() => setActiveModal('checkout')}
+            className="bg-red-500 text-white rounded-3xl p-5 shadow-md cursor-pointer hover:bg-red-600 transition-all active:scale-95 flex flex-col justify-between h-36 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 transform group-hover:scale-110 transition-transform">
+              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div className="p-2 bg-white/20 rounded-xl w-fit text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+            <h3 className="text-base font-bold">{t('checkout.title')}</h3>
+          </div>
+        )}
 
         {activeServices.map(service => (
           <ServiceTile
@@ -112,6 +134,8 @@ export default function Home() {
       </div>
 
       {isConfirmType(activeModal) && <ConfirmSheet open={true} type={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirm} />}
+
+      {activeModal === 'checkout' && <CheckoutSheet open={true} onClose={() => setActiveModal(null)} onConfirm={handleCheckout} />}
 
       {(activeModal === 'food' || activeModal === 'transfer' || activeModal === 'cleaning') && activeModal && (
         <OrderForm

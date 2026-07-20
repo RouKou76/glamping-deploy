@@ -6,6 +6,7 @@ interface DeviceInfo {
   houseId: string | null
   houseNumber: number | null
   guestCount: number | null
+  checkoutRequested: boolean
   deviceToken: string | null
   isInitialized: boolean
 }
@@ -14,6 +15,7 @@ const DeviceContext = createContext<DeviceInfo>({
   houseId: null,
   houseNumber: null,
   guestCount: null,
+  checkoutRequested: false,
   deviceToken: null,
   isInitialized: false,
 })
@@ -23,6 +25,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     houseId: null,
     houseNumber: null,
     guestCount: null,
+    checkoutRequested: false,
     deviceToken: null,
     isInitialized: false,
   })
@@ -44,6 +47,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       houseId: houseId || null,
       houseNumber: null,
       guestCount: null,
+      checkoutRequested: false,
       deviceToken: token || null,
       isInitialized: true,
     })
@@ -71,9 +75,11 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
                 i18n.changeLanguage(session.lang)
                 localStorage.setItem('glamp-lang', session.lang)
               }
-              if (session.guestCount) {
-                setInfo(prev => ({ ...prev, guestCount: session.guestCount }))
-              }
+              setInfo(prev => ({
+                ...prev,
+                guestCount: session.guestCount ?? prev.guestCount,
+                checkoutRequested: session.checkoutRequested ?? false,
+              }))
             }
           }
         })
