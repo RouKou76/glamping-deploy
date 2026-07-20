@@ -6,7 +6,7 @@ interface ConnectionStatusOptions {
 }
 
 export function useConnectionStatus(options: ConnectionStatusOptions = {}) {
-  const { checkInterval = 30000, endpoint = "/health" } = options;
+  const { checkInterval = 30000, endpoint = "/api/health" } = options;
   const [isConnected, setIsConnected] = useState(true);
   const [lastChecked, setLastChecked] = useState<Date>(new Date());
 
