@@ -48,7 +48,8 @@
     "drinks": "Drinks",
     "included": "included",
     "extra": "extra",
-    "extraDish": "Extra item (additional charge)"
+    "extraDish": "Extra item (additional charge)",
+    "main": "Main Dishes"
   },
   "minibar": {
     "title": "Minibar Refill",

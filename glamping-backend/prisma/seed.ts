@@ -60,14 +60,15 @@ async function main() {
 
   // Create menu items
   const menuItems = [
-    // Завтрак (без подкатегорий)
-    { name: 'Сырники из фермерского творога', category: 'breakfast', subcat: null, price: 450 },
-    { name: 'Овсяная каша с ягодами', category: 'breakfast', subcat: null, price: 320 },
-    { name: 'Яичница с беконом', category: 'breakfast', subcat: null, price: 380 },
-    { name: 'Кофе', category: 'breakfast', subcat: null, price: 200 },
-    { name: 'Чай зеленый', category: 'breakfast', subcat: null, price: 150 },
-    { name: 'Чай черный', category: 'breakfast', subcat: null, price: 150 },
-    { name: 'Горячий шоколад', category: 'breakfast', subcat: null, price: 250 },
+    // Завтрак — Основные блюда
+    { name: 'Сырники из фермерского творога', category: 'breakfast', subcat: 'main', price: 450 },
+    { name: 'Овсяная каша с ягодами', category: 'breakfast', subcat: 'main', price: 320 },
+    { name: 'Яичница с беконом', category: 'breakfast', subcat: 'main', price: 380 },
+    // Завтрак — Напитки
+    { name: 'Кофе', category: 'breakfast', subcat: 'drinks', price: 200 },
+    { name: 'Чай зеленый', category: 'breakfast', subcat: 'drinks', price: 150 },
+    { name: 'Чай черный', category: 'breakfast', subcat: 'drinks', price: 150 },
+    { name: 'Горячий шоколад', category: 'breakfast', subcat: 'drinks', price: 250 },
     // Обед — Закуски/Салаты
     { name: 'Греческий салат', category: 'lunch', subcat: 'appetizers', price: 380 },
     { name: 'Цезарь с курицей', category: 'lunch', subcat: 'appetizers', price: 420 },
@@ -119,6 +120,11 @@ async function main() {
           subcat: item.subcat,
           price: item.price,
         },
+      });
+    } else if (item.subcat && !existing.subcat) {
+      await prisma.menuItem.update({
+        where: { id: existing.id },
+        data: { subcat: item.subcat },
       });
     }
   }

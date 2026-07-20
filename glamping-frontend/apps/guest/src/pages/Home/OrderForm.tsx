@@ -335,10 +335,10 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
                 ? s.items.filter(i => i.isAvailable && ('category' in i && (i as { category: string }).category === period))
                 : s.items.filter(i => i.isAvailable)
 
-              const useSubcats = taskType === 'food' && period && (period === 'lunch' || period === 'dinner')
+              const useSubcats = taskType === 'food' && period && (period === 'breakfast' || period === 'lunch' || period === 'dinner')
 
               if (useSubcats) {
-                const subcatOrder = ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
+                const subcatOrder = period === 'breakfast' ? ['main', 'drinks'] : ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
                 const grouped = subcatOrder
                   .map(sc => ({
                     subcat: sc,
@@ -433,24 +433,34 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
             return null
           })}
 
-          {cartItems.length > 0 && (
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {cartItems.reduce((s, i) => s + i.qty, 0)}</span>
-                <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
+          {cartItems.length > 0 && (() => {
+            const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
+            const exceedsGuests = guestCount ? totalQty > guestCount : false
+            return (
+              <div className="space-y-1">
+                {exceedsGuests ? (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {totalQty}</span>
+                      <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-amber-600 dark:text-amber-400">
+                        {guestCount} {t('food.included')} · {totalQty - guestCount!} {t('food.extra')}
+                      </span>
+                      <span className="text-amber-600 dark:text-amber-400 font-medium">
+                        +{totalQty - guestCount!} {t('food.extraDish')}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-sm text-gray-600 dark:text-white/50">
+                    {t('food.subtotal')}: {totalQty}
+                  </div>
+                )}
               </div>
-              {guestCount && cartItems.reduce((s, i) => s + i.qty, 0) > guestCount && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-amber-600 dark:text-amber-400">
-                    {guestCount} {t('food.included')} · {cartItems.reduce((s, i) => s + i.qty, 0) - guestCount} {t('food.extra')}
-                  </span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">
-                    +{cartItems.reduce((s, i) => s + i.qty, 0) - guestCount} {t('food.extraDish')}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+            )
+          })()}
 
           <button onClick={handleSubmit} disabled={cooldown > 0}
             className="w-full bg-glamp-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-glamp-700 active:scale-95 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">

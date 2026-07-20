@@ -48,7 +48,8 @@
     "drinks": "饮品",
     "included": "已包含",
     "extra": "额外",
-    "extraDish": "额外菜品（需加费）"
+    "extraDish": "额外菜品（需加费）",
+    "main": "主菜"
   },
   "minibar": {
     "title": "迷你吧补充",
