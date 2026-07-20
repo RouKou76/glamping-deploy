@@ -15,8 +15,8 @@
     "typecheck": "npm run typecheck -w @glamping/guest && npm run typecheck -w @glamping/admin",
     "test": "vitest run",
     "test:watch": "vitest",
-    "start": "serve apps/guest/dist -s -l $PORT",
-    "start:admin": "serve apps/admin/dist -s -l $PORT"
+    "start": "serve apps/guest/dist -s -l ${PORT:-3000}",
+    "start:admin": "serve apps/admin/dist -s -l ${PORT:-3001}"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
