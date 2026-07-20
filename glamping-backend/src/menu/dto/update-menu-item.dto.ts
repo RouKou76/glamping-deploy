@@ -23,6 +23,11 @@ export class UpdateMenuItemDto {
   @IsOptional()
   category?: string;
 
+  @ApiPropertyOptional({ enum: ['appetizers', 'hot', 'sides', 'desserts', 'drinks'] })
+  @IsString()
+  @IsOptional()
+  subcat?: string;
+
   @ApiPropertyOptional()
   @IsInt()
   @IsOptional()

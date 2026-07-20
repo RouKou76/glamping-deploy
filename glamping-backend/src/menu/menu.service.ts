@@ -19,6 +19,7 @@ export class MenuService {
       name: i.name,
       description: i.description,
       category: i.category,
+      subcat: i.subcat ?? null,
       price: i.price,
       isAvailable: !i.hidden,
     }));
@@ -30,6 +31,7 @@ export class MenuService {
         name: dto.name,
         description: dto.description,
         category: dto.category as never,
+        subcat: dto.subcat ?? null,
         price: dto.price,
         hidden: !dto.isAvailable,
         showPrice: dto.showPrice ?? true,
@@ -46,6 +48,7 @@ export class MenuService {
       name: item.name,
       description: item.description,
       category: item.category,
+      subcat: item.subcat ?? null,
       price: item.price,
       isAvailable: !item.hidden,
     };
@@ -61,6 +64,7 @@ export class MenuService {
         name: dto.name,
         description: dto.description,
         category: dto.category as never,
+        subcat: dto.subcat !== undefined ? dto.subcat : undefined,
         price: dto.price,
         hidden: dto.isAvailable !== undefined ? !dto.isAvailable : undefined,
         showPrice: dto.showPrice,
@@ -77,6 +81,7 @@ export class MenuService {
       name: updated.name,
       description: updated.description,
       category: updated.category,
+      subcat: updated.subcat ?? null,
       price: updated.price,
       isAvailable: !updated.hidden,
     };
