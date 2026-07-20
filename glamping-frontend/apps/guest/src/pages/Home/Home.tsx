@@ -90,14 +90,14 @@ export default function Home() {
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg>} label={t('home.towels')} color="bg-cyan-500" onClick={() => setActiveModal('towels')} />
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>} label={t('home.minibar')} color="bg-purple-500" onClick={() => setActiveModal('minibar')} />
 
-        <div onClick={() => setActiveModal('gates')}
+        {/* <div onClick={() => setActiveModal('gates')}
           className="bg-glamp-600 text-white rounded-3xl p-5 shadow-md cursor-pointer hover:bg-glamp-700 transition-all active:scale-95 flex flex-col justify-between h-36 group relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 transform group-hover:scale-110 transition-transform">
             <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
           </div>
           <div className="p-2 bg-white/20 rounded-xl w-fit text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
           <h3 className="text-base font-bold">{t('home.gates')}</h3>
-        </div>
+        </div> */}
 
         {activeServices.map(service => (
           <ServiceTile
