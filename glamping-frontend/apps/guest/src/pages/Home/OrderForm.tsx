@@ -338,7 +338,7 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
               const useSubcats = taskType === 'food' && period && (period === 'breakfast' || period === 'lunch' || period === 'dinner')
 
               if (useSubcats) {
-                const subcatOrder = period === 'breakfast' ? ['main', 'drinks'] : ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
+                const subcatOrder = period === 'breakfast' ? ['drinks', 'main'] : ['drinks', 'appetizers', 'hot', 'sides', 'desserts']
                 const grouped = subcatOrder
                   .map(sc => ({
                     subcat: sc,
@@ -355,7 +355,7 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
                     <div className="space-y-4">
                       {grouped.map(group => (
                         <div key={group.subcat}>
-                          <p className="text-[11px] font-bold text-glamp-600 dark:text-green-400 uppercase tracking-wider mb-1.5">{group.label}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 mb-1.5 inline-block">{group.label}</p>
                           <div className="space-y-2">
                             {group.items.map(item => (
                               <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
