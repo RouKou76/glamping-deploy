@@ -6,8 +6,32 @@ import { ConfirmDialog } from '@glamping/ui'
 type CategoryFilter = MenuCategory | 'all'
 const CATEGORY_LABELS: Record<MenuCategory, string> = { breakfast: 'Завтрак', lunch: 'Обед', dinner: 'Ужин', minibar: 'Минибар' }
 const VISIBLE_CATEGORIES: MenuCategory[] = ['breakfast', 'lunch', 'dinner']
-const SUBCAT_LABELS: Record<string, string> = { appetizers: 'Закуски/Салаты', hot: 'Горячее', sides: 'Гарниры', desserts: 'Десерты', drinks: 'Напитки' }
-const SUBCAT_KEYS = ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
+const SUBCAT_LABELS: Record<string, string> = { main: 'Основные блюда', drinks: 'Напитки', appetizers: 'Закуски/Салаты', hot: 'Горячее', sides: 'Гарниры', desserts: 'Десерты' }
+const BREAKFAST_ORDER = ['drinks', 'main']
+const MEAL_ORDER = ['drinks', 'appetizers', 'hot', 'sides', 'desserts']
+
+function ItemRow({ item, onToggle, onEdit, onDelete }: { item: MenuItem; onToggle: () => void; onEdit: () => void; onDelete: () => void }) {
+  return (
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${!item.isAvailable ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
+        {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5 truncate">{item.description}</p>}
+        <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button onClick={onToggle} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
+          {item.isAvailable ? 'Скрыть' : 'Показать'}
+        </button>
+        <button onClick={onEdit} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+        </button>
+        <button onClick={onDelete} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function Menu() {
   const { data: apiItems } = useApi<MenuItem[]>('/api/menu')
@@ -23,6 +47,19 @@ export default function Menu() {
   const [formDescription, setFormDescription] = useState('')
 
   const filtered = useMemo(() => items.filter(i => i.category !== 'minibar' && (category === 'all' || i.category === category)), [items, category])
+
+  const groupedItems = useMemo(() => {
+    if (category === 'all') return null
+    const subcatOrder = category === 'breakfast' ? BREAKFAST_ORDER : MEAL_ORDER
+    return subcatOrder
+      .map(sc => ({
+        subcat: sc,
+        label: SUBCAT_LABELS[sc],
+        items: filtered.filter(i => i.subcat === sc),
+      }))
+      .filter(g => g.items.length > 0)
+  }, [filtered, category])
+
   function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormSubcat(null); setFormDescription(''); setShowForm(true) }
   function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormSubcat(item.subcat ?? null); setFormDescription(item.description ?? ''); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
@@ -49,7 +86,7 @@ export default function Menu() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   function handleDeleteConfirm() { if (deleteId) { setItems(prev => prev.filter(i => i.id !== deleteId)); apiDelete(`/api/menu/${deleteId}`).catch(() => {}) }; setDeleteId(null) }
 
-  const showSubcat = formCategory === 'lunch' || formCategory === 'dinner'
+  const showSubcat = formCategory === 'breakfast' || formCategory === 'lunch' || formCategory === 'dinner'
 
   return (
     <div className="p-4 space-y-4">
@@ -62,32 +99,30 @@ export default function Menu() {
           <button key={val} onClick={() => setCategory(val)} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${category === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>{label}</button>
         ))}
       </div>
-      <div className="space-y-2">
-        {filtered.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>) : filtered.map(item => (
-          <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${!item.isAvailable ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
-              {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5 truncate">{item.description}</p>}
-              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">
-                {CATEGORY_LABELS[item.category]}
-                {item.subcat ? ` · ${SUBCAT_LABELS[item.subcat] ?? item.subcat}` : ''}
-                {' · '}{item.price} ₽
-              </p>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>
+      ) : groupedItems ? (
+        <div className="space-y-5">
+          {groupedItems.map(group => (
+            <div key={group.subcat}>
+              <p className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-glamp-50 dark:bg-glamp-500/10 border border-glamp-200 dark:border-glamp-500/20 text-glamp-700 dark:text-green-400 mb-2 inline-block">{group.label}</p>
+              <div className="space-y-2">
+                {group.items.map(item => (
+                  <ItemRow key={item.id} item={item} onToggle={() => toggleAvailable(item.id)} onEdit={() => openEdit(item)} onDelete={() => setDeleteId(item.id)} />
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={() => toggleAvailable(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
-                {item.isAvailable ? 'Скрыть' : 'Показать'}
-              </button>
-              <button onClick={() => openEdit(item)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-              </button>
-              <button onClick={() => setDeleteId(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map(item => (
+            <ItemRow key={item.id} item={item} onToggle={() => toggleAvailable(item.id)} onEdit={() => openEdit(item)} onDelete={() => setDeleteId(item.id)} />
+          ))}
+        </div>
+      )}
+
       {showForm && (
         <div className="fixed inset-0 z-40 bg-black/60 flex items-end" onClick={() => setShowForm(false)}>
           <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-4 animate-slide-up" onClick={e => e.stopPropagation()}>
@@ -96,12 +131,12 @@ export default function Menu() {
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽) *</label><input type="number" value={formPrice} onChange={e => { setFormPrice(e.target.value); setFormErrors(p => ({ ...p, price: undefined })) }} min={0} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.price ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.price && <p className="text-red-500 text-xs mt-1">{formErrors.price}</p>}</div>
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
-              <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => { setFormCategory(c); if (c !== 'lunch' && c !== 'dinner') setFormSubcat(null) }} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
+              <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => { setFormCategory(c); if (c === 'minibar') setFormSubcat(null) }} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
             </div>
             {showSubcat && (
               <div>
                 <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Подкатегория</label>
-                <div className="flex flex-wrap gap-2">{SUBCAT_KEYS.map(sc => (<button key={sc} onClick={() => setFormSubcat(sc as MenuSubcategory)} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${formSubcat === sc ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{SUBCAT_LABELS[sc]}</button>))}</div>
+                <div className="flex flex-wrap gap-2">{(formCategory === 'breakfast' ? BREAKFAST_ORDER : MEAL_ORDER).map(sc => (<button key={sc} onClick={() => setFormSubcat(sc as MenuSubcategory)} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${formSubcat === sc ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{SUBCAT_LABELS[sc]}</button>))}</div>
               </div>
             )}
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Описание</label><textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={2} placeholder="Краткое описание блюда" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" /></div>
