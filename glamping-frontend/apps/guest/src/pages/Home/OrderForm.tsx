@@ -436,21 +436,15 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
           {cartItems.length > 0 && (() => {
             const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
             const exceedsGuests = guestCount ? totalQty > guestCount : false
+            const extraCount = exceedsGuests ? totalQty - guestCount! : 0
+            const extraPrice = extraCount > 0 ? Math.round(totalPrice / totalQty * extraCount) : 0
             return (
               <div className="space-y-1">
                 {exceedsGuests ? (
                   <>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {totalQty}</span>
-                      <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-amber-600 dark:text-amber-400">
-                        {guestCount} {t('food.included')} · {totalQty - guestCount!} {t('food.extra')}
-                      </span>
-                      <span className="text-amber-600 dark:text-amber-400 font-medium">
-                        +{totalQty - guestCount!} {t('food.extraDish')}
-                      </span>
+                      <span className="text-amber-600 dark:text-amber-400">{t('food.extraDish')}: {extraCount}</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">{extraPrice} ₽</span>
                     </div>
                   </>
                 ) : (
