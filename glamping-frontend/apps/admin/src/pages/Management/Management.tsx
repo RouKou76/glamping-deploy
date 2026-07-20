@@ -2,13 +2,15 @@ import { useState } from 'react'
 import Menu from '../Menu/Menu'
 import Services from '../Services/Services'
 import InfoEditor from '../InfoEditor/InfoEditor'
+import Andetta from '../Andetta/Andetta'
 
-type ManagementTab = 'menu' | 'services' | 'info'
+type ManagementTab = 'menu' | 'services' | 'info' | 'andetta'
 
 const TABS: { id: ManagementTab; label: string }[] = [
   { id: 'menu', label: 'Меню' },
   { id: 'services', label: 'Услуги' },
   { id: 'info', label: 'Инфо' },
+  { id: 'andetta', label: 'ANDETTA' },
 ]
 
 export default function Management() {
@@ -28,6 +30,7 @@ export default function Management() {
         {tab === 'menu' && <Menu />}
         {tab === 'services' && <Services />}
         {tab === 'info' && <InfoEditor />}
+        {tab === 'andetta' && <Andetta />}
       </div>
     </div>
   )

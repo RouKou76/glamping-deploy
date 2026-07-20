@@ -2,7 +2,8 @@
   "nav": {
     "services": "Services",
     "chat": "Chat",
-    "info": "Info"
+    "info": "Info",
+    "andetta": "Catalog"
   },
   "home": {
     "title": "Order Services",
@@ -118,5 +119,9 @@
     "selectDish": "Please select at least one item",
     "offline": "No network connection",
     "minAdvanceTime": "Food orders must be placed at least 1 hour in advance"
+  },
+  "andetta": {
+    "title": "ANDITTA Products",
+    "noCatalog": "Catalog not yet available"
   }
 }

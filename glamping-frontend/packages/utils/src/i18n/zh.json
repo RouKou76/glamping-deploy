@@ -2,7 +2,8 @@
   "nav": {
     "services": "服务",
     "chat": "联系",
-    "info": "信息"
+    "info": "信息",
+    "andetta": "目录"
   },
   "home": {
     "title": "订购服务",
@@ -118,5 +119,9 @@
     "selectDish": "请至少选择一项",
     "offline": "无网络连接",
     "minAdvanceTime": "订餐需提前至少1小时"
+  },
+  "andetta": {
+    "title": "ANDETTA 产品",
+    "noCatalog": "目录暂未提供"
   }
 }
