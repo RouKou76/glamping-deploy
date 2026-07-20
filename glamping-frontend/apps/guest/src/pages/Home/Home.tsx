@@ -14,7 +14,7 @@ type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleanin
 
 export default function Home() {
   const { t } = useTranslation()
-  const { houseId, houseNumber } = useDevice()
+  const { houseId, houseNumber, guestCount } = useDevice()
   const { data: services } = useApi<Service[]>('/api/services')
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
@@ -31,7 +31,7 @@ export default function Home() {
         { type: 'date', key: 'date', label: t('food.date') },
         { type: 'time', key: 'time', label: t('food.time'), required: true },
         { type: 'select', key: 'location', label: t('food.location'), required: true, options: [
-          { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
+          { value: 'cabin', label: t('food.cabin') }, { value: 'gazebo', label: t('food.gazebo') },
         ]},
         { type: 'menu', key: 'items', items: items.filter(i => i.category !== 'minibar'), required: true },
       ],
@@ -119,6 +119,7 @@ export default function Home() {
           title={SERVICE_CONFIGS[activeModal].title}
           steps={SERVICE_CONFIGS[activeModal].steps}
           houseId={houseId}
+          guestCount={guestCount}
           taskType={activeModal}
           hint={SERVICE_CONFIGS[activeModal].hint}
           onClose={() => setActiveModal(null)}
@@ -132,6 +133,7 @@ export default function Home() {
           title={activeServiceConfig.title}
           steps={activeServiceConfig.steps}
           houseId={houseId}
+          guestCount={guestCount}
           taskType="custom"
           serviceName={activeServiceConfig.serviceName}
           onClose={() => setActiveServiceConfig(null)}

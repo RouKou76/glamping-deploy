@@ -1,11 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useApi, apiPost, apiDelete } from '@glamping/api'
-import type { MenuItem, MenuCategory } from '@glamping/types'
+import type { MenuItem, MenuCategory, MenuSubcategory } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
 type CategoryFilter = MenuCategory | 'all'
 const CATEGORY_LABELS: Record<MenuCategory, string> = { breakfast: 'Завтрак', lunch: 'Обед', dinner: 'Ужин', minibar: 'Минибар' }
 const VISIBLE_CATEGORIES: MenuCategory[] = ['breakfast', 'lunch', 'dinner']
+const SUBCAT_LABELS: Record<string, string> = { appetizers: 'Закуски/Салаты', hot: 'Горячее', sides: 'Гарниры', desserts: 'Десерты', drinks: 'Напитки' }
+const SUBCAT_KEYS = ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
 
 export default function Menu() {
   const { data: apiItems } = useApi<MenuItem[]>('/api/menu')
@@ -17,11 +19,12 @@ export default function Menu() {
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState('')
   const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast')
+  const [formSubcat, setFormSubcat] = useState<MenuSubcategory>(null)
   const [formDescription, setFormDescription] = useState('')
 
   const filtered = useMemo(() => items.filter(i => i.category !== 'minibar' && (category === 'all' || i.category === category)), [items, category])
-  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormDescription(''); setShowForm(true) }
-  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormDescription(item.description ?? ''); setShowForm(true) }
+  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormSubcat(null); setFormDescription(''); setShowForm(true) }
+  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormSubcat(item.subcat ?? null); setFormDescription(item.description ?? ''); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
   function handleSave() {
     const errs: { name?: string; price?: string } = {}
@@ -30,20 +33,23 @@ export default function Menu() {
     if (!formPrice || isNaN(price) || price < 0) errs.price = 'Укажите корректную цену'
     if (Object.keys(errs).length > 0) { setFormErrors(errs); return }
     setFormErrors({})
+    const payload = { name: formName.trim(), price, category: formCategory, subcat: formSubcat, description: formDescription || undefined }
     if (editItem) {
-      const updated = { ...editItem, name: formName.trim(), price, category: formCategory, description: formDescription || undefined }
+      const updated = { ...editItem, ...payload }
       setItems(prev => prev.map(i => i.id === editItem.id ? updated : i))
-      apiPost(`/api/menu/${editItem.id}`, updated).catch(() => {})
+      apiPost(`/api/menu/${editItem.id}`, payload).catch(() => {})
     } else {
-      const newItem: MenuItem = { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true, description: formDescription || undefined }
+      const newItem: MenuItem = { id: `m-${Date.now()}`, ...payload, isAvailable: true }
       setItems(prev => [...prev, newItem])
-      apiPost('/api/menu', newItem).catch(() => {})
+      apiPost('/api/menu', { ...payload, isAvailable: true }).catch(() => {})
     }
     setShowForm(false)
   }
   function toggleAvailable(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i)); apiPost(`/api/menu/${id}`, { isAvailable: !items.find(i => i.id === id)?.isAvailable }).catch(() => {}) }
   const [deleteId, setDeleteId] = useState<string | null>(null)
   function handleDeleteConfirm() { if (deleteId) { setItems(prev => prev.filter(i => i.id !== deleteId)); apiDelete(`/api/menu/${deleteId}`).catch(() => {}) }; setDeleteId(null) }
+
+  const showSubcat = formCategory === 'lunch' || formCategory === 'dinner'
 
   return (
     <div className="p-4 space-y-4">
@@ -62,7 +68,11 @@ export default function Menu() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
               {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5 truncate">{item.description}</p>}
-              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.price} ₽</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">
+                {CATEGORY_LABELS[item.category]}
+                {item.subcat ? ` · ${SUBCAT_LABELS[item.subcat] ?? item.subcat}` : ''}
+                {' · '}{item.price} ₽
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => toggleAvailable(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
@@ -86,8 +96,14 @@ export default function Menu() {
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽) *</label><input type="number" value={formPrice} onChange={e => { setFormPrice(e.target.value); setFormErrors(p => ({ ...p, price: undefined })) }} min={0} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.price ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.price && <p className="text-red-500 text-xs mt-1">{formErrors.price}</p>}</div>
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
-              <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => setFormCategory(c)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
+              <div className="grid grid-cols-3 gap-2">{VISIBLE_CATEGORIES.map(c => (<button key={c} onClick={() => { setFormCategory(c); if (c !== 'lunch' && c !== 'dinner') setFormSubcat(null) }} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === c ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{CATEGORY_LABELS[c]}</button>))}</div>
             </div>
+            {showSubcat && (
+              <div>
+                <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Подкатегория</label>
+                <div className="flex flex-wrap gap-2">{SUBCAT_KEYS.map(sc => (<button key={sc} onClick={() => setFormSubcat(sc as MenuSubcategory)} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${formSubcat === sc ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{SUBCAT_LABELS[sc]}</button>))}</div>
+              </div>
+            )}
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Описание</label><textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={2} placeholder="Краткое описание блюда" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" /></div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>

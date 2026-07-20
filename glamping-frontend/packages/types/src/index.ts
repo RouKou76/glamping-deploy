@@ -18,6 +18,8 @@ export type TaskStatus =
 
 export type MenuCategory = 'breakfast' | 'lunch' | 'dinner' | 'minibar'
 
+export type MenuSubcategory = 'appetizers' | 'hot' | 'sides' | 'desserts' | 'drinks' | null
+
 export type MealPeriod = 'breakfast' | 'lunch' | 'dinner' | 'none'
 
 export type AssignedRole = 'cook' | 'cleaning' | 'driver' | 'admin'
@@ -60,6 +62,7 @@ export interface MenuItem {
   name: string
   description?: string
   category: MenuCategory
+  subcat?: MenuSubcategory
   price: number
   isAvailable: boolean
 }

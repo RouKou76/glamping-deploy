@@ -5,6 +5,7 @@ import { useWebSocket } from '@glamping/api'
 interface DeviceInfo {
   houseId: string | null
   houseNumber: number | null
+  guestCount: number | null
   deviceToken: string | null
   isInitialized: boolean
 }
@@ -12,6 +13,7 @@ interface DeviceInfo {
 const DeviceContext = createContext<DeviceInfo>({
   houseId: null,
   houseNumber: null,
+  guestCount: null,
   deviceToken: null,
   isInitialized: false,
 })
@@ -20,6 +22,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const [info, setInfo] = useState<DeviceInfo>({
     houseId: null,
     houseNumber: null,
+    guestCount: null,
     deviceToken: null,
     isInitialized: false,
   })
@@ -40,6 +43,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     setInfo({
       houseId: houseId || null,
       houseNumber: null,
+      guestCount: null,
       deviceToken: token || null,
       isInitialized: true,
     })
@@ -62,9 +66,14 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
           const sessions = data?.data
           if (Array.isArray(sessions)) {
             const session = sessions.find((s: { houseId: string; isActive: boolean }) => s.houseId === houseId && s.isActive)
-            if (session?.lang) {
-              i18n.changeLanguage(session.lang)
-              localStorage.setItem('glamp-lang', session.lang)
+            if (session) {
+              if (session.lang) {
+                i18n.changeLanguage(session.lang)
+                localStorage.setItem('glamp-lang', session.lang)
+              }
+              if (session.guestCount) {
+                setInfo(prev => ({ ...prev, guestCount: session.guestCount }))
+              }
             }
           }
         })

@@ -22,6 +22,7 @@ interface OrderFormProps {
   title: string
   steps: OrderStep[]
   houseId: string | null
+  guestCount: number | null
   taskType: string
   serviceName?: string
   hint?: string
@@ -59,7 +60,7 @@ function getPeriodFromTime(time: string): string {
   return 'dinner'
 }
 
-export function OrderForm({ open, title, steps, houseId, taskType, serviceName, hint, onClose, onSubmit }: OrderFormProps) {
+export function OrderForm({ open, title, steps, houseId, guestCount, taskType, serviceName, hint, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
   function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
@@ -333,6 +334,54 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
               const filteredItems = taskType === 'food' && period
                 ? s.items.filter(i => i.isAvailable && ('category' in i && (i as { category: string }).category === period))
                 : s.items.filter(i => i.isAvailable)
+
+              const useSubcats = taskType === 'food' && period && (period === 'lunch' || period === 'dinner')
+
+              if (useSubcats) {
+                const subcatOrder = ['appetizers', 'hot', 'sides', 'desserts', 'drinks']
+                const grouped = subcatOrder
+                  .map(sc => ({
+                    subcat: sc,
+                    label: t(`food.${sc}`),
+                    items: filteredItems.filter(i => (i as MenuItem).subcat === sc),
+                  }))
+                  .filter(g => g.items.length > 0)
+
+                return (
+                  <div key={s.key}>
+                    <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
+                      {t('food.menu')} ({t(`food.${period}`)}){s.required && ' *'}
+                    </label>
+                    <div className="space-y-4">
+                      {grouped.map(group => (
+                        <div key={group.subcat}>
+                          <p className="text-[11px] font-bold text-glamp-600 dark:text-green-400 uppercase tracking-wider mb-1.5">{group.label}</p>
+                          <div className="space-y-2">
+                            {group.items.map(item => (
+                              <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
+                                <div className="flex-1">
+                                  <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
+                                  {item.description && <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{item.description}</p>}
+                                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>
+                                </div>
+                                <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
+                                  <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
+                                    className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
+                                  <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
+                                  <button onClick={() => setQty(item.id, +1)}
+                                    className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ErrorMsg text={errors[s.key]} />
+                  </div>
+                )
+              }
+
               return (
                 <div key={s.key}>
                   <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">
@@ -385,9 +434,21 @@ export function OrderForm({ open, title, steps, houseId, taskType, serviceName, 
           })}
 
           {cartItems.length > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {cartItems.reduce((s, i) => s + i.qty, 0)}</span>
-              <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {cartItems.reduce((s, i) => s + i.qty, 0)}</span>
+                <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
+              </div>
+              {guestCount && cartItems.reduce((s, i) => s + i.qty, 0) > guestCount && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-amber-600 dark:text-amber-400">
+                    {guestCount} {t('food.included')} · {cartItems.reduce((s, i) => s + i.qty, 0) - guestCount} {t('food.extra')}
+                  </span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                    +{cartItems.reduce((s, i) => s + i.qty, 0) - guestCount} {t('food.extraDish')}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

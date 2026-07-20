@@ -29,7 +29,6 @@
     "lunch": "Lunch",
     "dinner": "Dinner",
     "cabin": "To cottage",
-    "terrace": "To terrace",
     "gazebo": "To gazebo",
     "next": "Next",
     "back": "← Back",
@@ -41,7 +40,15 @@
     "kitchenClosed": "Kitchen is currently closed",
     "kitchenHours": "Breakfast: 08:00–10:00 · Lunch: 13:00–15:00 · Dinner: 19:00–21:00",
     "required": "Please select a time",
-    "selectTimeFirst": "Please select delivery time first"
+    "selectTimeFirst": "Please select delivery time first",
+    "appetizers": "Appetizers/Salads",
+    "hot": "Hot Dishes",
+    "sides": "Sides",
+    "desserts": "Desserts",
+    "drinks": "Drinks",
+    "included": "included",
+    "extra": "extra",
+    "extraDish": "Extra item (additional charge)"
   },
   "minibar": {
     "title": "Minibar Refill",
