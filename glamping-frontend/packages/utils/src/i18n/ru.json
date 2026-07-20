@@ -130,7 +130,11 @@
   },
   "andetta": {
     "title": "Продукция ANDETTA",
-    "noCatalog": "Каталог пока не загружен"
+    "noCatalog": "Каталог пока не загружен",
+    "confirmTitle": "Каталог ANDETTA",
+    "confirmMessage": "Открыть каталог продукции?",
+    "open": "Открыть",
+    "back": "Назад"
   },
   "checkout": {
     "title": "Выезд",

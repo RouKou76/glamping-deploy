@@ -130,7 +130,11 @@
   },
   "andetta": {
     "title": "ANDITTA Products",
-    "noCatalog": "Catalog not yet available"
+    "noCatalog": "Catalog not yet available",
+    "confirmTitle": "ANDITTA Catalog",
+    "confirmMessage": "Open the product catalog?",
+    "open": "Open",
+    "back": "Back"
   },
   "checkout": {
     "title": "Check-out",

@@ -130,7 +130,11 @@
   },
   "andetta": {
     "title": "ANDETTA 产品",
-    "noCatalog": "目录暂未提供"
+    "noCatalog": "目录暂未提供",
+    "confirmTitle": "ANDETTA 目录",
+    "confirmMessage": "打开产品目录？",
+    "open": "打开",
+    "back": "返回"
   },
   "checkout": {
     "title": "退房",
