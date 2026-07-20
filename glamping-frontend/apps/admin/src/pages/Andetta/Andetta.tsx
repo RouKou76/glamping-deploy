@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useApi, apiPost } from '@glamping/api'
+import { useApi } from '@glamping/api'
 
 export default function Andetta() {
   const { data, refetch } = useApi<{ filename: string | null }>('/api/andetta')
@@ -14,7 +14,12 @@ export default function Andetta() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      await apiPost('/api/andetta/upload', formData)
+      const token = localStorage.getItem('glamp-token')
+      await fetch('/api/andetta/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
       refetch()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 2500)
