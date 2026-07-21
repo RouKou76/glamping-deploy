@@ -64,6 +64,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         setIsConnected(false);
       });
 
+      socket.on("server:auth:error", () => {
+        socket.disconnect();
+        socketRef.current = null;
+        setIsConnected(false);
+      });
+
       socket.onAny((event: string, data: unknown) => {
         onMessageRef.current?.({ type: event, payload: data, timestamp: new Date().toISOString() });
       });
