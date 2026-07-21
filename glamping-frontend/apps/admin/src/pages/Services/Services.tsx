@@ -4,7 +4,7 @@ import type { Service } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
 export default function Services() {
-  const { data: apiServices } = useApi<Service[]>('/api/services')
+  const { data: apiServices } = useApi<Service[]>('/api/services?showInactive=true')
   const [services, setServices] = useState<Service[]>([])
   const [showForm, setShowForm] = useState(false)
 
