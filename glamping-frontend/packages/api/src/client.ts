@@ -12,7 +12,10 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, { headers: getAuthHeaders() });
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: getAuthHeaders(),
+    credentials: 'include',
+  });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
   return response.json();
 }
@@ -21,6 +24,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -31,6 +35,7 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "PUT",
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -41,6 +46,7 @@ export async function apiDelete(path: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
 }

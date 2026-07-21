@@ -15,8 +15,6 @@ let isRefreshing = false
 let refreshPromise: Promise<boolean> | null = null
 
 async function tryRefreshToken(): Promise<boolean> {
-  const refreshToken = localStorage.getItem('glamp-refresh-token')
-  if (!refreshToken) return false
   if (isRefreshing && refreshPromise) return refreshPromise
 
   isRefreshing = true
@@ -24,13 +22,11 @@ async function tryRefreshToken(): Promise<boolean> {
     try {
       const response = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
       })
       if (!response.ok) return false
-      const result: ApiResponse<{ accessToken: string; refreshToken: string }> = await response.json()
+      const result: ApiResponse<{ accessToken: string }> = await response.json()
       localStorage.setItem('glamp-token', result.data.accessToken)
-      localStorage.setItem('glamp-refresh-token', result.data.refreshToken)
       return true
     } catch {
       return false
@@ -51,15 +47,22 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 async function fetchWithRefresh<T>(url: string, options: RequestInit): Promise<T> {
-  let response = await fetch(url, { ...options, headers: { ...options.headers as Record<string, string>, ...getAuthHeaders() } })
+  let response = await fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: { ...options.headers as Record<string, string>, ...getAuthHeaders() },
+  })
 
   if (response.status === 401) {
     const refreshed = await tryRefreshToken()
     if (refreshed) {
-      response = await fetch(url, { ...options, headers: { ...options.headers as Record<string, string>, ...getAuthHeaders() } })
+      response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+        headers: { ...options.headers as Record<string, string>, ...getAuthHeaders() },
+      })
     } else {
       localStorage.removeItem('glamp-token')
-      localStorage.removeItem('glamp-refresh-token')
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
@@ -114,6 +117,10 @@ export async function apiDelete(path: string): Promise<void> {
   const token = localStorage.getItem('glamp-token')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
-  const response = await fetch(`${API_BASE}${path}`, { method: 'DELETE', headers })
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers,
+  })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
 }

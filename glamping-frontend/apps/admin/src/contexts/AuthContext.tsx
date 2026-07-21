@@ -42,18 +42,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await apiPost<{ success: boolean; data: { accessToken: string; refreshToken: string; user: User } }>('/api/auth/login', { email, password })
-    const { accessToken, refreshToken, user } = res.data
-    localStorage.setItem('glamp-token', accessToken)
-    localStorage.setItem('glamp-refresh-token', refreshToken)
-    setUser(user)
+    const res = await apiPost<{ accessToken: string; user: User }>('/api/auth/login', { email, password })
+    localStorage.setItem('glamp-token', res.accessToken)
+    setUser(res.user)
     subscribeToPush()
   }, [])
 
   const logout = useCallback(() => {
     unsubscribeFromPush()
+    apiPost('/api/auth/logout', {}).catch(() => {})
     localStorage.removeItem('glamp-token')
-    localStorage.removeItem('glamp-refresh-token')
     setUser(null)
   }, [])
 
