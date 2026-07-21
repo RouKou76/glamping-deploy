@@ -23,9 +23,18 @@ export class AndettaService {
   }
 
   async getInfo() {
-    const current = await this.getSetting('andetta_current');
+    let current = await this.getSetting('andetta_current');
     const previous = await this.getSetting('andetta_previous');
     const active = await this.getSetting('andetta_active');
+
+    if (!current) {
+      const oldFile = await this.getSetting('andetta_pdf');
+      if (oldFile) {
+        await this.setSetting('andetta_current', oldFile);
+        current = oldFile;
+      }
+    }
+
     return {
       current,
       previous,
@@ -34,9 +43,8 @@ export class AndettaService {
   }
 
   async getActivePdf(): Promise<string> {
-    const active = await this.getSetting('andetta_active');
-    const key = active === 'previous' ? 'andetta_previous' : 'andetta_current';
-    const filename = await this.getSetting(key);
+    const info = await this.getInfo();
+    const filename = info.active === 'previous' ? info.previous : info.current;
     if (!filename) throw new NotFoundException('PDF not found');
     const filePath = join(this.uploadsDir, filename);
     if (!existsSync(filePath)) throw new NotFoundException('PDF not found');
@@ -54,9 +62,10 @@ export class AndettaService {
 
     if (currentFilename) {
       const curPath = join(this.uploadsDir, currentFilename);
-      const prevPath = join(this.uploadsDir, `andetta-previous.pdf`);
+      const newPrevName = `andetta-prev-${Date.now()}.pdf`;
+      const prevPath = join(this.uploadsDir, newPrevName);
       if (existsSync(curPath)) renameSync(curPath, prevPath);
-      await this.setSetting('andetta_previous', currentFilename);
+      await this.setSetting('andetta_previous', newPrevName);
     }
 
     await this.setSetting('andetta_current', filename);
@@ -66,7 +75,8 @@ export class AndettaService {
   }
 
   async switchVersion(version: 'current' | 'previous') {
-    const filename = await this.getSetting(version === 'previous' ? 'andetta_previous' : 'andetta_current');
+    const info = await this.getInfo();
+    const filename = version === 'previous' ? info.previous : info.current;
     if (!filename) throw new NotFoundException(`Version "${version}" not found`);
     await this.setSetting('andetta_active', version);
     return this.getInfo();
