@@ -16,7 +16,7 @@ type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleanin
 export default function Home() {
   const { t } = useTranslation()
   const { houseId, houseNumber, guestCount, checkoutRequested } = useDevice()
-  const { data: services } = useApi<Service[]>('/api/services')
+  const { data: services, refetch: refetchServices } = useApi<Service[]>('/api/services')
   const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
@@ -128,7 +128,7 @@ export default function Home() {
             label={service.name}
             sublabel={service.priceInfo}
             color={SERVICE_COLORS[service.id] ?? 'bg-gray-600'}
-            onClick={() => setActiveServiceConfig(buildServiceConfig(service))}
+            onClick={() => { refetchServices(); setActiveServiceConfig(buildServiceConfig(service)) }}
           />
         ))}
       </div>
