@@ -47,8 +47,6 @@ export class GatewayService
     if (role === 'admin') {
       if (!token) {
         this.logger.warn(`Admin connection rejected: no token`);
-        client.emit('server:auth:error', { message: 'No token provided' });
-        client.disconnect(true);
         return;
       }
       try {
@@ -57,8 +55,6 @@ export class GatewayService
         });
       } catch {
         this.logger.warn(`Admin connection rejected: invalid token`);
-        client.emit('server:auth:error', { message: 'Invalid token' });
-        client.disconnect(true);
         return;
       }
       this.logger.log(`Admin connected: ${client.id}`);
@@ -69,8 +65,6 @@ export class GatewayService
       });
       if (!house) {
         this.logger.warn(`House connection rejected: invalid houseId ${houseId}`);
-        client.emit('server:auth:error', { message: 'Invalid house' });
-        client.disconnect(true);
         return;
       }
       this.logger.log(`House ${house.number} connected: ${client.id}`);
