@@ -55,8 +55,8 @@ export default function CheckIn() {
   async function confirmSetupTablet() {
     if (!tabletHouse) return
     try {
-      const res = await apiPost<{ success: boolean; data: { houseId: string; number: number; deviceToken: string } }>(`/api/houses/${tabletHouse.id}/device-token`, {})
-      setTokenModal({ number: res.data.number, token: res.data.deviceToken, hid: res.data.houseId })
+      const res = await apiPost<{ houseId: string; number: number; deviceToken: string }>(`/api/houses/${tabletHouse.id}/device-token`, {})
+      setTokenModal({ number: res.number, token: res.deviceToken, hid: res.houseId })
       setCopied(false)
     } catch { /* ignore */ }
     setTabletHouse(null)

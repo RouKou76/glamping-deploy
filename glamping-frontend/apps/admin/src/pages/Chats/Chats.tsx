@@ -70,8 +70,8 @@ export default function Chats() {
     const tempId = `temp-${Date.now()}`
     setMessages(prev => [...prev, { id: tempId, houseId: activeHouseId, sender: 'STAFF', text, timestamp: new Date().toISOString(), read: true }])
     try {
-      const result = await apiPost<{ success: boolean; data: { id: string } }>('/api/messages', { houseId: activeHouseId, text, sender: 'STAFF' })
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.data.id } : m))
+      const result = await apiPost<{ id: string }>('/api/messages', { houseId: activeHouseId, text, sender: 'STAFF' })
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.id } : m))
     } catch {
       setMessages(prev => prev.filter(m => m.id !== tempId))
     }
