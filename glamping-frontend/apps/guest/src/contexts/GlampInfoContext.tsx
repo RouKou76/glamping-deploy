@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { apiPost } from '@glamping/api'
 
 export interface GlampInfo {
@@ -35,7 +35,7 @@ export function GlampInfoProvider({ children }: { children: ReactNode }) {
   const [info, setInfo] = useState<GlampInfo>(DEFAULT_INFO)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchInfo = useCallback(() => {
     fetch('/api/settings')
       .then(r => r.ok ? r.json() : null)
       .then(data => {
@@ -51,6 +51,14 @@ export function GlampInfoProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => { fetchInfo() }, [fetchInfo])
+
+  useEffect(() => {
+    const handler = () => fetchInfo()
+    window.addEventListener('glamp:data:refresh', handler)
+    return () => window.removeEventListener('glamp:data:refresh', handler)
+  }, [fetchInfo])
 
   function updateInfo(patch: Partial<GlampInfo>) {
     setInfo(prev => {

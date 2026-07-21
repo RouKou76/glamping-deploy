@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { ThemeToggle } from '@glamping/ui'
 import { useConnectionStatus } from '@glamping/api'
 import { useGlampInfo } from '../contexts/GlampInfoContext'
+import { useDevice } from '../contexts/DeviceContext'
 
 export default function GuestLayout() {
   const { t } = useTranslation()
   const { info } = useGlampInfo()
-  const { isConnected } = useConnectionStatus({ checkInterval: 15000 })
+  const { houseId } = useDevice()
+  const { isConnected } = useConnectionStatus({ checkInterval: 15000, wsConnected: houseId ? undefined : true })
   const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
 
   useEffect(() => {

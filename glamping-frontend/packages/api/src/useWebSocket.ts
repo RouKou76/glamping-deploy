@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 const WS_URL = import.meta.env.VITE_WS_URL || "";
+const RECONNECT_DEBOUNCE_MS = 500;
 
 export interface WebSocketMessage {
   type: string;
@@ -25,11 +26,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const onConnectRef = useRef(onConnect);
   const onDisconnectRef = useRef(onDisconnect);
   const prevAuthRef = useRef<string>("");
+  const lastConnectRef = useRef<number>(0);
+  const connectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   onMessageRef.current = onMessage;
   onConnectRef.current = onConnect;
   onDisconnectRef.current = onDisconnect;
 
-  const connect = useCallback(() => {
+  const doConnect = useCallback(() => {
     const authKey = JSON.stringify(auth || {});
     if (socketRef.current?.connected && prevAuthRef.current === authKey) return;
 
@@ -39,6 +42,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
 
     prevAuthRef.current = authKey;
+    lastConnectRef.current = Date.now();
     try {
       const socket = io(WS_URL || undefined, {
         autoConnect: false,
@@ -64,12 +68,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         setIsConnected(false);
       });
 
-      socket.on("server:auth:error", () => {
-        socket.disconnect();
-        socketRef.current = null;
-        setIsConnected(false);
-      });
-
       socket.onAny((event: string, data: unknown) => {
         onMessageRef.current?.({ type: event, payload: data, timestamp: new Date().toISOString() });
       });
@@ -80,7 +78,22 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
   }, [auth]);
 
+  const connect = useCallback(() => {
+    const now = Date.now();
+    const elapsed = now - lastConnectRef.current;
+    if (elapsed < RECONNECT_DEBOUNCE_MS) {
+      if (connectTimerRef.current) clearTimeout(connectTimerRef.current);
+      connectTimerRef.current = setTimeout(doConnect, RECONNECT_DEBOUNCE_MS - elapsed);
+      return;
+    }
+    doConnect();
+  }, [doConnect]);
+
   const disconnect = useCallback(() => {
+    if (connectTimerRef.current) {
+      clearTimeout(connectTimerRef.current);
+      connectTimerRef.current = null;
+    }
     socketRef.current?.disconnect();
     socketRef.current = null;
     setIsConnected(false);

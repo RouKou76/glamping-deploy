@@ -100,7 +100,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         }
       }
       if (msg.type === 'server:menu:updated' || msg.type === 'server:services:updated' || msg.type === 'server:info:updated') {
-        window.location.reload()
+        window.dispatchEvent(new Event('glamp:data:refresh'))
       }
       if (msg.type === 'server:message:new') {
         window.dispatchEvent(new CustomEvent('glamp:message:new', { detail: msg.payload }))

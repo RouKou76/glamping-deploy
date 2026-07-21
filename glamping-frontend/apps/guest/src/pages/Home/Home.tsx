@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useApi, apiPost } from '@glamping/api'
 import { useTask } from '../../contexts/TaskContext'
@@ -18,6 +18,12 @@ export default function Home() {
   const { houseId, houseNumber, guestCount, checkoutRequested } = useDevice()
   const { data: services, refetch: refetchServices } = useApi<Service[]>('/api/services')
   const { data: menuItems, refetch: refetchMenuItems } = useApi<MenuItem[]>('/api/menu')
+
+  useEffect(() => {
+    const handler = () => { refetchServices(); refetchMenuItems() }
+    window.addEventListener('glamp:data:refresh', handler)
+    return () => window.removeEventListener('glamp:data:refresh', handler)
+  }, [refetchServices, refetchMenuItems])
   const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
   const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string; serviceName: string } | null>(null)

@@ -13,6 +13,18 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   return outputArray.buffer
 }
 
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3, delayMs = 2000): Promise<T> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch {
+      if (i === attempts - 1) throw new Error('Max retries exceeded')
+      await new Promise(r => setTimeout(r, delayMs * (i + 1)))
+    }
+  }
+  throw new Error('Unreachable')
+}
+
 export async function subscribeToPush(): Promise<boolean> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
 
@@ -35,15 +47,17 @@ export async function subscribeToPush(): Promise<boolean> {
     })
 
     const sub = subscription.toJSON()
-    await fetch(`${API_BASE}/api/push/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: sub.endpoint,
-        p256dh: sub.keys?.p256dh ?? '',
-        p256da: sub.keys?.p256da ?? '',
-      }),
-    })
+    await withRetry(() =>
+      fetch(`${API_BASE}/api/push/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+          p256dh: sub.keys?.p256dh ?? '',
+          p256da: sub.keys?.p256da ?? '',
+        }),
+      }).then(r => { if (!r.ok) throw new Error('Subscribe failed') })
+    )
 
     return true
   } catch {

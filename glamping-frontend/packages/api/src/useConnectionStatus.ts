@@ -3,10 +3,11 @@ import { useState, useEffect, useCallback } from "react";
 interface ConnectionStatusOptions {
   checkInterval?: number;
   endpoint?: string;
+  wsConnected?: boolean;
 }
 
 export function useConnectionStatus(options: ConnectionStatusOptions = {}) {
-  const { checkInterval = 30000, endpoint = "/api/health" } = options;
+  const { checkInterval = 30000, endpoint = "/api/health", wsConnected } = options;
   const [isConnected, setIsConnected] = useState(true);
   const [lastChecked, setLastChecked] = useState<Date>(new Date());
 
@@ -20,10 +21,14 @@ export function useConnectionStatus(options: ConnectionStatusOptions = {}) {
   }, [endpoint]);
 
   useEffect(() => {
-    checkConnection();
-    const interval = setInterval(checkConnection, checkInterval);
-    return () => clearInterval(interval);
-  }, [checkConnection, checkInterval]);
+    if (wsConnected === undefined) {
+      checkConnection();
+      const interval = setInterval(checkConnection, checkInterval);
+      return () => clearInterval(interval);
+    }
+  }, [checkConnection, checkInterval, wsConnected]);
 
-  return { isConnected, lastChecked, checkConnection };
+  const effectiveConnected = wsConnected !== undefined ? wsConnected : isConnected;
+
+  return { isConnected: effectiveConnected, lastChecked, checkConnection };
 }
