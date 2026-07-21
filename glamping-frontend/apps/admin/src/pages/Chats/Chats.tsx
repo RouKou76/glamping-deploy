@@ -24,6 +24,9 @@ export default function Chats() {
   const { data: apiMessages, refetch } = useApi<Message[]>(messagesPath)
 
   useEffect(() => { if (apiHouses) { setHouses(apiHouses); if (!activeHouseId && apiHouses.length > 0) setActiveHouseId(apiHouses[0].id) } }, [apiHouses, activeHouseId])
+  useEffect(() => {
+    if (activeHouseId) setMessages([])
+  }, [activeHouseId])
   useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])
 
   const activeMessages = activeHouseId ? messages : []
