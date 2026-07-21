@@ -72,50 +72,52 @@ export class HousesService {
   }
 
   async checkin(houseId: string, dto: CheckInDto) {
-    const house = await this.prisma.house.findUnique({
-      where: { id: houseId },
-    });
-    if (!house) throw new NotFoundException('House not found');
+    return this.prisma.$transaction(async (tx) => {
+      const house = await tx.house.findUnique({
+        where: { id: houseId },
+      });
+      if (!house) throw new NotFoundException('House not found');
 
-    if (house.status === 'occupied') {
-      throw new BadRequestException('House is already occupied');
-    }
+      if (house.status === 'occupied') {
+        throw new BadRequestException('House is already occupied');
+      }
 
-    const session = await this.prisma.guestSession.create({
-      data: {
-        houseId,
+      const session = await tx.guestSession.create({
+        data: {
+          houseId,
+          guestCount: dto.guestCount,
+          lang: dto.lang || 'ru',
+          checkInAt: new Date(),
+        },
+      });
+
+      await tx.house.update({
+        where: { id: houseId },
+        data: { status: 'occupied' },
+      });
+
+      this.gateway.broadcastToAdmins('server:house:updated', {
+        id: houseId,
+        number: house.number,
+        status: 'occupied',
         guestCount: dto.guestCount,
         lang: dto.lang || 'ru',
-        checkInAt: new Date(),
-      },
-    });
+        checkInAt: session.checkInAt?.toISOString(),
+      });
 
-    await this.prisma.house.update({
-      where: { id: houseId },
-      data: { status: 'occupied' },
-    });
+      this.gateway.sendToHouse(houseId, 'server:session:updated', {
+        lang: dto.lang || 'ru',
+      });
 
-    this.gateway.broadcastToAdmins('server:house:updated', {
-      id: houseId,
-      number: house.number,
-      status: 'occupied',
-      guestCount: dto.guestCount,
-      lang: dto.lang || 'ru',
-      checkInAt: session.checkInAt?.toISOString(),
+      return {
+        id: houseId,
+        number: house.number,
+        status: 'occupied' as const,
+        guestCount: dto.guestCount,
+        lang: dto.lang || 'ru',
+        checkInAt: session.checkInAt?.toISOString(),
+      };
     });
-
-    this.gateway.sendToHouse(houseId, 'server:session:updated', {
-      lang: dto.lang || 'ru',
-    });
-
-    return {
-      id: houseId,
-      number: house.number,
-      status: 'occupied' as const,
-      guestCount: dto.guestCount,
-      lang: dto.lang || 'ru',
-      checkInAt: session.checkInAt?.toISOString(),
-    };
   }
 
   async generateDeviceToken(houseId: string) {

@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageDto {
@@ -8,6 +8,7 @@ export class CreateMessageDto {
 
   @ApiProperty()
   @IsString()
+  @MaxLength(5000)
   text: string;
 
   @ApiPropertyOptional({ enum: ['GUEST', 'STAFF'] })

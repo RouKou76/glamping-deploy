@@ -7,6 +7,8 @@ import {
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../common/prisma/prisma.service';
 
 @WebSocketGateway({
   cors: (
@@ -24,7 +26,11 @@ export class GatewayService
 
   private readonly logger = new Logger('Gateway');
 
-  constructor(private config: ConfigService) {}
+  constructor(
+    private config: ConfigService,
+    private jwtService: JwtService,
+    private prisma: PrismaService,
+  ) {}
 
   afterInit() {
     this.server.engine.opts.cors = {
@@ -33,16 +39,38 @@ export class GatewayService
     };
   }
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
-
+  async handleConnection(client: Socket) {
     const role = client.handshake.auth?.role as string | undefined;
     const houseId = client.handshake.auth?.houseId as string | undefined;
+    const token = client.handshake.auth?.token as string | undefined;
 
     if (role === 'admin') {
+      if (!token) {
+        this.logger.warn(`Admin connection rejected: no token`);
+        client.disconnect();
+        return;
+      }
+      try {
+        this.jwtService.verify(token, {
+          secret: this.config.get('JWT_SECRET'),
+        });
+      } catch {
+        this.logger.warn(`Admin connection rejected: invalid token`);
+        client.disconnect();
+        return;
+      }
+      this.logger.log(`Admin connected: ${client.id}`);
       void client.join('admins');
-    }
-    if (houseId) {
+    } else if (houseId) {
+      const house = await this.prisma.house.findUnique({
+        where: { id: houseId },
+      });
+      if (!house) {
+        this.logger.warn(`House connection rejected: invalid houseId ${houseId}`);
+        client.disconnect();
+        return;
+      }
+      this.logger.log(`House ${house.number} connected: ${client.id}`);
       void client.join(`house:${houseId}`);
     }
 

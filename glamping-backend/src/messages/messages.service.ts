@@ -2,6 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 @Injectable()
 export class MessagesService {
   constructor(
@@ -81,7 +90,7 @@ export class MessagesService {
     });
 
     const message = await this.prisma.chatMessage.create({
-      data: { houseId, sender, text, sessionId: session?.id },
+      data: { houseId, sender, text: escapeHtml(text), sessionId: session?.id },
     });
 
     return {

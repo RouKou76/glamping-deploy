@@ -111,7 +111,7 @@ export default function Tickets() {
   const { notify } = useNotifications()
 
   useWebSocket({
-    auth: { role: 'admin' },
+    auth: { role: 'admin', token: localStorage.getItem('glamp-token') || '' },
     onMessage: (event) => {
       if (event.type === 'server:ticket:created') {
         const task = event.payload as Task
