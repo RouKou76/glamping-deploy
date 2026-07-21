@@ -35,7 +35,13 @@ export default function Services() {
     setShowForm(false)
   }
 
-  function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)); apiPost(`/api/services/${id}`, { active: !services.find(s => s.id === id)?.active }).catch(() => {}) }
+  function toggleActive(id: string) {
+    const service = services.find(s => s.id === id)
+    if (!service) return
+    const newValue = !service.active
+    setServices(prev => prev.map(s => s.id === id ? { ...s, active: newValue } : s))
+    apiPost(`/api/services/${id}`, { active: newValue }).catch(() => {})
+  }
   const [deleteId, setDeleteId] = useState<string | null>(null)
   function handleDeleteConfirm() { if (deleteId) { setServices(prev => prev.filter(s => s.id !== deleteId)); apiDelete(`/api/services/${deleteId}`).catch(() => {}) }; setDeleteId(null) }
 
