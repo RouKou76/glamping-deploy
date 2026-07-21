@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react'
 import { i18n } from '@glamping/utils'
 import { useWebSocket } from '@glamping/api'
 
@@ -87,8 +87,10 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const wsAuth = useMemo(() => info.houseId ? { houseId: info.houseId } : undefined, [info.houseId])
+
   useWebSocket({
-    auth: info.houseId ? { houseId: info.houseId } : undefined,
+    auth: wsAuth,
     onMessage: (msg) => {
       if (msg.type === 'server:session:updated') {
         const payload = msg.payload as { lang?: string }

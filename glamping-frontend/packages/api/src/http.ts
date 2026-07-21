@@ -114,13 +114,5 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function apiDelete(path: string): Promise<void> {
-  const token = localStorage.getItem('glamp-token')
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers,
-  })
-  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  await fetchWithRefresh<void>(`${API_BASE}${path}`, { method: 'DELETE' })
 }

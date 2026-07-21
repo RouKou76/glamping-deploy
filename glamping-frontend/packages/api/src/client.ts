@@ -43,10 +43,17 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function apiDelete(path: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  let response = await fetch(`${API_BASE_URL}${path}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
     credentials: 'include',
   });
+  if (response.status === 401) {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+      credentials: 'include',
+    });
+  }
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
 }
