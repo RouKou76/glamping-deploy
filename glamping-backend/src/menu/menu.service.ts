@@ -43,6 +43,11 @@ export class MenuService {
       await this.findAll(true),
     );
 
+    void this.gateway.broadcastToAllHouses(
+      'server:menu:updated',
+      await this.findAll(),
+    );
+
     return {
       id: item.id,
       name: item.name,
@@ -76,6 +81,11 @@ export class MenuService {
       await this.findAll(true),
     );
 
+    void this.gateway.broadcastToAllHouses(
+      'server:menu:updated',
+      await this.findAll(),
+    );
+
     return {
       id: updated.id,
       name: updated.name,
@@ -92,6 +102,10 @@ export class MenuService {
     void this.gateway.broadcastToAdmins(
       'server:menu:updated',
       await this.findAll(true),
+    );
+    void this.gateway.broadcastToAllHouses(
+      'server:menu:updated',
+      await this.findAll(),
     );
   }
 }

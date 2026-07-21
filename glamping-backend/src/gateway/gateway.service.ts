@@ -60,4 +60,12 @@ export class GatewayService
   sendToHouse(houseId: string, event: string, payload: unknown) {
     this.server.to(`house:${houseId}`).emit(event, payload);
   }
+
+  broadcastToAllHouses(event: string, payload: unknown) {
+    for (const [roomName] of this.server.sockets.adapter.rooms) {
+      if (roomName.startsWith('house:')) {
+        this.server.to(roomName).emit(event, payload);
+      }
+    }
+  }
 }

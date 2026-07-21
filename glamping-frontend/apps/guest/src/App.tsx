@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from '@glamping/ui'
 import { i18n } from '@glamping/utils'
@@ -11,6 +12,12 @@ import Info from './pages/Info/Info'
 import Andetta from './pages/Andetta/Andetta'
 
 export default function App() {
+  useEffect(() => {
+    const handler = () => { if (document.visibilityState === 'visible') window.location.reload() }
+    document.addEventListener('visibilitychange', handler)
+    return () => document.removeEventListener('visibilitychange', handler)
+  }, [])
+
   return (
     <ThemeProvider>
       <DeviceProvider>

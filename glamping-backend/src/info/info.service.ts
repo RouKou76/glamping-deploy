@@ -44,6 +44,7 @@ export class InfoService {
 
     const info = await this.getInfo();
     this.gateway.broadcastToAdmins('server:info:updated', info);
+    this.gateway.broadcastToAllHouses('server:info:updated', info);
 
     return info;
   }

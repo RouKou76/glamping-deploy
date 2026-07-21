@@ -46,6 +46,11 @@ export class ServicesCatalogService {
       await this.findAll(true),
     );
 
+    void this.gateway.broadcastToAllHouses(
+      'server:services:updated',
+      await this.findAll(),
+    );
+
     return {
       id: service.id,
       name: service.name,
@@ -82,6 +87,11 @@ export class ServicesCatalogService {
       await this.findAll(true),
     );
 
+    void this.gateway.broadcastToAllHouses(
+      'server:services:updated',
+      await this.findAll(),
+    );
+
     return {
       id: updated.id,
       name: updated.name,
@@ -100,6 +110,10 @@ export class ServicesCatalogService {
     void this.gateway.broadcastToAdmins(
       'server:services:updated',
       await this.findAll(true),
+    );
+    void this.gateway.broadcastToAllHouses(
+      'server:services:updated',
+      await this.findAll(),
     );
   }
 }

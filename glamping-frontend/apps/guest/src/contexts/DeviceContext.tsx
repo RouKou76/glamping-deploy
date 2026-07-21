@@ -97,6 +97,9 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('glamp-lang', payload.lang)
         }
       }
+      if (msg.type === 'server:menu:updated' || msg.type === 'server:services:updated' || msg.type === 'server:info:updated') {
+        window.location.reload()
+      }
     },
   })
 
