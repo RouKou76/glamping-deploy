@@ -37,7 +37,7 @@ export default function Andetta() {
       </div>
       <div className="flex-1 bg-glamp-50 dark:bg-[#0f1117] transition-colors">
         {data?.filename ? (
-          <iframe src={`/api/andetta/pdf`} className="w-full h-full border-0" title="ANDITTA catalog" />
+          <iframe src={`/api/andetta/pdf?v=${Date.now()}`} className="w-full h-full border-0" title="ANDITTA catalog" />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <p className="text-gray-500 dark:text-gray-400 text-sm">{t('andetta.noCatalog')}</p>

@@ -43,6 +43,7 @@ export class AndettaController {
       'andetta',
       info.filename,
     );
+    res.set('Cache-Control', 'no-store');
     return res.sendFile(filePath);
   }
 
