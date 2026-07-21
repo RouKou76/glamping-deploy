@@ -24,12 +24,21 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const onMessageRef = useRef(onMessage);
   const onConnectRef = useRef(onConnect);
   const onDisconnectRef = useRef(onDisconnect);
+  const prevAuthRef = useRef<string>("");
   onMessageRef.current = onMessage;
   onConnectRef.current = onConnect;
   onDisconnectRef.current = onDisconnect;
 
   const connect = useCallback(() => {
-    if (socketRef.current?.connected) return;
+    const authKey = JSON.stringify(auth || {});
+    if (socketRef.current?.connected && prevAuthRef.current === authKey) return;
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
+    prevAuthRef.current = authKey;
     try {
       const socket = io(WS_URL || undefined, {
         autoConnect: false,
@@ -63,7 +72,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     } catch {
       console.error("Failed to create Socket.IO connection");
     }
-  }, []);
+  }, [auth]);
 
   const disconnect = useCallback(() => {
     socketRef.current?.disconnect();
