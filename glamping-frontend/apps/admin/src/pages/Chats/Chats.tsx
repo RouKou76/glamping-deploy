@@ -23,9 +23,23 @@ export default function Chats() {
   const messagesPath = activeHouseId ? `/api/messages?houseId=${activeHouseId}` : '/api/messages'
   const { data: apiMessages, refetch } = useApi<Message[]>(messagesPath)
 
-  useEffect(() => { if (apiHouses) { setHouses(apiHouses); if (!activeHouseId && apiHouses.length > 0) setActiveHouseId(apiHouses[0].id) } }, [apiHouses, activeHouseId])
   useEffect(() => {
-    if (activeHouseId) setMessages([])
+    if (!apiHouses) return
+    setHouses(apiHouses)
+    if (activeHouseId) return
+    const lastUsed = localStorage.getItem('glamp-chat-house')
+    const occupied = apiHouses.filter(h => h.status === 'occupied')
+    if (lastUsed && occupied.some(h => h.id === lastUsed)) {
+      setActiveHouseId(lastUsed)
+    } else if (occupied.length > 0) {
+      setActiveHouseId(occupied[0].id)
+    }
+  }, [apiHouses, activeHouseId])
+  useEffect(() => {
+    if (activeHouseId) {
+      localStorage.setItem('glamp-chat-house', activeHouseId)
+      setMessages([])
+    }
   }, [activeHouseId])
   useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])
 
