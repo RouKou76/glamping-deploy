@@ -110,8 +110,10 @@ export default function Tickets() {
 
   const { notify } = useNotifications()
 
+  const wsAuth = useMemo(() => ({ role: 'admin', token: localStorage.getItem('glamp-token') || '' }), [])
+
   useWebSocket({
-    auth: { role: 'admin', token: localStorage.getItem('glamp-token') || '' },
+    auth: wsAuth,
     onMessage: (event) => {
       if (event.type === 'server:ticket:created') {
         const task = event.payload as Task
