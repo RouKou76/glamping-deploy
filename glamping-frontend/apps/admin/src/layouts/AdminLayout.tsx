@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { ConnectionBanner, ThemeToggle } from '@glamping/ui'
 import type { ConnectionStatus } from '@glamping/ui'
+import { useWebSocket } from '@glamping/api'
 import { GateAlertBanner } from './GateAlertBanner'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -23,6 +24,20 @@ export default function AdminLayout() {
   const [gateRequest, setGateRequest] = useState<GateRequest | null>(null)
   const { user, logout } = useAuth()
   const allowedPaths = ROLE_NAV[user?.role?.name ?? 'admin'] ?? ROLE_NAV.admin
+
+  const wsAuth = useMemo(() => ({ role: 'admin', token: localStorage.getItem('glamp-token') || '' }), [])
+
+  useWebSocket({
+    auth: wsAuth,
+    onMessage: (msg) => {
+      if (msg.type === 'server:ticket:created' || msg.type === 'server:ticket:updated') {
+        window.dispatchEvent(new CustomEvent('glamp:ticket:update', { detail: msg }))
+      }
+      if (msg.type === 'server:message:new') {
+        window.dispatchEvent(new CustomEvent('glamp:message:new', { detail: msg.payload }))
+      }
+    },
+  })
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-[#0f1117] text-gray-800 dark:text-white overflow-hidden transition-colors">

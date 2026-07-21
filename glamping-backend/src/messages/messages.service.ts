@@ -93,7 +93,7 @@ export class MessagesService {
       data: { houseId, sender, text: escapeHtml(text), sessionId: session?.id },
     });
 
-    return {
+    const result = {
       id: message.id,
       houseId: message.houseId,
       sender: message.sender,
@@ -101,6 +101,11 @@ export class MessagesService {
       timestamp: message.timestamp.toISOString(),
       read: message.read,
     };
+
+    this.gateway.sendToHouse(houseId, 'server:message:new', result);
+    this.gateway.broadcastToAdmins('server:message:new', result);
+
+    return result;
   }
 
   async markAsRead(id: string) {

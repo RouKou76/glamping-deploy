@@ -7,7 +7,7 @@ import { useDevice } from '../../contexts/DeviceContext'
 export default function Chat() {
   const { t, i18n } = useTranslation()
   const { houseId } = useDevice()
-  const { data: initialMessages, refetch } = useApi<Message[]>(houseId ? `/api/messages?houseId=${houseId}` : '')
+  const { data: initialMessages } = useApi<Message[]>(houseId ? `/api/messages?houseId=${houseId}` : '')
   const [messages, setMessages] = useState<Message[]>([])
   const [msg, setMsg] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
@@ -15,14 +15,22 @@ export default function Chat() {
   useEffect(() => { if (initialMessages) setMessages(initialMessages) }, [initialMessages])
 
   useEffect(() => {
-    if (!houseId) return
-    const interval = setInterval(() => { refetch() }, 5000)
-    return () => clearInterval(interval)
-  }, [houseId, refetch])
-
-  const [sending, setSending] = useState(false)
+    const handler = (e: Event) => {
+      const msg = (e as CustomEvent<Message>).detail
+      if (msg.houseId === houseId) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === msg.id)) return prev
+          return [...prev, msg]
+        })
+      }
+    }
+    window.addEventListener('glamp:message:new', handler)
+    return () => window.removeEventListener('glamp:message:new', handler)
+  }, [houseId])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+
+  const [sending, setSending] = useState(false)
 
   async function handleSend() {
     if (!msg.trim() || sending || !houseId) return

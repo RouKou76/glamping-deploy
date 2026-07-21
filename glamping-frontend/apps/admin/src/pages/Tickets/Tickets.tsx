@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useApi, apiPost, useWebSocket, useNotifications } from '@glamping/api'
+import { useState, useEffect } from 'react'
+import { useApi, apiPost, useNotifications } from '@glamping/api'
 import type { Task, TaskStatus, House } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
@@ -103,18 +103,11 @@ export default function Tickets() {
   useEffect(() => { if (apiTasks) setTickets(apiTasks) }, [apiTasks])
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
 
-  useEffect(() => {
-    const interval = setInterval(() => { refetch() }, 5000)
-    return () => clearInterval(interval)
-  }, [refetch])
-
   const { notify } = useNotifications()
 
-  const wsAuth = useMemo(() => ({ role: 'admin', token: localStorage.getItem('glamp-token') || '' }), [])
-
-  useWebSocket({
-    auth: wsAuth,
-    onMessage: (event) => {
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const event = (e as CustomEvent).detail
       if (event.type === 'server:ticket:created') {
         const task = event.payload as Task
         setTickets(prev => [task, ...prev])
@@ -129,8 +122,10 @@ export default function Tickets() {
           setTickets(prev => prev.map(t => t.id === updated.id ? updated : t))
         }
       }
-    },
-  })
+    }
+    window.addEventListener('glamp:ticket:update', handler)
+    return () => window.removeEventListener('glamp:ticket:update', handler)
+  }, [])
 
   function getHouseNumber(houseId: string): number { return houses.find(h => h.id === houseId)?.number ?? 0 }
 

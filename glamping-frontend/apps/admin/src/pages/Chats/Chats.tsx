@@ -29,10 +29,16 @@ export default function Chats() {
   const activeMessages = activeHouseId ? messages : []
 
   useEffect(() => {
-    if (!activeHouseId) return
-    const interval = setInterval(() => { refetch() }, 5000)
-    return () => clearInterval(interval)
-  }, [activeHouseId, refetch])
+    const handler = (e: Event) => {
+      const msg = (e as CustomEvent<Message>).detail
+      setMessages(prev => {
+        if (prev.some(m => m.id === msg.id)) return prev
+        return [...prev, msg]
+      })
+    }
+    window.addEventListener('glamp:message:new', handler)
+    return () => window.removeEventListener('glamp:message:new', handler)
+  }, [])
 
   useEffect(() => {
     if (!activeHouseId) return
