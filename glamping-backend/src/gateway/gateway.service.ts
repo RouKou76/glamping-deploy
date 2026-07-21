@@ -10,14 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../common/prisma/prisma.service';
 
-@WebSocketGateway({
-  cors: (
-    client: Socket,
-    done: (err: Error | null, origin?: string) => void,
-  ) => {
-    done(null, '*');
-  },
-})
+@WebSocketGateway()
 export class GatewayService
   implements OnGatewayConnection, OnGatewayDisconnect
 {

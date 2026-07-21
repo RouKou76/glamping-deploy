@@ -1,9 +1,20 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
+
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
 
 @Injectable()
 export class AuthService {
@@ -56,7 +67,7 @@ export class AuthService {
         where: { id: payload.sub },
       });
 
-      if (!user || user.refreshToken !== refreshToken) {
+      if (!user || !user.refreshToken || !safeCompare(user.refreshToken, refreshToken)) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
