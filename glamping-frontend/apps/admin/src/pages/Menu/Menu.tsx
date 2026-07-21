@@ -34,7 +34,7 @@ function ItemRow({ item, onToggle, onEdit, onDelete }: { item: MenuItem; onToggl
 }
 
 export default function Menu() {
-  const { data: apiItems } = useApi<MenuItem[]>('/api/menu')
+  const { data: apiItems } = useApi<MenuItem[]>('/api/menu?showHidden=true')
   const [items, setItems] = useState<MenuItem[]>([])
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [showForm, setShowForm] = useState(false)
