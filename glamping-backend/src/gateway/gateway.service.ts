@@ -62,10 +62,13 @@ export class GatewayService
   }
 
   broadcastToAllHouses(event: string, payload: unknown) {
+    const houseRooms: string[] = [];
     for (const [roomName] of this.server.sockets.adapter.rooms) {
       if (roomName.startsWith('house:')) {
+        houseRooms.push(roomName);
         this.server.to(roomName).emit(event, payload);
       }
     }
+    this.logger.log(`Broadcast ${event} to houses: [${houseRooms.join(', ')}]`);
   }
 }
