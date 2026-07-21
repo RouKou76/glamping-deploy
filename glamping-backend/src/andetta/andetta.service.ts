@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { existsSync } from 'fs';
+import { existsSync, renameSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
 @Injectable()
@@ -9,27 +9,66 @@ export class AndettaService {
 
   constructor(private prisma: PrismaService) {}
 
-  async getInfo() {
-    const setting = await this.prisma.setting.findUnique({
-      where: { key: 'andetta_pdf' },
+  private async getSetting(key: string): Promise<string | null> {
+    const row = await this.prisma.setting.findUnique({ where: { key } });
+    return row?.value ?? null;
+  }
+
+  private async setSetting(key: string, value: string) {
+    await this.prisma.setting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
     });
-    return { filename: setting?.value ?? null };
+  }
+
+  async getInfo() {
+    const current = await this.getSetting('andetta_current');
+    const previous = await this.getSetting('andetta_previous');
+    const active = await this.getSetting('andetta_active');
+    return {
+      current,
+      previous,
+      active: (active as 'current' | 'previous') || 'current',
+    };
+  }
+
+  async getActivePdf(): Promise<string> {
+    const active = await this.getSetting('andetta_active');
+    const key = active === 'previous' ? 'andetta_previous' : 'andetta_current';
+    const filename = await this.getSetting(key);
+    if (!filename) throw new NotFoundException('PDF not found');
+    const filePath = join(this.uploadsDir, filename);
+    if (!existsSync(filePath)) throw new NotFoundException('PDF not found');
+    return filePath;
   }
 
   async upload(filename: string) {
-    await this.prisma.setting.upsert({
-      where: { key: 'andetta_pdf' },
-      update: { value: filename },
-      create: { key: 'andetta_pdf', value: filename },
-    });
-    return { filename };
+    const currentFilename = await this.getSetting('andetta_current');
+    const previousFilename = await this.getSetting('andetta_previous');
+
+    if (previousFilename) {
+      const oldPrevPath = join(this.uploadsDir, previousFilename);
+      if (existsSync(oldPrevPath)) unlinkSync(oldPrevPath);
+    }
+
+    if (currentFilename) {
+      const curPath = join(this.uploadsDir, currentFilename);
+      const prevPath = join(this.uploadsDir, `andetta-previous.pdf`);
+      if (existsSync(curPath)) renameSync(curPath, prevPath);
+      await this.setSetting('andetta_previous', currentFilename);
+    }
+
+    await this.setSetting('andetta_current', filename);
+    await this.setSetting('andetta_active', 'current');
+
+    return this.getInfo();
   }
 
-  getFilePath(filename: string): string {
-    const filePath = join(this.uploadsDir, filename);
-    if (!existsSync(filePath)) {
-      throw new NotFoundException('PDF not found');
-    }
-    return filePath;
+  async switchVersion(version: 'current' | 'previous') {
+    const filename = await this.getSetting(version === 'previous' ? 'andetta_previous' : 'andetta_current');
+    if (!filename) throw new NotFoundException(`Version "${version}" not found`);
+    await this.setSetting('andetta_active', version);
+    return this.getInfo();
   }
 }

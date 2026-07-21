@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Body,
   UploadedFile,
   UseInterceptors,
   UseGuards,
@@ -9,13 +10,20 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiProperty } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { join } from 'path';
+import { IsIn } from 'class-validator';
 import { AndettaService } from './andetta.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
+
+class SwitchVersionDto {
+  @ApiProperty({ enum: ['current', 'previous'] })
+  @IsIn(['current', 'previous'])
+  version: 'current' | 'previous';
+}
 
 @ApiTags('andetta')
 @Controller('andetta')
@@ -31,18 +39,9 @@ export class AndettaController {
 
   @Get('pdf')
   @Public()
-  @ApiOperation({ summary: 'Download andetta PDF' })
+  @ApiOperation({ summary: 'Download active andetta PDF' })
   async getPdf(@Res() res: Response) {
-    const info = await this.andettaService.getInfo();
-    if (!info.filename) {
-      return res.status(404).json({ message: 'PDF not found' });
-    }
-    const filePath = join(
-      process.cwd(),
-      'uploads',
-      'andetta',
-      info.filename,
-    );
+    const filePath = await this.andettaService.getActivePdf();
     res.set('Cache-Control', 'no-store');
     return res.sendFile(filePath);
   }
@@ -52,7 +51,7 @@ export class AndettaController {
   @RequirePermissions('manage_settings')
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload andetta PDF' })
+  @ApiOperation({ summary: 'Upload new andetta PDF version' })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -74,5 +73,14 @@ export class AndettaController {
   )
   async upload(@UploadedFile() file: Express.Multer.File) {
     return this.andettaService.upload(file.filename);
+  }
+
+  @Post('switch')
+  @UseGuards(JwtAuthGuard)
+  @RequirePermissions('manage_settings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Switch active PDF version' })
+  async switchVersion(@Body() dto: SwitchVersionDto) {
+    return this.andettaService.switchVersion(dto.version);
   }
 }
