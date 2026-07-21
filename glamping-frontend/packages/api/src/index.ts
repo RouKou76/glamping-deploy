@@ -1,5 +1,4 @@
-export { apiGet, apiPost, apiPut, apiDelete } from "./client";
-export { useApi, apiPost as apiPostV2, apiPut as apiPutV2, apiDelete as apiDeleteV2 } from "./http";
+export { apiGet, apiPost, apiPut, apiDelete, useApi } from "./http";
 export { WS_EVENTS } from "./wsEvents";
 export type { WSEventType, WSEvent } from "./wsEvents";
 export { useWebSocket } from "./useWebSocket";

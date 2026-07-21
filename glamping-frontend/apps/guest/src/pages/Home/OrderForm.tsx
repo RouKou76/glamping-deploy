@@ -180,8 +180,8 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
       .map(([id, quantity]) => {
         const ms = steps.find(s => s.type === 'menu')
         if (ms && ms.type === 'menu') {
-          const item = ms.items.find(i => i.id === id)!
-          return { menuItemId: id, name: item.name, price: item.price, quantity }
+          const item = ms.items.find(i => i.id === id)
+          if (item) return { menuItemId: id, name: item.name, price: item.price, quantity }
         }
         return { menuItemId: id, name: id, price: 0, quantity }
       })

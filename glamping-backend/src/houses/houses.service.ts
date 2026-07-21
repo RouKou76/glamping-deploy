@@ -193,6 +193,9 @@ export class HousesService {
   }
 
   async checkoutRequest(houseId: string) {
+    const house = await this.prisma.house.findUnique({ where: { id: houseId } });
+    if (!house) throw new NotFoundException('House not found');
+
     const session = await this.prisma.guestSession.findFirst({
       where: { houseId, isActive: true },
     });
@@ -219,8 +222,6 @@ export class HousesService {
       },
     });
 
-    const house = await this.prisma.house.findUnique({ where: { id: houseId } });
-
     this.gateway.broadcastToAdmins('server:ticket:created', {
       id: ticket.id,
       houseId: ticket.houseId,
@@ -228,7 +229,7 @@ export class HousesService {
       status: ticket.status,
       createdAt: ticket.sentAt.toISOString(),
       description: ticket.description,
-      houseNumber: house?.number,
+      houseNumber: house.number,
     });
 
     return { success: true };

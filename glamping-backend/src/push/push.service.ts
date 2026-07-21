@@ -48,24 +48,40 @@ export class PushService {
 
     const subscriptions = await this.prisma.pushSubscription.findMany();
     const message = JSON.stringify(payload);
+    const CONCURRENCY = 10;
 
-    for (const sub of subscriptions) {
-      try {
-        await webPush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, p256da: sub.p256da },
-          },
-          message,
-        );
-      } catch (err: any) {
-        this.logger.error(`Push failed for ${sub.endpoint}: ${err.message}`);
-        if (err.statusCode === 404 || err.statusCode === 410) {
-          await this.prisma.pushSubscription.deleteMany({
-            where: { endpoint: sub.endpoint },
-          });
-        }
+    const staleEndpoints: string[] = [];
+
+    const chunks: typeof subscriptions[] = [];
+    for (let i = 0; i < subscriptions.length; i += CONCURRENCY) {
+      chunks.push(subscriptions.slice(i, i + CONCURRENCY));
+    }
+
+    for (const chunk of chunks) {
+      const results = await Promise.allSettled(
+        chunk.map((sub) =>
+          webPush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, p256da: sub.p256da } },
+            message,
+          ).catch((err: any) => {
+            if (err.statusCode === 404 || err.statusCode === 410) {
+              staleEndpoints.push(sub.endpoint);
+            }
+            throw err;
+          }),
+        ),
+      );
+
+      const failures = results.filter((r) => r.status === 'rejected');
+      if (failures.length > 0) {
+        this.logger.warn(`Push batch: ${failures.length}/${chunk.length} failed`);
       }
+    }
+
+    if (staleEndpoints.length > 0) {
+      await this.prisma.pushSubscription.deleteMany({
+        where: { endpoint: { in: staleEndpoints } },
+      });
     }
   }
 }

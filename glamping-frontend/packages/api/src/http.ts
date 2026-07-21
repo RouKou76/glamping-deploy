@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -80,23 +80,32 @@ export function useApi<T>(path: string, options: UseApiOptions = {}) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(immediate)
   const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   const fetchData = useCallback(async () => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
     setLoading(true)
     setError(null)
     try {
-      const result = await fetchWithRefresh<T>(`${API_BASE}${path}`, { method: 'GET' })
-      setData(result)
+      const result = await fetchWithRefresh<T>(`${API_BASE}${path}`, { method: 'GET', signal: controller.signal })
+      if (!controller.signal.aborted) setData(result)
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
-      setLoading(false)
+      if (!controller.signal.aborted) setLoading(false)
     }
   }, [path])
 
-  useEffect(() => { if (immediate) fetchData() }, [fetchData, immediate])
+  useEffect(() => { if (immediate) fetchData(); return () => { abortRef.current?.abort() } }, [fetchData, immediate])
 
   return { data, loading, error, refetch: fetchData }
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  return fetchWithRefresh<T>(`${API_BASE}${path}`, { method: 'GET' })
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
