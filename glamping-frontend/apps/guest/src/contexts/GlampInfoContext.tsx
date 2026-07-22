@@ -12,7 +12,7 @@ export interface GlampInfo {
 }
 
 const DEFAULT_INFO: GlampInfo = {
-  title: '',
+  title: 'Глэмпинг "Пример названия"',
   phone: '+7 (999) 123-45-67',
   wifiName: 'Glamp_Guest',
   wifiPassword: 'forest2026',

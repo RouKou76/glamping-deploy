@@ -191,6 +191,7 @@ async function main() {
 
   // Create settings
   const settings = [
+    { key: 'title', value: 'Глэмпинг "Пример названия"' },
     { key: 'phone', value: '+7 (999) 123-45-67' },
     { key: 'wifi_name', value: 'Glamp_Guest' },
     { key: 'wifi_password', value: 'forest2026' },
