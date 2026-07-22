@@ -13,6 +13,22 @@ export default function Andetta() {
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  async function uploadFile(formData: FormData, token: string | null): Promise<boolean> {
+    const doFetch = (t: string | null) => fetch('/api/andetta/upload', {
+      method: 'POST',
+      credentials: 'include',
+      headers: t ? { Authorization: `Bearer ${t}` } : {},
+      body: formData,
+    })
+    let res = await doFetch(token)
+    if (res.status === 401) {
+      await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+      const newToken = localStorage.getItem('glamp-token')
+      res = await doFetch(newToken)
+    }
+    return res.ok
+  }
+
   async function handleUpload() {
     const file = fileRef.current?.files?.[0]
     if (!file) return
@@ -21,15 +37,13 @@ export default function Andetta() {
       const formData = new FormData()
       formData.append('file', file)
       const token = localStorage.getItem('glamp-token')
-      await fetch('/api/andetta/upload', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
-      refetch()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 2500)
-      if (fileRef.current) fileRef.current.value = ''
+      const ok = await uploadFile(formData, token)
+      if (ok) {
+        refetch()
+        setSuccess(true)
+        setTimeout(() => setSuccess(false), 2500)
+        if (fileRef.current) fileRef.current.value = ''
+      }
     } catch {
       // ignore
     }
@@ -37,12 +51,19 @@ export default function Andetta() {
   }
 
   async function handleSwitch(version: 'current' | 'previous') {
-    const token = localStorage.getItem('glamp-token')
-    await fetch('/api/andetta/switch', {
+    const doFetch = (token: string | null) => fetch('/api/andetta/switch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({ version }),
     })
+    let token = localStorage.getItem('glamp-token')
+    let res = await doFetch(token)
+    if (res.status === 401) {
+      await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+      token = localStorage.getItem('glamp-token')
+      res = await doFetch(token)
+    }
     refetch()
   }
 
