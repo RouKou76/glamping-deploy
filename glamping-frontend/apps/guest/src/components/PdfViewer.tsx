@@ -14,7 +14,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pageCount, setPageCount] = useState(0)
-  const renderedRef = useRef(false)
+  const docRef = useRef<any>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -22,27 +22,26 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
       try {
         const doc = await (pdfjsLib as any).getDocument({ url }).promise
         if (cancelled) return
+        docRef.current = doc
         setPageCount(doc.numPages)
         setLoading(false)
-        renderAllPages(doc)
       } catch (e: any) {
         if (!cancelled) setError(`PDF: ${e?.message || 'ошибка'}`)
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => { cancelled = true; docRef.current = null }
   }, [url])
 
-  function renderAllPages(doc: any) {
+  useEffect(() => {
+    if (loading || !docRef.current || !containerRef.current) return
+    const doc = docRef.current
     const container = containerRef.current
-    if (!container || renderedRef.current) return
-    renderedRef.current = true
     container.innerHTML = ''
 
     for (let i = 1; i <= doc.numPages; i++) {
       const pageDiv = document.createElement('div')
-      pageDiv.className = 'pdf-page'
-      pageDiv.dataset.page = String(i)
+      pageDiv.className = 'flex justify-center mb-2'
       container.appendChild(pageDiv)
 
       doc.getPage(i).then((page: any) => {
@@ -59,7 +58,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
         })
       })
     }
-  }
+  }, [loading, pageCount])
 
   if (error) return <div className="flex items-center justify-center h-full text-red-500 text-sm p-4 text-center">{error}</div>
   if (loading) return <div className="flex items-center justify-center h-full text-gray-400 text-sm">Загрузка...</div>
@@ -69,7 +68,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
       <div className="flex items-center px-3 py-2 bg-white dark:bg-[#1a1d27] border-b border-gray-200 dark:border-white/10 shrink-0 transition-colors">
         <span className="text-xs text-gray-600 dark:text-white/60">{pageCount} стр.</span>
       </div>
-      <div ref={containerRef} className="flex-1 overflow-y-auto bg-gray-100 dark:bg-[#0a0c10] p-2 space-y-2" />
+      <div ref={containerRef} className="flex-1 overflow-y-auto bg-gray-100 dark:bg-[#0a0c10] p-2" />
     </div>
   )
 }
