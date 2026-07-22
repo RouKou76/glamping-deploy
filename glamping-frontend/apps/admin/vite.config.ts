@@ -3,20 +3,6 @@ import react from '@vitejs/plugin-react'
 import legacy from '@vitejs/plugin-legacy'
 import path from 'path'
 
-function adminRedirect() {
-  return {
-    name: 'admin-redirect',
-    configureServer(server: any) {
-      server.middlewares.use((req: any, _res: any, next: any) => {
-        if (req.url === '/' || req.url === '') {
-          req.url = '/admin/'
-        }
-        next()
-      })
-    },
-  }
-}
-
 export default defineConfig({
   base: '/admin/',
   plugins: [
@@ -25,7 +11,6 @@ export default defineConfig({
       targets: ['Chrome >= 51'],
       additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
     }),
-    adminRedirect(),
   ],
   resolve: {
     alias: {
