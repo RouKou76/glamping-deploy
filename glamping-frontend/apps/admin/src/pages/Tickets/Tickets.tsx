@@ -106,9 +106,31 @@ export default function Tickets() {
 
   const availableTypes = useMemo(() => {
     const builtIn = ['food', 'minibar', 'transfer', 'cleaning', 'towels']
-    const activeCustom = apiServices?.filter(s => s.active).map(() => 'custom') ?? []
-    return [...builtIn, ...new Set(activeCustom)]
+    const customServices = apiServices?.filter(s => s.active).map(s => `custom:${s.name}`) ?? []
+    return [...builtIn, ...customServices]
   }, [apiServices])
+
+  function getCustomServiceName(description?: string): string | null {
+    if (!description) return null
+    const match = description.match(/^\[(.+?)\]/)
+    return match ? match[1] : null
+  }
+
+  function getTicketFilterType(t: Task): string {
+    if (t.type === 'custom') {
+      const name = getCustomServiceName(t.description)
+      return name ? `custom:${name}` : 'custom'
+    }
+    return t.type
+  }
+
+  function getTicketLabel(t: Task): string {
+    if (t.type === 'custom') {
+      const name = getCustomServiceName(t.description)
+      return name ?? TYPE_CONFIG.custom.label
+    }
+    return TYPE_CONFIG[t.type]?.label ?? t.type
+  }
 
   const { notify } = useNotifications()
 
@@ -149,7 +171,8 @@ export default function Tickets() {
 
   const filtered = useMemo(() => {
     const result = tickets.filter(t => {
-      const matchType = typeFilter === 'all' || t.type === typeFilter
+      const ticketType = getTicketFilterType(t)
+      const matchType = typeFilter === 'all' || ticketType === typeFilter
       if (statusFilter === 'archived') return t.status === 'archived' && matchType
       const matchStatus = statusFilter === 'all' || t.status === statusFilter
       return matchStatus && matchType && t.status !== 'cancelled' && t.status !== 'archived'
@@ -191,7 +214,7 @@ export default function Tickets() {
         {(['all', ...availableTypes] as FilterType[]).map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-            {t === 'all' ? 'Все типы' : TYPE_CONFIG[t]?.label}
+            {t === 'all' ? 'Все типы' : t.startsWith('custom:') ? t.replace('custom:', '') : TYPE_CONFIG[t]?.label}
           </button>
         ))}
       </div>
@@ -205,6 +228,7 @@ export default function Tickets() {
         <div className="space-y-3">
           {filtered.map(ticket => {
             const config = TYPE_CONFIG[ticket.type] ?? { icon: null, label: 'Заявка' }
+            const ticketLabel = getTicketLabel(ticket)
             const houseNumber = getHouseNumber(ticket.houseId)
             const mainContent = getMainContent(ticket)
             const extraInfo = getExtraInfo(ticket)
@@ -222,7 +246,7 @@ export default function Tickets() {
                 <div className="px-4 pt-3 pb-1 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-gray-600 dark:text-white/60 shrink-0">{config.icon}</span>
-                    <span className="font-bold text-sm text-gray-800 dark:text-white truncate">{config.label}</span>
+                    <span className="font-bold text-sm text-gray-800 dark:text-white truncate">{ticketLabel}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="bg-gray-100 dark:bg-white/10 text-gray-800 dark:text-white/50 text-[11px] font-bold px-2 py-0.5 rounded">Домик №{houseNumber}</span>
