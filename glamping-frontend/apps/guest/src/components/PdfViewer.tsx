@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
-;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
+;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfjsWorker
 
 interface PdfViewerProps {
   url: string
   className?: string
+  onError?: () => void
 }
 
-export function PdfViewer({ url, className = '' }: PdfViewerProps) {
+export function PdfViewer({ url, className = '', onError }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -21,7 +23,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     let cancelled = false
     async function load() {
       try {
-        const loadingTask = pdfjsLib.getDocument(url as any)
+        const loadingTask = pdfjsLib.getDocument({ url })
         const doc = await loadingTask.promise
         if (cancelled) return
         docRef.current = doc
@@ -29,8 +31,11 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
         setCurrentPage(1)
         setLoading(false)
         renderPage(doc, 1, 1)
-      } catch {
-        if (!cancelled) setError('Не удалось загрузить PDF')
+      } catch (e: any) {
+        if (!cancelled) {
+          setError(`PDF: ${e?.message || 'ошибка'}`)
+          onError?.()
+        }
       }
     }
     load()
@@ -43,17 +48,17 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     }
   }, [currentPage, scale])
 
-  function renderPage(doc: pdfjsLib.PDFDocumentProxy, pageNum: number, s: number) {
+  function renderPage(doc: any, pageNum: number, s: number) {
     const container = containerRef.current
     if (!container) return
-    doc.getPage(pageNum).then(page => {
+    doc.getPage(pageNum).then((page: any) => {
       const viewport = page.getViewport({ scale: s })
       const canvas = document.createElement('canvas')
       canvas.width = viewport.width
       canvas.height = viewport.height
       const ctx = canvas.getContext('2d')
       if (!ctx) return
-      page.render({ canvasContext: ctx, viewport } as any).promise.then(() => {
+      page.render({ canvasContext: ctx, viewport }).promise.then(() => {
         container.innerHTML = ''
         canvas.style.maxWidth = '100%'
         canvas.style.height = 'auto'
@@ -66,7 +71,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   function zoomOut() { setScale(s => Math.max(s - 0.25, 0.5)) }
   function fitWidth() { setScale(1) }
 
-  if (error) return <div className="flex items-center justify-center h-full text-red-500 text-sm">{error}</div>
+  if (error) return <div className="flex items-center justify-center h-full text-red-500 text-sm p-4 text-center">{error}</div>
   if (loading) return <div className="flex items-center justify-center h-full text-gray-400 text-sm">Загрузка...</div>
 
   return (

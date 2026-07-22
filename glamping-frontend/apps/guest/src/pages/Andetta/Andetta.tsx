@@ -15,8 +15,10 @@ export default function Andetta() {
   const navigate = useNavigate()
   const { data } = useApi<AndettaInfo>('/api/andetta')
   const [confirmed, setConfirmed] = useState(false)
+  const [pdfFailed, setPdfFailed] = useState(false)
 
   const hasPdf = !!data?.current || !!data?.previous
+  const pdfUrl = `/api/andetta/pdf?v=${Date.now()}`
 
   if (!confirmed) {
     return (
@@ -46,7 +48,11 @@ export default function Andetta() {
       </div>
       <div className="flex-1">
         {hasPdf ? (
-          <PdfViewer url={`/api/andetta/pdf?v=${Date.now()}`} className="h-full" />
+          pdfFailed ? (
+            <iframe src={pdfUrl} className="w-full h-full border-0" title="ANDITTA catalog" />
+          ) : (
+            <PdfViewer url={pdfUrl} className="h-full" onError={() => setPdfFailed(true)} />
+          )
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <p className="text-gray-500 dark:text-gray-400 text-sm">{t('andetta.noCatalog')}</p>
