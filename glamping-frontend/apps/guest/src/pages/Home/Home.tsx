@@ -75,7 +75,10 @@ export default function Home() {
 
   function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string; serviceName: string } {
     const steps: OrderStep[] = []
-    if (service.requiresTime) steps.push({ type: 'time', key: 'time', label: t('food.time') })
+    if (service.requiresTime) {
+      steps.push({ type: 'date', key: 'date', label: t('food.date') })
+      steps.push({ type: 'time', key: 'time', label: t('food.time'), required: true })
+    }
     steps.push({ type: 'textarea', key: 'comment', label: 'Комментарий', placeholder: service.name })
     return { title: service.name, steps, message: `Заявка «${service.name}» отправлена`, serviceName: service.name }
   }
