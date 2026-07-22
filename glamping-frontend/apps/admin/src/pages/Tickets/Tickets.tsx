@@ -189,7 +189,7 @@ export default function Tickets() {
         details.push({ label: subcat, extra, price: extraPrice })
       }
     }
-    return { totalExtra, totalExtraPrice, details, exceeds: totalExtra > 0 }
+    return { totalExtra, totalExtraPrice, details, exceeds: totalExtra > 0, exceededSubcats: new Set(details.map(d => d.label)) }
   }
 
   function getHouseNumber(houseId: string): number { return houses.find(h => h.id === houseId)?.number ?? 0 }
@@ -344,18 +344,23 @@ export default function Tickets() {
                   <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-white/10 space-y-3">
                     {ticket.items && ticket.items.length > 0 && (() => {
                       const pricing = getPricingInfo(ticket)
+                      const menuMap = new Map((apiMenu ?? []).map(m => [m.id, m.subcat ?? 'default']))
                       return (
                         <div className="space-y-3">
                           <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
-                          {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
-                            <div key={item.menuItemId} className="text-sm text-gray-800 dark:text-white">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <span className="min-w-0 truncate">{item.name}</span>
-                                <span className="shrink-0 font-medium">×{item.quantity}</span>
+                          {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => {
+                            const subcat = menuMap.get(item.menuItemId) ?? 'default'
+                            const isExtra = pricing?.exceededSubcats?.has(subcat) ?? false
+                            return (
+                              <div key={item.menuItemId} className="text-sm text-gray-800 dark:text-white">
+                                <div className="flex items-baseline justify-between gap-2">
+                                  <span className="min-w-0 truncate">{item.name}</span>
+                                  <span className="shrink-0 font-medium">×{item.quantity}</span>
+                                  {isExtra && <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">{item.price} ₽</span>}
+                                </div>
                               </div>
-                              <div className="text-right text-xs text-gray-500 dark:text-white/50">{item.price * item.quantity} ₽</div>
-                            </div>
-                          ))}
+                            )
+                          })}
                           {pricing && pricing.exceeds ? (
                             <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
                               <span className="text-xs font-bold text-amber-700 dark:text-amber-400">К оплате: {pricing.totalExtra} доп. позиции.</span>
