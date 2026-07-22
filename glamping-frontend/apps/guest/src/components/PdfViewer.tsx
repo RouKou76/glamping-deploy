@@ -66,11 +66,21 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   const applyScale = useCallback((s: number) => {
     scaleRef.current = s
     const wrapper = wrapperRef.current
-    if (wrapper) wrapper.style.transform = `scale(${s})`
     const scroll = wrapper?.parentElement
-    if (scroll) {
-      scroll.scrollLeft = (scroll.scrollWidth - scroll.clientWidth) / 2
-    }
+    if (!wrapper || !scroll) return
+
+    const prevScrollX = scroll.scrollLeft
+    const prevScrollY = scroll.scrollTop
+    const prevCenterX = prevScrollX + scroll.clientWidth / 2
+    const prevCenterY = prevScrollY + scroll.clientHeight / 2
+    const prevScale = wrapper.dataset.prevScale ? parseFloat(wrapper.dataset.prevScale) : 1
+
+    wrapper.style.transform = `scale(${s})`
+    wrapper.dataset.prevScale = String(s)
+
+    const ratio = s / prevScale
+    scroll.scrollLeft = prevCenterX * ratio - scroll.clientWidth / 2
+    scroll.scrollTop = prevCenterY * ratio - scroll.clientHeight / 2
   }, [])
 
   useEffect(() => {
@@ -135,7 +145,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
         </div>
       </div>
       <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2">
-        <div ref={wrapperRef} className="origin-top-left w-full">
+        <div ref={wrapperRef} className="inline-block origin-top-left">
           <div ref={containerRef} />
         </div>
       </div>
