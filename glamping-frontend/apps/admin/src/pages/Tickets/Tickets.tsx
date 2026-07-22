@@ -158,6 +158,23 @@ export default function Tickets() {
     return () => window.removeEventListener('glamp:ticket:update', handler)
   }, [])
 
+  function getHouseGuestCount(houseId: string): number {
+    const house = houses.find(h => h.id === houseId) as { guestCount?: number } | undefined
+    return house?.guestCount ?? 0
+  }
+
+  function getPricingInfo(ticket: Task) {
+    if (!ticket.items || ticket.items.length === 0) return null
+    const guestCount = getHouseGuestCount(ticket.houseId)
+    if (!guestCount) return null
+    const totalQty = ticket.items.reduce((s, i) => s + i.quantity, 0)
+    const totalPrice = ticket.items.reduce((s, i) => s + i.price * i.quantity, 0)
+    if (totalQty <= guestCount) return { totalQty, totalPrice, exceeds: false, extraCount: 0, extraPrice: 0 }
+    const extraCount = totalQty - guestCount
+    const extraPrice = Math.round(totalPrice / totalQty * extraCount)
+    return { totalQty, totalPrice, exceeds: true, extraCount, extraPrice }
+  }
+
   function getHouseNumber(houseId: string): number { return houses.find(h => h.id === houseId)?.number ?? 0 }
 
   function handleStatusChange(id: string, status: TaskStatus) {
@@ -308,21 +325,37 @@ export default function Tickets() {
                 {/* Расширенный блок */}
                 {isExpanded && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-white/10 space-y-3">
-                    {ticket.items && ticket.items.length > 0 && (
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
-                        {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
-                          <div key={item.menuItemId} className="flex items-center justify-between gap-2 text-sm text-gray-800 dark:text-white">
-                            <span className="min-w-0 truncate">• {item.name} ×{item.quantity}</span>
-                            <span className="shrink-0 whitespace-nowrap">{item.price * item.quantity} ₽</span>
-                          </div>
-                        ))}
-                        <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
-                          <span>Итого</span>
-                          <span>{ticket.items!.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)} ₽</span>
+                    {ticket.items && ticket.items.length > 0 && (() => {
+                      const pricing = getPricingInfo(ticket)
+                      return (
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
+                          {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
+                            <div key={item.menuItemId} className="flex items-center justify-between gap-2 text-sm text-gray-800 dark:text-white">
+                              <span className="min-w-0 truncate">• {item.name} ×{item.quantity}</span>
+                              <span className="shrink-0 whitespace-nowrap">{item.price * item.quantity} ₽</span>
+                            </div>
+                          ))}
+                          {pricing && !pricing.exceeds && (
+                            <div className="flex justify-between text-sm text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
+                              <span>Позиций: {pricing.totalQty}</span>
+                            </div>
+                          )}
+                          {pricing && pricing.exceeds && (
+                            <>
+                              <div className="flex justify-between text-sm text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
+                                <span>Итого</span>
+                                <span>{pricing.totalPrice} ₽</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-amber-600 dark:text-amber-400">Доплата за {pricing.extraCount} поз.</span>
+                                <span className="text-amber-600 dark:text-amber-400 font-bold">+{pricing.extraPrice} ₽</span>
+                              </div>
+                            </>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      )
+                    })()}
                     <div className="grid grid-cols-2 gap-2">
                       {nextStatus && (
                         <button onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, nextStatus) }}
