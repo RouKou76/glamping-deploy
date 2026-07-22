@@ -62,6 +62,14 @@ export default function Home() {
       ],
       message: t('cleaning.successMsg'),
     },
+    towels: {
+      title: t('towels.title'),
+      steps: [
+        { type: 'date', key: 'date', label: t('food.date') },
+        { type: 'time', key: 'time', label: t('food.time'), required: true },
+      ],
+      message: t('towels.success'),
+    },
   }
   }, [t, menuItems])
 
@@ -74,7 +82,7 @@ export default function Home() {
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
-  const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates' || m === 'minibar'
+  const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'gates' || m === 'minibar'
 
   function handleConfirm(type: ConfirmSheetType) {
     apiPost('/api/tasks', { houseId, type, description: t(`${type}.title`) })
@@ -143,7 +151,7 @@ export default function Home() {
 
       {activeModal === 'checkout' && <CheckoutSheet open={true} onClose={() => setActiveModal(null)} onConfirm={handleCheckout} />}
 
-      {(activeModal === 'food' || activeModal === 'transfer' || activeModal === 'cleaning') && activeModal && (
+      {(activeModal === 'food' || activeModal === 'transfer' || activeModal === 'cleaning' || activeModal === 'towels') && activeModal && (
         <OrderForm
           open={true}
           title={SERVICE_CONFIGS[activeModal].title}
