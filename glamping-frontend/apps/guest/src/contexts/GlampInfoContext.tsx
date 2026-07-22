@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { apiPost } from '@glamping/api'
 
 export interface GlampInfo {
+  title: string
   phone: string
   wifiName: string
   wifiPassword: string
@@ -11,6 +12,7 @@ export interface GlampInfo {
 }
 
 const DEFAULT_INFO: GlampInfo = {
+  title: '',
   phone: '+7 (999) 123-45-67',
   wifiName: 'Glamp_Guest',
   wifiPassword: 'forest2026',

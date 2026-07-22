@@ -5,6 +5,11 @@ export class UpdateInfoDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
+  title?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
   phone?: string;
 
   @ApiPropertyOptional()

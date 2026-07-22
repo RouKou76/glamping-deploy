@@ -15,6 +15,7 @@ export class InfoService {
     const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 
     return {
+      title: map.title ?? '',
       phone: map.phone ?? '',
       wifiName: map.wifi_name ?? '',
       wifiPassword: map.wifi_password ?? '',
@@ -26,6 +27,7 @@ export class InfoService {
 
   async updateInfo(dto: UpdateInfoDto) {
     const updates = [
+      { key: 'title', value: dto.title },
       { key: 'phone', value: dto.phone },
       { key: 'wifi_name', value: dto.wifiName },
       { key: 'wifi_password', value: dto.wifiPassword },
