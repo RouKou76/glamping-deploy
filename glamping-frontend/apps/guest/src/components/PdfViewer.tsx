@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 
-;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${(pdfjsLib as any).version}/build/pdf.worker.min.mjs`
+;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
 
 interface PdfViewerProps {
   url: string
