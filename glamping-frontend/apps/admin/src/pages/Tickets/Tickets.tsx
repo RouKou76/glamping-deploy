@@ -346,13 +346,23 @@ export default function Tickets() {
                       const pricing = getPricingInfo(ticket)
                       return (
                         <div className="space-y-2">
+                          <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
+                          {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
+                            <div key={item.menuItemId} className="flex items-baseline justify-between gap-2 text-sm text-gray-800 dark:text-white">
+                              <span className="min-w-0">
+                                <span className="truncate">{item.name}</span>
+                                <span className="text-gray-500 dark:text-white/50 ml-1">×{item.quantity}</span>
+                              </span>
+                              <span className="shrink-0 whitespace-nowrap">{item.price * item.quantity} ₽</span>
+                            </div>
+                          ))}
                           {pricing && pricing.exceeds ? (
-                            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">К оплате</span>
+                            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 mt-2">
+                              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">К оплате: {pricing.totalExtra} доп. поз.</span>
                               <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{pricing.totalExtraPrice} ₽</span>
                             </div>
                           ) : (
-                            <div className="text-xs text-gray-500 dark:text-white/40">Без доплаты</div>
+                            <div className="text-xs text-gray-500 dark:text-white/40 mt-2">Без доплаты</div>
                           )}
                         </div>
                       )
