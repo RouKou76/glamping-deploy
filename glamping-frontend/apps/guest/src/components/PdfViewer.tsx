@@ -107,7 +107,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     el.addEventListener('pointermove', onPointerMove)
     el.addEventListener('pointerup', onPointerUp)
     el.addEventListener('pointercancel', onPointerUp)
-    el.style.touchAction = 'none'
+    el.style.touchAction = 'pan-y'
 
     return () => {
       el.removeEventListener('pointerdown', onPointerDown)
