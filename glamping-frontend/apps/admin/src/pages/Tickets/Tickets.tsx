@@ -52,7 +52,7 @@ function getDesiredTimeLabel(type: string): string {
     case 'food': return 'Подать '
     case 'transfer': return 'Выезд '
     case 'cleaning': return 'Уборка'
-    default: return 'Время'
+    default: return 'Заказано на'
   }
 }
 
