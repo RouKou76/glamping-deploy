@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ThemeToggle } from '@glamping/ui'
 import { useApi, apiPost } from '@glamping/api'
 import type { Message } from '@glamping/types'
 import { useDevice } from '../../contexts/DeviceContext'
@@ -54,15 +55,17 @@ export default function Chat() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="bg-white dark:bg-[#1a1d27] p-4 border-b border-gray-100 dark:border-white/10 shadow-sm flex items-center gap-3 transition-colors">
-        <div className="w-10 h-10 bg-glamp-100 dark:bg-glamp-500/20 rounded-full flex items-center justify-center text-glamp-600 dark:text-green-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <div className="bg-white dark:bg-[#1a1d27] p-4 border-b border-gray-100 dark:border-white/10 shadow-sm flex items-center justify-between transition-colors">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-glamp-100 dark:bg-glamp-500/20 rounded-full flex items-center justify-center text-glamp-600 dark:text-green-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          </div>
+          <div>
+            <h2 className="font-bold text-base text-gray-800 dark:text-gray-200">{t('chat.admin')}</h2>
+            <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> {t('chat.online')}</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-bold text-base text-gray-800 dark:text-gray-200">{t('chat.admin')}</h2>
-          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> {t('chat.online')}</p>
-        </div>
-
+        <ThemeToggle size="lg" />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-glamp-50 dark:bg-[#0f1117] transition-colors">
