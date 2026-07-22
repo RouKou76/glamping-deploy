@@ -101,7 +101,6 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
 
     const onPointerMove = (e: PointerEvent) => {
       if (pointers.size !== 2) return
-      e.preventDefault()
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
       const pts = Array.from(pointers.values())
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
@@ -117,7 +116,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     el.addEventListener('pointermove', onPointerMove)
     el.addEventListener('pointerup', onPointerUp)
     el.addEventListener('pointercancel', onPointerUp)
-    el.style.touchAction = 'pan-y'
+    el.style.touchAction = 'auto'
 
     return () => {
       el.removeEventListener('pointerdown', onPointerDown)
