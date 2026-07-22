@@ -39,8 +39,6 @@ export default function GuestLayout() {
         </div>
       )}
 
-      {!isOffline && <div className="fixed top-4 right-4 z-40"><ThemeToggle size="lg" /></div>}
-
       <main className="flex-1 overflow-y-auto pb-20">
         <Outlet />
       </main>

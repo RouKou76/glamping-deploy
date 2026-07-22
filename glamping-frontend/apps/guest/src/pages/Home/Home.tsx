@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { ThemeToggle } from '@glamping/ui'
 import { useApi, apiPost } from '@glamping/api'
 import { useTask } from '../../contexts/TaskContext'
 import { useDevice } from '../../contexts/DeviceContext'
@@ -110,6 +111,7 @@ export default function Home() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('home.title')}</h1>
+        <ThemeToggle size="lg" />
       </div>
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('home.house')}{houseNumber ? ` №${houseNumber}` : ''}</p>
 
