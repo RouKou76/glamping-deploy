@@ -356,7 +356,7 @@ export default function Tickets() {
                                 <div className="flex items-baseline justify-between gap-2">
                                   <span className="min-w-0 truncate">{item.name}</span>
                                   <span className="shrink-0 font-medium">×{item.quantity}</span>
-                                  {isExtra && <span className="shrink-0 text-amber-600 dark:text-amber-400 font-bold">{item.price} ₽</span>}
+                                  {isExtra && <span className="shrink-0 font-bold">{item.price} ₽</span>}
                                 </div>
                               </div>
                             )
