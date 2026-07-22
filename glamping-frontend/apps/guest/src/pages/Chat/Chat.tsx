@@ -16,6 +16,7 @@ export default function Chat() {
 
   useEffect(() => {
     const handler = (e: Event) => {
+      if (justSentRef.current) return
       const msg = (e as CustomEvent<Message>).detail
       if (msg.houseId === houseId) {
         setMessages(prev => {
@@ -31,10 +32,12 @@ export default function Chat() {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const [sending, setSending] = useState(false)
+  const justSentRef = useRef(false)
 
   async function handleSend() {
     if (!msg.trim() || sending || !houseId) return
     setSending(true)
+    justSentRef.current = true
     const text = msg
     setMsg('')
     setMessages(prev => [...prev, { id: `temp-${Date.now()}`, houseId, sender: 'GUEST', text, timestamp: new Date().toISOString(), read: true }])
@@ -45,6 +48,7 @@ export default function Chat() {
       setMessages(prev => prev.filter(m => !(m.id.startsWith('temp-') && m.text === text)))
     } finally {
       setSending(false)
+      setTimeout(() => { justSentRef.current = false }, 2000)
     }
   }
 

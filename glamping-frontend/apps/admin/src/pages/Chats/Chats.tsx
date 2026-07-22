@@ -15,6 +15,7 @@ export default function Chats() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const justSentRef = useRef(false)
   const [activeHouseId, setActiveHouseId] = useState<string>('')
   const [history, setHistory] = useState<HistorySession[]>([])
   const [showHistory, setShowHistory] = useState(false)
@@ -47,6 +48,7 @@ export default function Chats() {
 
   useEffect(() => {
     const handler = (e: Event) => {
+      if (justSentRef.current) return
       const msg = (e as CustomEvent<Message>).detail
       setMessages(prev => {
         if (prev.some(m => m.id === msg.id)) return prev
@@ -84,6 +86,7 @@ export default function Chats() {
     const text = input.trim()
     if (!text || !activeHouseId || !houses.find(h => h.id === activeHouseId)) return
     setInput('')
+    justSentRef.current = true
     const tempId = `temp-${Date.now()}`
     setMessages(prev => [...prev, { id: tempId, houseId: activeHouseId, sender: 'STAFF', text, timestamp: new Date().toISOString(), read: true }])
     try {
@@ -91,6 +94,8 @@ export default function Chats() {
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.id } : m))
     } catch {
       setMessages(prev => prev.filter(m => m.id !== tempId))
+    } finally {
+      setTimeout(() => { justSentRef.current = false }, 2000)
     }
   }, [input, activeHouseId, houses])
 
