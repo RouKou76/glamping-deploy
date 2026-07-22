@@ -108,13 +108,22 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     }
   }, [applyScale])
 
+  const zoomIn = () => applyScale(Math.min(3, Math.round((scaleRef.current + 0.25) * 20) / 20))
+  const zoomOut = () => applyScale(Math.max(0.3, Math.round((scaleRef.current - 0.25) * 20) / 20))
+  const zoomReset = () => applyScale(1)
+
   if (error) return <div className="flex items-center justify-center h-full text-red-500 text-sm p-4 text-center">{error}</div>
   if (loading) return <div className="flex items-center justify-center h-full text-gray-400 text-sm">Загрузка...</div>
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      <div className="flex items-center px-3 py-2 bg-white dark:bg-[#1a1d27] border-b border-gray-200 dark:border-white/10 shrink-0 transition-colors">
+      <div className="flex items-center justify-between px-3 py-2 bg-white dark:bg-[#1a1d27] border-b border-gray-200 dark:border-white/10 shrink-0 transition-colors">
         <span className="text-xs text-gray-600 dark:text-white/60">{pageCount} стр.</span>
+        <div className="flex items-center gap-1">
+          <button onClick={zoomOut} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">−</button>
+          <span className="text-xs text-gray-600 dark:text-white/60 min-w-[40px] text-center">{Math.round(scaleRef.current * 100)}%</span>
+          <button onClick={zoomIn} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">+</button>
+        </div>
       </div>
       <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2">
         <div ref={wrapperRef} className="origin-top-left w-full">
