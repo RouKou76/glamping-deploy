@@ -48,11 +48,13 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
       container.appendChild(pageDiv)
 
       doc.getPage(i).then((page: any) => {
-        const viewport = page.getViewport({ scale: 1.5 })
+        const dpr = window.devicePixelRatio || 1
+        const renderScale = 2 * dpr
+        const viewport = page.getViewport({ scale: renderScale })
         const canvas = document.createElement('canvas')
         canvas.width = viewport.width
         canvas.height = viewport.height
-        canvas.style.width = '100%'
+        canvas.style.width = `${viewport.width / dpr}px`
         canvas.style.height = 'auto'
         const ctx = canvas.getContext('2d')
         if (!ctx) return
