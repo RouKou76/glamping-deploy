@@ -142,9 +142,9 @@ export default function Tickets() {
 
   const filtered = useMemo(() => {
     const result = tickets.filter(t => {
-      if (statusFilter === 'archived') return t.status === 'archived'
-      const matchStatus = statusFilter === 'all' || t.status === statusFilter
       const matchType = typeFilter === 'all' || t.type === typeFilter
+      if (statusFilter === 'archived') return t.status === 'archived' && matchType
+      const matchStatus = statusFilter === 'all' || t.status === statusFilter
       return matchStatus && matchType && t.status !== 'cancelled' && t.status !== 'archived'
     })
     return result.sort((a, b) => {
