@@ -55,14 +55,14 @@ export default function Andetta() {
 
       {data?.current && (
         <div className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm transition-colors space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-xl flex items-center justify-center">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-bold text-gray-800 dark:text-white">Текущая версия</p>
-                <p className="text-xs text-gray-500 dark:text-white/50 truncate max-w-[200px]">{data.current}</p>
+                <p className="text-xs text-gray-500 dark:text-white/50 truncate">{data.current}</p>
               </div>
             </div>
             {data.active === 'current' ? (
@@ -76,14 +76,14 @@ export default function Andetta() {
 
       {data?.previous && (
         <div className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm transition-colors space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-white/30"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-bold text-gray-800 dark:text-white">Предыдущая версия</p>
-                <p className="text-xs text-gray-500 dark:text-white/50 truncate max-w-[200px]">{data.previous}</p>
+                <p className="text-xs text-gray-500 dark:text-white/50 truncate">{data.previous}</p>
               </div>
             </div>
             {data.active === 'previous' ? (

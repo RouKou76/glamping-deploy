@@ -312,9 +312,9 @@ export default function Tickets() {
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
                         {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
-                          <div key={item.menuItemId} className="flex justify-between text-sm text-gray-800 dark:text-white">
-                            <span>• {item.name} ×{item.quantity}</span>
-                            <span>{item.price * item.quantity} ₽</span>
+                          <div key={item.menuItemId} className="flex items-center justify-between gap-2 text-sm text-gray-800 dark:text-white">
+                            <span className="min-w-0 truncate">• {item.name} ×{item.quantity}</span>
+                            <span className="shrink-0 whitespace-nowrap">{item.price * item.quantity} ₽</span>
                           </div>
                         ))}
                         <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
