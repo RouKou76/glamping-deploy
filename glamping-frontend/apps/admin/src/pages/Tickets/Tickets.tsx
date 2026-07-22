@@ -357,8 +357,6 @@ export default function Tickets() {
                         </div>
                       )
                     })()}
-                      )
-                    })()}
                     <div className="grid grid-cols-2 gap-2">
                       {nextStatus && (
                         <button onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, nextStatus) }}
