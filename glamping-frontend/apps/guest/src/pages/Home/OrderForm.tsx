@@ -219,12 +219,37 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
   const menuStep = steps.find(s => s.type === 'menu')
   const cartItems = menuStep && menuStep.type === 'menu'
     ? Object.entries(cart).filter(([, q]) => q > 0).map(([id, qty]) => {
-      const item = menuStep.items.find(i => i.id === id)!
-      return { name: item.name, price: item.price, qty }
-    })
+        const item = menuStep.items.find(i => i.id === id)
+        if (!item) return null
+        return { name: item.name, price: item.price, qty, subcat: (item as MenuItem).subcat ?? 'default' }
+      }).filter(Boolean) as { name: string; price: number; qty: number; subcat: string }[]
     : []
 
   const totalPrice = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
+
+  const pricingInfo = (() => {
+    if (cartItems.length === 0 || !guestCount) return null
+    const bySubcat = new Map<string, { qty: number; price: number }>()
+    for (const item of cartItems) {
+      const cur = bySubcat.get(item.subcat) ?? { qty: 0, price: 0 }
+      cur.qty += item.qty
+      cur.price += item.price * item.qty
+      bySubcat.set(item.subcat, cur)
+    }
+    let totalExtra = 0
+    let totalExtraPrice = 0
+    const details: { label: string; extra: number; price: number }[] = []
+    for (const [subcat, data] of bySubcat) {
+      if (data.qty > guestCount) {
+        const extra = data.qty - guestCount
+        const extraPrice = Math.round(data.price / data.qty * extra)
+        totalExtra += extra
+        totalExtraPrice += extraPrice
+        details.push({ label: subcat, extra, price: extraPrice })
+      }
+    }
+    return { totalExtra, totalExtraPrice, details, exceeds: totalExtra > 0 }
+  })()
 
   return (
     <Modal open={open} onClose={handleClose} title={title}>
@@ -441,28 +466,28 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
             return null
           })}
 
-          {cartItems.length > 0 && (() => {
-            const totalQty = cartItems.reduce((s, i) => s + i.qty, 0)
-            const exceedsGuests = guestCount ? totalQty > guestCount : false
-            const extraCount = exceedsGuests ? totalQty - guestCount! : 0
-            const extraPrice = extraCount > 0 ? Math.round(totalPrice / totalQty * extraCount) : 0
-            return (
-              <div className="space-y-1">
-                {exceedsGuests ? (
-                  <>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-amber-600 dark:text-amber-400">{t('food.extraDish')}: {extraCount}</span>
-                      <span className="text-amber-600 dark:text-amber-400 font-bold">{extraPrice} ₽</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-gray-600 dark:text-white/50">
-                    {t('food.subtotal')}: {totalQty}
+          {cartItems.length > 0 && pricingInfo && (
+            <div className="space-y-1">
+              {pricingInfo.exceeds ? (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-amber-600 dark:text-amber-400">{t('food.extraDish')}: {pricingInfo.totalExtra}</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">{pricingInfo.totalExtraPrice} ₽</span>
                   </div>
-                )}
-              </div>
-            )
-          })()}
+                  {pricingInfo.details.map(d => (
+                    <div key={d.label} className="flex justify-between text-xs text-amber-500 dark:text-amber-400/70">
+                      <span>{t(`food.${d.label}`) || d.label}: +{d.extra}</span>
+                      <span>+{d.price} ₽</span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="text-sm text-gray-600 dark:text-white/50">
+                  {t('food.subtotal')}: {cartItems.reduce((s, i) => s + i.qty, 0)}
+                </div>
+              )}
+            </div>
+          )}
 
           <button onClick={handleSubmit} disabled={cooldown > 0}
             className="w-full bg-glamp-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-glamp-700 active:scale-95 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">

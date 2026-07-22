@@ -95,6 +95,7 @@ export default function Tickets() {
   const { data: apiTasks, refetch } = useApi<Task[]>('/api/tasks')
   const { data: apiHouses } = useApi<House[]>('/api/houses')
   const { data: apiServices } = useApi<Service[]>('/api/services')
+  const { data: apiMenu } = useApi<{ id: string; subcat?: string }[]>('/api/menu')
   const [tickets, setTickets] = useState<Task[]>([])
   const [houses, setHouses] = useState<House[]>([])
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
@@ -167,12 +168,28 @@ export default function Tickets() {
     if (!ticket.items || ticket.items.length === 0) return null
     const guestCount = getHouseGuestCount(ticket.houseId)
     if (!guestCount) return null
-    const totalQty = ticket.items.reduce((s, i) => s + i.quantity, 0)
-    const totalPrice = ticket.items.reduce((s, i) => s + i.price * i.quantity, 0)
-    if (totalQty <= guestCount) return { totalQty, totalPrice, exceeds: false, extraCount: 0, extraPrice: 0 }
-    const extraCount = totalQty - guestCount
-    const extraPrice = Math.round(totalPrice / totalQty * extraCount)
-    return { totalQty, totalPrice, exceeds: true, extraCount, extraPrice }
+    const menuMap = new Map((apiMenu ?? []).map(m => [m.id, m.subcat ?? 'default']))
+    const bySubcat = new Map<string, { qty: number; price: number }>()
+    for (const item of ticket.items) {
+      const subcat = menuMap.get(item.menuItemId) ?? 'default'
+      const cur = bySubcat.get(subcat) ?? { qty: 0, price: 0 }
+      cur.qty += item.quantity
+      cur.price += item.price * item.quantity
+      bySubcat.set(subcat, cur)
+    }
+    let totalExtra = 0
+    let totalExtraPrice = 0
+    const details: { label: string; extra: number; price: number }[] = []
+    for (const [subcat, data] of bySubcat) {
+      if (data.qty > guestCount) {
+        const extra = data.qty - guestCount
+        const extraPrice = Math.round(data.price / data.qty * extra)
+        totalExtra += extra
+        totalExtraPrice += extraPrice
+        details.push({ label: subcat, extra, price: extraPrice })
+      }
+    }
+    return { totalExtra, totalExtraPrice, details, exceeds: totalExtra > 0 }
   }
 
   function getHouseNumber(houseId: string): number { return houses.find(h => h.id === houseId)?.number ?? 0 }
@@ -338,19 +355,21 @@ export default function Tickets() {
                           ))}
                           {pricing && !pricing.exceeds && (
                             <div className="flex justify-between text-sm text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
-                              <span>Позиций: {pricing.totalQty}</span>
+                              <span>Позиций: {ticket.items!.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)}</span>
                             </div>
                           )}
                           {pricing && pricing.exceeds && (
                             <>
-                              <div className="flex justify-between text-sm text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
-                                <span>Итого</span>
-                                <span>{pricing.totalPrice} ₽</span>
+                              <div className="flex justify-between text-xs text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
+                                <span>Доплата: {pricing.totalExtra} поз.</span>
+                                <span className="font-bold text-amber-600 dark:text-amber-400">+{pricing.totalExtraPrice} ₽</span>
                               </div>
-                              <div className="flex justify-between text-xs">
-                                <span className="text-amber-600 dark:text-amber-400">Доплата за {pricing.extraCount} поз.</span>
-                                <span className="text-amber-600 dark:text-amber-400 font-bold">+{pricing.extraPrice} ₽</span>
-                              </div>
+                              {pricing.details.map(d => (
+                                <div key={d.label} className="flex justify-between text-xs text-amber-500 dark:text-amber-400/70">
+                                  <span>{d.label}: +{d.extra}</span>
+                                  <span>+{d.price} ₽</span>
+                                </div>
+                              ))}
                             </>
                           )}
                         </div>
