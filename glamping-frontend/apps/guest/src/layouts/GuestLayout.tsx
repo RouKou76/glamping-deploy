@@ -35,11 +35,11 @@ export default function GuestLayout() {
             <p className="text-xs text-red-600 dark:text-red-300">Связь с администратором:</p>
             <a href={`tel:${info.phone}`} className="text-sm text-red-600 dark:text-red-300 font-medium underline">{info.phone}</a>
           </div>
-          <ThemeToggle />
+          <ThemeToggle size="lg" />
         </div>
       )}
 
-      {!isOffline && <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>}
+      {!isOffline && <div className="fixed top-4 right-4 z-40"><ThemeToggle size="lg" /></div>}
 
       <main className="flex-1 overflow-y-auto pb-20">
         <Outlet />
