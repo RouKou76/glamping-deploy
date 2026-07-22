@@ -143,8 +143,8 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
           <button onClick={zoomIn} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">+</button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2">
-        <div ref={wrapperRef} className="inline-block origin-top-left">
+      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2 flex justify-center">
+        <div ref={wrapperRef} className="origin-top">
           <div ref={containerRef} />
         </div>
       </div>
