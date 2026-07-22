@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useApi, apiPost, useNotifications } from '@glamping/api'
-import type { Task, TaskStatus, House } from '@glamping/types'
+import type { Task, TaskStatus, House, Service } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
 type FilterStatus = TaskStatus | 'all' | 'archived'
@@ -94,6 +94,7 @@ const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" heigh
 export default function Tickets() {
   const { data: apiTasks, refetch } = useApi<Task[]>('/api/tasks')
   const { data: apiHouses } = useApi<House[]>('/api/houses')
+  const { data: apiServices } = useApi<Service[]>('/api/services')
   const [tickets, setTickets] = useState<Task[]>([])
   const [houses, setHouses] = useState<House[]>([])
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
@@ -102,6 +103,12 @@ export default function Tickets() {
 
   useEffect(() => { if (apiTasks) setTickets(apiTasks) }, [apiTasks])
   useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
+
+  const availableTypes = useMemo(() => {
+    const builtIn = ['food', 'minibar', 'transfer', 'cleaning', 'towels']
+    const activeCustom = apiServices?.filter(s => s.active).map(() => 'custom') ?? []
+    return [...builtIn, ...new Set(activeCustom)]
+  }, [apiServices])
 
   const { notify } = useNotifications()
 
@@ -181,7 +188,7 @@ export default function Tickets() {
       </div>
 
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-        {(['all', 'food', 'minibar', 'transfer', 'cleaning', 'towels'] as FilterType[]).map(t => (
+        {(['all', ...availableTypes] as FilterType[]).map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
             {t === 'all' ? 'Все типы' : TYPE_CONFIG[t]?.label}
