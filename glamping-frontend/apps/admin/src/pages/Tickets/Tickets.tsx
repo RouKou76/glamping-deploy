@@ -345,34 +345,18 @@ export default function Tickets() {
                     {ticket.items && ticket.items.length > 0 && (() => {
                       const pricing = getPricingInfo(ticket)
                       return (
-                        <div className="space-y-1">
-                          <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
-                          {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
-                            <div key={item.menuItemId} className="flex items-center justify-between gap-2 text-sm text-gray-800 dark:text-white">
-                              <span className="min-w-0 truncate">• {item.name} ×{item.quantity}</span>
-                              <span className="shrink-0 whitespace-nowrap">{item.price * item.quantity} ₽</span>
+                        <div className="space-y-2">
+                          {pricing && pricing.exceeds ? (
+                            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">К оплате</span>
+                              <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{pricing.totalExtraPrice} ₽</span>
                             </div>
-                          ))}
-                          {pricing && !pricing.exceeds && (
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
-                              <span>Позиций: {ticket.items!.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)}</span>
-                            </div>
-                          )}
-                          {pricing && pricing.exceeds && (
-                            <>
-                              <div className="flex justify-between text-xs text-gray-600 dark:text-white/50 pt-1 border-t border-gray-100 dark:border-white/10">
-                                <span>Доплата: {pricing.totalExtra} поз.</span>
-                                <span className="font-bold text-amber-600 dark:text-amber-400">+{pricing.totalExtraPrice} ₽</span>
-                              </div>
-                              {pricing.details.map(d => (
-                                <div key={d.label} className="flex justify-between text-xs text-amber-500 dark:text-amber-400/70">
-                                  <span>{d.label}: +{d.extra}</span>
-                                  <span>+{d.price} ₽</span>
-                                </div>
-                              ))}
-                            </>
+                          ) : (
+                            <div className="text-xs text-gray-500 dark:text-white/40">Без доплаты</div>
                           )}
                         </div>
+                      )
+                    })()}
                       )
                     })()}
                     <div className="grid grid-cols-2 gap-2">
