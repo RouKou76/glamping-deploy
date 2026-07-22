@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApi, apiPost } from '@glamping/api'
 import { useTask } from '../../contexts/TaskContext'
@@ -15,6 +16,7 @@ type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleanin
 
 export default function Home() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { houseId, houseNumber, guestCount, checkoutRequested } = useDevice()
   const { data: services, refetch: refetchServices } = useApi<Service[]>('/api/services')
   const { data: menuItems, refetch: refetchMenuItems } = useApi<MenuItem[]>('/api/menu')
@@ -117,6 +119,8 @@ export default function Home() {
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>} label={t('home.cleaning')} color="bg-teal-500" onClick={() => { refetchServices(); setActiveModal('cleaning') }} />
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg>} label={t('home.towels')} color="bg-cyan-500" onClick={() => { refetchServices(); setActiveModal('towels') }} />
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>} label={t('home.minibar')} color="bg-purple-500" onClick={() => { refetchServices(); setActiveModal('minibar') }} />
+
+        <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>} label={t('home.andetta')} color="bg-rose-500" onClick={() => navigate('/andetta')} />
 
         {checkoutRequested ? (
           <div className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-5 flex flex-col justify-between h-36 transition-colors">

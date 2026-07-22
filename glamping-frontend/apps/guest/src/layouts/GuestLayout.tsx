@@ -51,11 +51,6 @@ export default function GuestLayout() {
           <span className="text-[10px] font-semibold">{t('nav.info')}</span>
         </NavLink>
 
-        <NavLink to="/andetta" className={({ isActive }) => `flex flex-col items-center justify-center w-16 gap-1 transition-colors ${isActive ? 'text-glamp-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span className="text-[10px] font-semibold">{t('nav.andetta')}</span>
-        </NavLink>
-
         <div className="-mt-6">
           <NavLink to="/" end className={({ isActive }) => `w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transition-transform ${isActive ? 'bg-glamp-600 scale-110' : 'bg-gray-800 dark:bg-white/10 hover:bg-gray-700 dark:hover:bg-white/20'}`}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
