@@ -39,7 +39,7 @@ export function PdfViewer({ url, className = '', onError }: PdfViewerProps) {
       }
     }
     load()
-    return () => { cancelled = true; docRef.current?.destroy() }
+    return () => { cancelled = true; if (docRef.current?.destroy) docRef.current.destroy(); else if (docRef.current?.cleanup) docRef.current.cleanup() }
   }, [url])
 
   useEffect(() => {
