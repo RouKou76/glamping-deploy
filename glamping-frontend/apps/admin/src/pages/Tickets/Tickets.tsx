@@ -112,8 +112,10 @@ export default function Tickets() {
 
   function getCustomServiceName(description?: string): string | null {
     if (!description) return null
-    const match = description.match(/^\[(.+?)\]/)
-    return match ? match[1] : null
+    const bracketMatch = description.match(/^\[(.+?)\]/)
+    if (bracketMatch) return bracketMatch[1]
+    if (description.trim()) return description.trim()
+    return null
   }
 
   function getTicketFilterType(t: Task): string {
