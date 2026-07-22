@@ -3,11 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApi } from '@glamping/api'
 
+interface AndettaInfo {
+  current: string | null
+  previous: string | null
+  active: 'current' | 'previous'
+}
+
 export default function Andetta() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { data } = useApi<{ filename: string | null }>('/api/andetta')
+  const { data } = useApi<AndettaInfo>('/api/andetta')
   const [confirmed, setConfirmed] = useState(false)
+
+  const hasPdf = !!data?.current || !!data?.previous
 
   if (!confirmed) {
     return (
@@ -23,7 +31,7 @@ export default function Andetta() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{t('andetta.confirmMessage')}</p>
           <div className="flex gap-3 w-full max-w-xs">
             <button onClick={() => navigate('/')} className="flex-1 py-3 rounded-2xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/5 transition-colors active:scale-95">{t('andetta.back')}</button>
-            <button onClick={() => setConfirmed(true)} disabled={!data?.filename} className="flex-1 py-3 rounded-2xl bg-glamp-600 text-white text-sm font-semibold hover:bg-glamp-700 transition-colors active:scale-95 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">{t('andetta.open')}</button>
+            <button onClick={() => setConfirmed(true)} disabled={!hasPdf} className="flex-1 py-3 rounded-2xl bg-glamp-600 text-white text-sm font-semibold hover:bg-glamp-700 transition-colors active:scale-95 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">{t('andetta.open')}</button>
           </div>
         </div>
       </div>
@@ -36,7 +44,7 @@ export default function Andetta() {
         <h2 className="font-bold text-base text-gray-800 dark:text-gray-200">{t('andetta.title')}</h2>
       </div>
       <div className="flex-1 bg-glamp-50 dark:bg-[#0f1117] transition-colors">
-        {data?.filename ? (
+        {hasPdf ? (
           <iframe src={`/api/andetta/pdf?v=${Date.now()}`} className="w-full h-full border-0" title="ANDITTA catalog" />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
