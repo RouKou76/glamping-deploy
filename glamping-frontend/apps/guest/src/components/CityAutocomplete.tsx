@@ -51,7 +51,6 @@ export function CityAutocomplete({ cities, value, onChange }: CityAutocompletePr
       <input
         type="text"
         inputMode="search"
-        autoFocus
         value={query}
         onChange={e => handleChange(e.target.value)}
         onFocus={() => query.length > 0 && setIsOpen(true)}
