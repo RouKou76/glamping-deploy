@@ -17,7 +17,6 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   const [pageCount, setPageCount] = useState(0)
   const docRef = useRef<any>(null)
   const scaleRef = useRef(1)
-  const pinchRef = useRef({ startDist: 0, startScale: 1 })
 
   useEffect(() => {
     let cancelled = false
@@ -83,6 +82,43 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     scroll.scrollTop = prevCenterY * ratio - scroll.clientHeight / 2
   }, [])
 
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    let startDist = 0
+    let startScale = 1
+
+    const getDist = (t: TouchList) => {
+      const dx = t[0].clientX - t[1].clientX
+      const dy = t[0].clientY - t[1].clientY
+      return Math.sqrt(dx * dx + dy * dy)
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault()
+        startDist = getDist(e.touches)
+        startScale = scaleRef.current
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault()
+        const ratio = getDist(e.touches) / startDist
+        applyScale(Math.min(3, Math.max(0.3, startScale * ratio)))
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: false })
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+    }
+  }, [applyScale])
+
   const zoomIn = () => applyScale(Math.min(3, Math.round((scaleRef.current + 0.25) * 20) / 20))
   const zoomOut = () => applyScale(Math.max(0.3, Math.round((scaleRef.current - 0.25) * 20) / 20))
   const zoomReset = () => applyScale(1)
@@ -100,7 +136,7 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
           <button onClick={zoomIn} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">+</button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2 flex justify-center" style={{ touchAction: 'pinch-zoom' }}>
+      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2 flex justify-center">
         <div ref={wrapperRef} className="origin-top">
           <div ref={containerRef} />
         </div>
