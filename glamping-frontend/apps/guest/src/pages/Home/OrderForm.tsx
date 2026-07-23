@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
 import { useApi, apiPost } from '@glamping/api'
 import type { MenuItem, TaskItem } from '@glamping/types'
+import { CityAutocomplete } from '../../components/CityAutocomplete'
 import { SLOTS } from '../../hooks/useMealPeriod'
 import { SuccessScreen } from './SuccessScreen'
 
@@ -14,8 +15,9 @@ export interface OrderStepText { type: 'text'; key: string; label: string; place
 export interface OrderStepTextarea { type: 'textarea'; key: string; label: string; placeholder?: string; required?: boolean }
 export interface OrderStepMenu { type: 'menu'; key: string; items: MenuItem[]; required?: boolean }
 export interface OrderStepCatalog { type: 'catalog'; key: string; label: string; items: { id: string; name: string; price: number; isAvailable?: boolean }[]; required?: boolean }
+export interface OrderStepCity { type: 'city'; key: string; label: string; required?: boolean }
 
-export type OrderStep = OrderStepDate | OrderStepTime | OrderStepSelect | OrderStepNumber | OrderStepText | OrderStepTextarea | OrderStepMenu | OrderStepCatalog
+export type OrderStep = OrderStepDate | OrderStepTime | OrderStepSelect | OrderStepNumber | OrderStepText | OrderStepTextarea | OrderStepMenu | OrderStepCatalog | OrderStepCity
 
 interface OrderFormProps {
   open: boolean
@@ -23,6 +25,7 @@ interface OrderFormProps {
   steps: OrderStep[]
   houseId: string | null
   guestCount: number | null
+  transfers?: { id: string; name: string; km: number; price: number }[]
   taskType: string
   serviceName?: string
   hint?: string
@@ -60,7 +63,7 @@ function getPeriodFromTime(time: string): string {
   return 'dinner'
 }
 
-export function OrderForm({ open, title, steps, houseId, guestCount, taskType, serviceName, hint, onClose, onSubmit }: OrderFormProps) {
+export function OrderForm({ open, title, steps, houseId, guestCount, transfers, taskType, serviceName, hint, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
 
   function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
@@ -204,6 +207,10 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
     }
     if (taskType === 'food' && values.time) payload.period = getPeriodFromTime(values.time as string)
     if (values.location) payload.location = values.location
+    if (values.city) {
+      payload.location = values.city
+      if (values.cityPrice) payload.priceFix = values.cityPrice
+    }
     if (values.geo) payload.geo = values.geo
     if (values.guestCount) payload.guestCount = values.guestCount
     if (taskType === 'custom' && serviceName) {
@@ -257,6 +264,14 @@ export function OrderForm({ open, title, steps, houseId, guestCount, taskType, s
         <div className="p-6 space-y-5">
           {hint && <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2 border border-amber-200 dark:border-amber-500/20">{hint}</p>}
           {steps.map(s => {
+            if (s.type === 'city') return (
+              <div key={s.key}>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
+                <CityAutocomplete cities={transfers ?? []} value={(values[s.key] as string) || ''} onChange={(city) => { if (city) { setVal(s.key, city.name); setVal('cityPrice', city.price) } else { setVal(s.key, ''); setVal('cityPrice', 0) } }} />
+                {errors[s.key] && <ErrorMsg text={errors[s.key]} />}
+                <p className="text-[10px] text-gray-400 dark:text-white/30 mt-2">{t('transfer.accuracyHint')}</p>
+              </div>
+            )
             if (s.type === 'date') return (
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>

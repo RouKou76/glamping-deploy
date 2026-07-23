@@ -21,6 +21,7 @@ export default function Home() {
   const { houseId, houseNumber, guestCount, checkoutRequested } = useDevice()
   const { data: services, refetch: refetchServices } = useApi<Service[]>('/api/services')
   const { data: menuItems, refetch: refetchMenuItems } = useApi<MenuItem[]>('/api/menu')
+  const { data: transfers } = useApi<{ id: string; name: string; km: number; price: number }[]>('/api/transfers')
 
   useEffect(() => {
     const handler = () => { refetchServices(); refetchMenuItems() }
@@ -50,12 +51,11 @@ export default function Home() {
     transfer: {
       title: t('transfer.title'),
       steps: [
-        { type: 'text', key: 'geo', label: t('transfer.destination'), required: true, placeholder: 'Введите адрес...' },
+        { type: 'city', key: 'city', label: t('transfer.destination'), required: true },
         { type: 'date', key: 'date', label: t('food.date') },
         { type: 'time', key: 'time', label: t('transfer.time'), required: true },
       ],
       message: t('transfer.successMsg'),
-      hint: t('transfer.priceHint'),
     },
     cleaning: {
       title: t('cleaning.title'),
@@ -167,6 +167,7 @@ export default function Home() {
           steps={SERVICE_CONFIGS[activeModal].steps}
           houseId={houseId}
           guestCount={guestCount}
+          transfers={transfers ?? undefined}
           taskType={activeModal}
           hint={SERVICE_CONFIGS[activeModal].hint}
           onClose={() => setActiveModal(null)}

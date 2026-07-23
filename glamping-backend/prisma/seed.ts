@@ -172,13 +172,9 @@ async function main() {
   }
 
   // Create transfer destinations
-  const destinations = [
-    { name: 'Суздаль', km: 45, price: 700 },
-    { name: 'Южа', km: 62, price: 1000 },
-    { name: 'Лух', km: 80, price: 1000 },
-    { name: 'Иваново', km: 95, price: 1000 },
-    { name: 'Владимир', km: 70, price: 1000 },
-  ];
+  const transfersPath = require('path').join(__dirname, '..', '..', 'scripts', 'transfers-seed.json')
+  const transfersRaw = require('fs').readFileSync(transfersPath, 'utf8')
+  const destinations = JSON.parse(transfersRaw.split('\n').slice(1).join('\n'))
 
   for (const dest of destinations) {
     const existing = await prisma.transferDestination.findFirst({ where: { name: dest.name } });
