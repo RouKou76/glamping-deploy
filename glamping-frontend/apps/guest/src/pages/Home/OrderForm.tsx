@@ -340,7 +340,7 @@ export function OrderForm({ open, title, steps, houseId, guestCount, transfers, 
             if (s.type === 'text') return (
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
-                <input type="text" value={(values[s.key] as string) || ''} placeholder={s.placeholder}
+                <input type="text" inputMode="text" value={(values[s.key] as string) || ''} placeholder={s.placeholder}
                   onChange={e => setVal(s.key, e.target.value)}
                   className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
                 <ErrorMsg text={errors[s.key]} />
@@ -350,7 +350,7 @@ export function OrderForm({ open, title, steps, houseId, guestCount, transfers, 
             if (s.type === 'textarea') return (
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
-                <textarea value={(values[s.key] as string) || ''} placeholder={s.placeholder} rows={3}
+                <textarea inputMode="text" value={(values[s.key] as string) || ''} placeholder={s.placeholder} rows={3}
                   onChange={e => setVal(s.key, e.target.value)}
                   className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
                 <ErrorMsg text={errors[s.key]} />
