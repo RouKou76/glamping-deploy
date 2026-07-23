@@ -83,43 +83,6 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     scroll.scrollTop = prevCenterY * ratio - scroll.clientHeight / 2
   }, [])
 
-  useEffect(() => {
-    const el = wrapperRef.current
-    if (!el) return
-    let startDist = 0
-    let startScale = 1
-
-    const getDist = (t: TouchList) => {
-      const dx = t[0].clientX - t[1].clientX
-      const dy = t[0].clientY - t[1].clientY
-      return Math.sqrt(dx * dx + dy * dy)
-    }
-
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault()
-        startDist = getDist(e.touches)
-        startScale = scaleRef.current
-      }
-    }
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault()
-        const ratio = getDist(e.touches) / startDist
-        applyScale(Math.min(3, Math.max(0.3, startScale * ratio)))
-      }
-    }
-
-    el.addEventListener('touchstart', onTouchStart, { passive: false })
-    el.addEventListener('touchmove', onTouchMove, { passive: false })
-
-    return () => {
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchmove', onTouchMove)
-    }
-  }, [applyScale])
-
   const zoomIn = () => applyScale(Math.min(3, Math.round((scaleRef.current + 0.25) * 20) / 20))
   const zoomOut = () => applyScale(Math.max(0.3, Math.round((scaleRef.current - 0.25) * 20) / 20))
   const zoomReset = () => applyScale(1)
