@@ -176,14 +176,9 @@ async function main() {
   const transfersRaw = require('fs').readFileSync(transfersPath, 'utf8')
   const destinations = JSON.parse(transfersRaw.split('\n').slice(1).join('\n'))
 
-  for (const dest of destinations) {
-    const existing = await prisma.transferDestination.findFirst({ where: { name: dest.name } });
-    if (existing) {
-      await prisma.transferDestination.update({ where: { id: existing.id }, data: dest });
-    } else {
-      await prisma.transferDestination.create({ data: dest });
-    }
-  }
+  await prisma.transferDestination.deleteMany()
+  await prisma.transferDestination.createMany({ data: destinations, skipDuplicates: true })
+  console.log(`Seeded ${destinations.length} transfer destinations`)
 
   // Create settings
   const settings = [
