@@ -85,37 +85,42 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   useEffect(() => {
     const el = wrapperRef.current
     if (!el) return
+    let pointers = new Map<number, { x: number; y: number }>()
     let startDist = 0
     let startScale = 1
 
-    const getDist = (t: TouchList) => {
-      const dx = t[0].clientX - t[1].clientX
-      const dy = t[0].clientY - t[1].clientY
-      return Math.sqrt(dx * dx + dy * dy)
-    }
-
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault()
-        startDist = getDist(e.touches)
+    const onPointerDown = (e: PointerEvent) => {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (pointers.size === 2) {
+        const pts = Array.from(pointers.values())
+        startDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
         startScale = scaleRef.current
       }
     }
 
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault()
-        const ratio = getDist(e.touches) / startDist
-        applyScale(Math.min(3, Math.max(0.3, startScale * ratio)))
-      }
+    const onPointerMove = (e: PointerEvent) => {
+      if (pointers.size !== 2) return
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      const pts = Array.from(pointers.values())
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
+      const ratio = dist / startDist
+      applyScale(Math.min(3, Math.max(0.3, startScale * ratio)))
     }
 
-    el.addEventListener('touchstart', onTouchStart, { passive: false })
-    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    const onPointerUp = (e: PointerEvent) => {
+      pointers.delete(e.pointerId)
+    }
+
+    el.addEventListener('pointerdown', onPointerDown)
+    el.addEventListener('pointermove', onPointerMove)
+    el.addEventListener('pointerup', onPointerUp)
+    el.addEventListener('pointercancel', onPointerUp)
 
     return () => {
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('pointerdown', onPointerDown)
+      el.removeEventListener('pointermove', onPointerMove)
+      el.removeEventListener('pointerup', onPointerUp)
+      el.removeEventListener('pointercancel', onPointerUp)
     }
   }, [applyScale])
 
