@@ -22,7 +22,7 @@ export default function CheckIn() {
   const [houses, setHouses] = useState<House[]>([])
   const [sessions, setSessions] = useState<GuestSession[]>([])
   const [showForm, setShowForm] = useState(false); const [selectedHouse, setSelectedHouse] = useState<House | null>(null)
-  const [formGuests, setFormGuests] = useState<number>(2); const [formLang, setFormLang] = useState<Lang>('ru')
+  const [formGuests, setFormGuests] = useState<number>(1); const [formLang, setFormLang] = useState<Lang>('ru')
   const [tokenModal, setTokenModal] = useState<{ number: number; token: string; hid: string } | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -136,10 +136,10 @@ export default function CheckIn() {
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Количество гостей</label>
               <div className="flex items-center gap-4">
-                <button onClick={() => setFormGuests(g => Math.max(2, g - 1))} className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
+                <button onClick={() => setFormGuests(g => Math.max(1, g - 1))} className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
                 <span className="text-2xl font-bold text-gray-800 dark:text-white w-8 text-center">{formGuests}</span>
                 <button onClick={() => setFormGuests(g => Math.min(8, g + 1))} className="w-10 h-10 rounded-full bg-glamp-600 hover:bg-glamp-700 text-white flex items-center justify-center transition-colors text-lg">+</button>
-                <span className="text-xs text-gray-500 dark:text-white/50">от 2 до 8</span>
+                <span className="text-xs text-gray-500 dark:text-white/50">от 1 до 8</span>
               </div>
             </div>
             <div>

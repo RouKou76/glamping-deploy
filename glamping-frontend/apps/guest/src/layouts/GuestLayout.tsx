@@ -35,7 +35,6 @@ export default function GuestLayout() {
             <p className="text-xs text-red-600 dark:text-red-300">Связь с администратором:</p>
             <a href={`tel:${info.phone}`} className="text-sm text-red-600 dark:text-red-300 font-medium underline">{info.phone}</a>
           </div>
-          <ThemeToggle size="lg" />
         </div>
       )}
 

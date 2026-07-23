@@ -3,7 +3,7 @@
     "services": "Services",
     "chat": "Chat",
     "info": "Info",
-    "andetta": "Catalog"
+    "catalog": "Catalog"
   },
   "home": {
     "title": "Order Services",
@@ -14,7 +14,8 @@
     "cleaning": "Cleaning",
     "towels": "Towel Replacement",
     "gates": "Open Gates",
-    "andetta": "ANDITTA Products",
+    "andetta": "ANDETTA Products",
+    "suveniry": "Souvenirs & Treats from Ivanovo",
     "additional": "Additional"
   },
   "food": {
@@ -131,11 +132,13 @@
     "offline": "No network connection",
     "minAdvanceTime": "Food orders must be placed at least 1 hour in advance"
   },
-  "andetta": {
-    "title": "ANDITTA Products",
+  "catalog": {
+    "title": "Catalog",
+    "andettaTitle": "ANDITTA Products",
+    "suveniryTitle": "Souvenirs & Treats from Ivanovo",
     "noCatalog": "Catalog not yet available",
-    "confirmTitle": "ANDITTA Catalog",
-    "confirmMessage": "Open the product catalog?",
+    "confirmTitle": "Catalog",
+    "confirmMessage": "Open the catalog?",
     "open": "Open",
     "back": "Back"
   },

@@ -1,33 +1,24 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useApi } from '@glamping/api'
 
-interface AndettaInfo {
+interface CatalogInfo {
   current: string | null
   previous: string | null
   active: 'current' | 'previous'
 }
 
-export default function Andetta() {
-  const { data, refetch } = useApi<AndettaInfo>('/api/andetta')
+interface CatalogSectionProps {
+  catalogId: string
+  title: string
+}
+
+function CatalogSection({ catalogId, title }: CatalogSectionProps) {
+  const { data, refetch } = useApi<CatalogInfo>(`/api/catalog/${catalogId}`)
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  async function uploadFile(formData: FormData, token: string | null): Promise<boolean> {
-    const doFetch = (t: string | null) => fetch('/api/andetta/upload', {
-      method: 'POST',
-      credentials: 'include',
-      headers: t ? { Authorization: `Bearer ${t}` } : {},
-      body: formData,
-    })
-    let res = await doFetch(token)
-    if (res.status === 401) {
-      await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
-      const newToken = localStorage.getItem('glamp-token')
-      res = await doFetch(newToken)
-    }
-    return res.ok
-  }
+  const hasPdf = !!data?.current || !!data?.previous
 
   async function handleUpload() {
     const file = fileRef.current?.files?.[0]
@@ -37,13 +28,16 @@ export default function Andetta() {
       const formData = new FormData()
       formData.append('file', file)
       const token = localStorage.getItem('glamp-token')
-      const ok = await uploadFile(formData, token)
-      if (ok) {
-        refetch()
-        setSuccess(true)
-        setTimeout(() => setSuccess(false), 2500)
-        if (fileRef.current) fileRef.current.value = ''
-      }
+      await fetch(`/api/catalog/${catalogId}/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+      refetch()
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 2500)
+      if (fileRef.current) fileRef.current.value = ''
     } catch {
       // ignore
     }
@@ -51,28 +45,19 @@ export default function Andetta() {
   }
 
   async function handleSwitch(version: 'current' | 'previous') {
-    const doFetch = (token: string | null) => fetch('/api/andetta/switch', {
+    const token = localStorage.getItem('glamp-token')
+    await fetch(`/api/catalog/${catalogId}/switch`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({ version }),
     })
-    let token = localStorage.getItem('glamp-token')
-    let res = await doFetch(token)
-    if (res.status === 401) {
-      await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
-      token = localStorage.getItem('glamp-token')
-      res = await doFetch(token)
-    }
     refetch()
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Продукция ANDETTA</h2>
-        <p className="text-xs text-gray-500 dark:text-white/50 mt-1">Управление PDF-каталогом для гостей</p>
-      </div>
+    <div className="space-y-4">
+      <h3 className="text-lg font-bold text-gray-800 dark:text-white">{title}</h3>
 
       {data?.current && (
         <div className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm transition-colors space-y-3">
@@ -116,7 +101,7 @@ export default function Andetta() {
         </div>
       )}
 
-      {!data?.current && !data?.previous && (
+      {!hasPdf && (
         <div className="bg-white dark:bg-[#1a1d27] border border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-8 text-center">
           <p className="text-gray-400 dark:text-white/30 text-sm">Каталог ещё не загружен</p>
         </div>
@@ -124,10 +109,10 @@ export default function Andetta() {
 
       <div className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm transition-colors space-y-3">
         <p className="text-sm font-bold text-gray-800 dark:text-white">
-          {data?.current ? 'Загрузить новую версию' : 'Загрузить каталог'}
+          {hasPdf ? 'Загрузить новую версию' : 'Загрузить каталог'}
         </p>
         <p className="text-xs text-gray-400 dark:text-white/30">
-          {data?.current ? 'Текущая версия станет предыдущей, самая старая будет удалена' : ''}
+          {hasPdf ? 'Текущая версия станет предыдущей, самая старая будет удалена' : ''}
         </p>
         <input
           ref={fileRef}
@@ -148,6 +133,18 @@ export default function Andetta() {
           </p>
         )}
       </div>
+    </div>
+  )
+}
+
+import { useRef } from 'react'
+
+export default function Catalog() {
+  return (
+    <div className="space-y-6">
+      <CatalogSection catalogId="andetta" title="Продукция бренда ANDETTA" />
+      <hr className="border-gray-200 dark:border-white/10" />
+      <CatalogSection catalogId="suveniry" title="Сувениры и вкусности из Иваново" />
     </div>
   )
 }

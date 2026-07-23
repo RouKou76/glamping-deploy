@@ -135,7 +135,7 @@ async function main() {
       name: 'Русская баня',
       price: '3 000 ₽ / час',
       icon: '🛁',
-      active: true,
+      active: false,
       assignedTo: 'admin',
       fields: {
         desiredAt: { enabled: true, label: 'Удобное время' },
@@ -147,7 +147,7 @@ async function main() {
       name: 'Прокат велосипедов',
       price: '500 ₽ / час',
       icon: '🚲',
-      active: true,
+      active: false,
       assignedTo: 'admin',
       fields: {
         desiredAt: { enabled: true, label: 'Время начала' },

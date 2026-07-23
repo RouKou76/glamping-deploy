@@ -2,15 +2,15 @@ import { useState } from 'react'
 import Menu from '../Menu/Menu'
 import Services from '../Services/Services'
 import InfoEditor from '../InfoEditor/InfoEditor'
-import Andetta from '../Andetta/Andetta'
+import Catalog from '../Catalog/Catalog'
 
-type ManagementTab = 'menu' | 'services' | 'info' | 'andetta'
+type ManagementTab = 'menu' | 'services' | 'info' | 'catalog'
 
 const TABS: { id: ManagementTab; label: string }[] = [
   { id: 'menu', label: 'Меню' },
   { id: 'services', label: 'Услуги' },
   { id: 'info', label: 'Инфо' },
-  { id: 'andetta', label: 'ANDETTA' },
+  { id: 'catalog', label: 'PDF каталоги' },
 ]
 
 export default function Management() {
@@ -30,7 +30,7 @@ export default function Management() {
         {tab === 'menu' && <Menu />}
         {tab === 'services' && <Services />}
         {tab === 'info' && <InfoEditor />}
-        {tab === 'andetta' && <Andetta />}
+        {tab === 'catalog' && <Catalog />}
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
     "services": "Услуги",
     "chat": "Связь",
     "info": "Информация",
-    "andetta": "Каталог"
+    "catalog": "Каталог"
   },
   "home": {
     "title": "Заказ услуг",
@@ -14,7 +14,8 @@
     "cleaning": "Вызов клининга",
     "towels": "Замена полотенец",
     "gates": "Открыть ворота",
-    "andetta": "Продукция бренда ANDETTA",
+    "andetta": "Продукция ANDETTA",
+    "suveniry": "Сувениры и вкусности из Иваново",
     "additional": "Дополнительно"
   },
   "food": {
@@ -131,11 +132,13 @@
     "offline": "Нет соединения с сетью",
     "minAdvanceTime": "Заказ еды возможен минимум за 1 час"
   },
-  "andetta": {
-    "title": "Продукция ANDETTA",
+  "catalog": {
+    "title": "Каталог",
+    "andettaTitle": "Продукция бренда ANDETTA",
+    "suveniryTitle": "Сувениры и вкусности из Иваново",
     "noCatalog": "Каталог пока не загружен",
-    "confirmTitle": "Каталог ANDETTA",
-    "confirmMessage": "Открыть каталог продукции?",
+    "confirmTitle": "Каталог",
+    "confirmMessage": "Открыть каталог?",
     "open": "Открыть",
     "back": "Назад"
   },

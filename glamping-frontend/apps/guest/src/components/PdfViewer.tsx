@@ -11,12 +11,14 @@ interface PdfViewerProps {
 
 export function PdfViewer({ url, className = '' }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const docRef = useRef<any>(null)
   const scaleRef = useRef(1)
+  const zoomDivRef = useRef<HTMLDivElement | null>(null)
+  const percentRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -41,10 +43,16 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
     const container = containerRef.current
     container.innerHTML = ''
 
+    const zoomDiv = document.createElement('div')
+    zoomDiv.style.transformOrigin = 'top center'
+    zoomDiv.style.transform = 'scale(1)'
+    container.appendChild(zoomDiv)
+    zoomDivRef.current = zoomDiv
+
     for (let i = 1; i <= doc.numPages; i++) {
       const pageDiv = document.createElement('div')
       pageDiv.className = 'flex justify-center mb-2'
-      container.appendChild(pageDiv)
+      zoomDiv.appendChild(pageDiv)
 
       doc.getPage(i).then((page: any) => {
         const viewport = page.getViewport({ scale: 1.5 })
@@ -64,69 +72,13 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
 
   const applyScale = useCallback((s: number) => {
     scaleRef.current = s
-    const wrapper = wrapperRef.current
-    const scroll = wrapper?.parentElement
-    if (!wrapper || !scroll) return
-
-    const prevScrollX = scroll.scrollLeft
-    const prevScrollY = scroll.scrollTop
-    const prevCenterX = prevScrollX + scroll.clientWidth / 2
-    const prevCenterY = prevScrollY + scroll.clientHeight / 2
-    const prevScale = wrapper.dataset.prevScale ? parseFloat(wrapper.dataset.prevScale) : 1
-
-    wrapper.style.transform = `scale(${s})`
-    wrapper.dataset.prevScale = String(s)
-
-    const ratio = s / prevScale
-    scroll.scrollLeft = prevCenterX * ratio - scroll.clientWidth / 2
-    scroll.scrollTop = prevCenterY * ratio - scroll.clientHeight / 2
+    if (zoomDivRef.current) zoomDivRef.current.style.transform = `scale(${s})`
+    if (percentRef.current) percentRef.current.textContent = `${Math.round(s * 100)}%`
   }, [])
 
-  useEffect(() => {
-    const el = wrapperRef.current
-    if (!el) return
-    let pointers = new Map<number, { x: number; y: number }>()
-    let startDist = 0
-    let startScale = 1
-
-    const onPointerDown = (e: PointerEvent) => {
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
-      if (pointers.size === 2) {
-        const pts = Array.from(pointers.values())
-        startDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
-        startScale = scaleRef.current
-      }
-    }
-
-    const onPointerMove = (e: PointerEvent) => {
-      if (pointers.size !== 2) return
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
-      const pts = Array.from(pointers.values())
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
-      const ratio = dist / startDist
-      applyScale(Math.min(3, Math.max(0.3, startScale * ratio)))
-    }
-
-    const onPointerUp = (e: PointerEvent) => {
-      pointers.delete(e.pointerId)
-    }
-
-    el.addEventListener('pointerdown', onPointerDown)
-    el.addEventListener('pointermove', onPointerMove)
-    el.addEventListener('pointerup', onPointerUp)
-    el.addEventListener('pointercancel', onPointerUp)
-
-    return () => {
-      el.removeEventListener('pointerdown', onPointerDown)
-      el.removeEventListener('pointermove', onPointerMove)
-      el.removeEventListener('pointerup', onPointerUp)
-      el.removeEventListener('pointercancel', onPointerUp)
-    }
-  }, [applyScale])
-
-  const zoomIn = () => applyScale(Math.min(3, Math.round((scaleRef.current + 0.25) * 20) / 20))
-  const zoomOut = () => applyScale(Math.max(0.3, Math.round((scaleRef.current - 0.25) * 20) / 20))
-  const zoomReset = () => applyScale(1)
+  const zoomIn = useCallback(() => applyScale(Math.min(3, Math.round((scaleRef.current + 0.25) * 20) / 20)), [applyScale])
+  const zoomOut = useCallback(() => applyScale(Math.max(0.3, Math.round((scaleRef.current - 0.25) * 20) / 20)), [applyScale])
+  const zoomReset = useCallback(() => applyScale(1), [applyScale])
 
   if (error) return <div className="flex items-center justify-center h-full text-red-500 text-sm p-4 text-center">{error}</div>
   if (loading) return <div className="flex items-center justify-center h-full text-gray-400 text-sm">Загрузка...</div>
@@ -137,14 +89,12 @@ export function PdfViewer({ url, className = '' }: PdfViewerProps) {
         <span className="text-xs text-gray-600 dark:text-white/60">{pageCount} стр.</span>
         <div className="flex items-center gap-1">
           <button onClick={zoomOut} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">−</button>
-          <span className="text-xs text-gray-600 dark:text-white/60 min-w-[40px] text-center">{Math.round(scaleRef.current * 100)}%</span>
+          <span ref={percentRef} className="text-xs text-gray-600 dark:text-white/60 min-w-[40px] text-center">100%</span>
           <button onClick={zoomIn} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">+</button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2 flex justify-center">
-        <div ref={wrapperRef} className="origin-top">
-          <div ref={containerRef} />
-        </div>
+      <div ref={scrollRef} className="flex-1 overflow-auto bg-gray-100 dark:bg-[#0a0c10] p-2 flex justify-center">
+        <div ref={containerRef} className="flex flex-col items-center origin-top" />
       </div>
     </div>
   )

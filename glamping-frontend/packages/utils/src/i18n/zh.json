@@ -3,7 +3,7 @@
     "services": "服务",
     "chat": "联系",
     "info": "信息",
-    "andetta": "目录"
+    "catalog": "目录"
   },
   "home": {
     "title": "订购服务",
@@ -15,6 +15,7 @@
     "towels": "更换毛巾",
     "gates": "开门",
     "andetta": "ANDETTA 产品",
+    "suveniry": "伊万诺沃纪念品和美食",
     "additional": "其他"
   },
   "food": {
@@ -131,11 +132,13 @@
     "offline": "无网络连接",
     "minAdvanceTime": "订餐需提前至少1小时"
   },
-  "andetta": {
-    "title": "ANDETTA 产品",
+  "catalog": {
+    "title": "目录",
+    "andettaTitle": "ANDETTA 产品目录",
+    "suveniryTitle": "伊万诺沃纪念品和美食",
     "noCatalog": "目录暂未提供",
-    "confirmTitle": "ANDETTA 目录",
-    "confirmMessage": "打开产品目录？",
+    "confirmTitle": "目录",
+    "confirmMessage": "打开目录？",
     "open": "打开",
     "back": "返回"
   },

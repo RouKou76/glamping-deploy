@@ -15,7 +15,7 @@ import { GatewayModule } from './gateway/gateway.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { PushModule } from './push/push.module';
-import { AndettaModule } from './andetta/andetta.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { AndettaModule } from './andetta/andetta.module';
     RolesModule,
     UsersModule,
     PushModule,
-    AndettaModule,
+    CatalogModule,
   ],
   controllers: [HealthController],
 })
