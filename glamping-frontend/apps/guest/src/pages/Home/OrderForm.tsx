@@ -81,6 +81,7 @@ export function OrderForm({ open, title, steps, houseId, guestCount, transfers, 
         const hasChecked = s.items.some(i => values[`${s.key}_selected_${i.id}`])
         if (!hasChecked) errors[s.key] = t('validation.selectDish')
       }
+      else if (s.type === 'city') { if (!values[s.key]) errors[s.key] = t('validation.required') }
     }
     return errors
   }
